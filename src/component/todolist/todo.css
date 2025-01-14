@@ -77,6 +77,13 @@
     color: #333;
   }
 
+  .todo-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px ;
+    /* align-content: space-between; */
+}
+
   logo {
     height: 6em;
     padding: 1.5em;
