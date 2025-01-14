@@ -9,7 +9,7 @@ const App =() => {
 
 
 
-  const [todoList, setTodoList ] = useState([
+  const [todoList, setTodoList] = useState([
 
   ]);
 
@@ -24,6 +24,9 @@ const App =() => {
     }
     setTodoList([...todoList, newTodo])
   }
+  const delTodoById = (id )=>{
+    setTodoList(todoList.filter((item) => item.id !== id));
+  }
 
   return(
     <>
@@ -33,10 +36,9 @@ const App =() => {
       addNewTodo ={addNewTodo}
       />
       {todoList.length > 0 ? 
-     <TodoData todoList= {todoList} />
+     <TodoData todoList= {todoList} delTodoById={delTodoById} />
       : <div className="todo-image"> <img src={reactLogo} /></div>
       }
-  
     </div>
     </>
   );
