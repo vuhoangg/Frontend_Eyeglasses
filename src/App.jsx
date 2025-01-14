@@ -14,8 +14,7 @@ const App =() => {
   // }
 
   const [todoList, setTodoList ] = useState([
-    {id :1, name: "Learning React"},
-    {id :2, name: "Learning Nest"},
+
   ]);
 
   const randomInteger =(min, max) => {
