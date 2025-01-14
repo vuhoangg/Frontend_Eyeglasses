@@ -9,11 +9,18 @@ const App =()=>{
     address :"Hà Nôi",
     email : "user@gmail.com"
   }
+
+  const addNewTodo = (name) =>{
+    alert(`call me ${name}`);
+  }
+
   return(
     <>
     <div className="todo-container">
       <TodoTitle />
-      <TodoNew />
+      <TodoNew 
+      addNewTodo ={addNewTodo}
+      />
      <TodoData
      name={a}
      data={data}
