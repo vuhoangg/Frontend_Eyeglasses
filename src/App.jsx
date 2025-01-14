@@ -7,11 +7,7 @@ import React, { useState } from 'react';
 
 const App =() => {
 
-  // const a = "Hi guy!"
-  // const data ={
-  //   address :"Hà Nôi",
-  //   email : "user@gmail.com"
-  // }
+
 
   const [todoList, setTodoList ] = useState([
 
@@ -36,13 +32,13 @@ const App =() => {
       <TodoNew 
       addNewTodo ={addNewTodo}
       />
-     <TodoData
-     todoList= {todoList}
-      />
+      {todoList.length > 0 ? 
+     <TodoData todoList= {todoList} />
+      : <div className="todo-image"> <img src={reactLogo} /></div>
+      }
+  
     </div>
-    <div className="todo-image"> 
-      <img src={reactLogo} />
-    </div></>
+    </>
   );
 }
 export default App;
