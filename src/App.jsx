@@ -4,6 +4,9 @@ import './component/todolist/todo.css'
 import { TodoTitle } from './component/todolist/TodoTitle';
 import reactLogo from './assets/react.svg';
 import React, { useState } from 'react';
+import HeaderLayout from './component/layout/header';
+import FooterLayout from './component/layout/footer';
+
 
 const App =() => {
 
@@ -30,6 +33,7 @@ const App =() => {
 
   return(
     <>
+    <HeaderLayout />
     <div className="todo-container">
       <TodoTitle />
       <TodoNew 
@@ -40,6 +44,7 @@ const App =() => {
       : <div className="todo-image"> <img src={reactLogo} /></div>
       }
     </div>
+    <FooterLayout/>
     </>
   );
 }
