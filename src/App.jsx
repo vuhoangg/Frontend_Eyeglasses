@@ -18,8 +18,16 @@ const App =() => {
     {id :2, name: "Learning Nest"},
   ]);
 
+  const randomInteger =(min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
   const addNewTodo = (name) =>{
-    alert(`call me ${name}`);
+    const newTodo ={
+      id : randomInteger(1,100),
+      name :name 
+    }
+    setTodoList([...todoList, newTodo])
   }
 
   return(
