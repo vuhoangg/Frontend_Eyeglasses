@@ -6,6 +6,7 @@ import reactLogo from './assets/react.svg';
 import React, { useState } from 'react';
 import HeaderLayout from './component/layout/header';
 import FooterLayout from './component/layout/footer';
+import { Outlet } from 'react-router-dom';
 
 
 const App =() => {
@@ -44,6 +45,7 @@ const App =() => {
       : <div className="todo-image"> <img src={reactLogo} /></div>
       }
     </div>
+    <Outlet/>
     <FooterLayout/>
     </>
   );
