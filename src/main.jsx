@@ -12,14 +12,15 @@ import RegisterPage from './pages/register.jsx';
 import UserPage from './pages/user.jsx';
 import ProductPage from './pages/product.jsx';
 import TodoApp from './component/todolist/TodoApp.jsx';
-
+import ErrorPage from './pages/userRouterError.jsx'
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App/>,
+    errorElement: <ErrorPage />,
     children:[
       { index: true, 
-        element: <TodoApp />
+        element: <TodoApp />,
       },
       /* existing routes */
       {
@@ -30,8 +31,10 @@ const router = createBrowserRouter([
         path: "/product",
         element: <ProductPage />
       }
-    ]
+    ],
+ 
   },
+
   {
     path: "/login",
     element: <LoginPage/>
