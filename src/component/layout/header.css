@@ -23,6 +23,10 @@ ul {
     background-color: #0eb28c;
   }
 
+  .active {
+    background-color: #04AA6D;
+  }
+
 
  /* Footer */
 
