@@ -1,13 +1,16 @@
 import './header.css'
+import { Link } from 'react-router-dom';
 const HeaderLayout= ()=>{
+    // tab a = anchor khi ta sử dụng thể a thì ngày lập từ website bị load lại trang khi chuyển đường link 
+    // vì vậy tả chuyển qua component <Link>
     return(
          <>
             <ul className="menu_bar">
-                <li><a class="active" href="/">Home</a></li>
-                <li><a href="/user">User</a></li>
-                <li><a href="/product">Product</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
+                <li><Link class="active" to="/">Home</Link></li>
+                <li><Link to="/user">User</Link></li>
+                <li><Link to="/product">Product</Link></li>
+                <li><Link to="/login">Login</Link></li>
+                <li><Link to="/register">Register</Link></li>
             </ul>
         </>
     );
