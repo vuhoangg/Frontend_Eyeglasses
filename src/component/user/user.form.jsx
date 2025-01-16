@@ -28,9 +28,15 @@ const UserForm = () => {
             message: "create user ",
             description : " tạo user thành công "
         })
+       }else{
+        {
+            notification.error({
+                message: "Error create user ",
+                description:JSON.stringify(res.message)
+            })
+        } 
        }
-       console.log(">> Check information data create User ", res.data );
-    };
+    }
 
     // Hàm cập nhật một thuộc tính trong object company
     const handleCompanyChange = (field, value) => {
