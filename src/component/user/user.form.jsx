@@ -2,6 +2,9 @@ import { Input } from 'antd';
 import { Button } from 'antd';
 import { useState } from 'react';
 import axios from 'axios';
+import { createUserAPI } from '../../services/api.service';
+import success from 'react';
+import { notification } from 'antd';
 const UserForm = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -17,21 +20,16 @@ const UserForm = () => {
     // });
 
    
-
-    const handleClickBtn = () => {
-        const URL_BACKEND = "http://localhost:8080/api/v1/users";
-        const data = {name : name ,email: email ,password : password ,address: address ,}
-        axios.post(URL_BACKEND, data )
-        console.log(">> Check ", {
-            name,
-            email,
-            password,
-            address,
-            // age,
-            // gender,
-            // role,
-            // company
-        });
+    // hứng kết quả Promise là gì ? sử dụng async và await
+    const handleClickBtn =  async () => {
+       const res = await  createUserAPI(name, email, password, address )
+       if(res.data){ 
+        notification.success({
+            message: "create user ",
+            description : " tạo user thành công "
+        })
+       }
+       console.log(">> Check information data create User ", res.data );
     };
 
     // Hàm cập nhật một thuộc tính trong object company
