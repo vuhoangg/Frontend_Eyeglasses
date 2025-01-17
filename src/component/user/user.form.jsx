@@ -1,5 +1,5 @@
 import { Input } from 'antd';
-import { Button } from 'antd';
+import { Button, Modal} from 'antd';
 import { useState } from 'react';
 import axios from 'axios';
 import { createUserAPI } from '../../services/api.service';
@@ -11,16 +11,21 @@ const UserForm = () => {
     const [password, setPassword] = useState("");
     const [address, setAddress] = useState("");
 
-    // const [age, setAge] = useState("");
-    // const [gender, setGender] = useState("");
-    // const [role, setRole] = useState("");
-    // const [company, setCompany] = useState({
-    //     _id: "",
-    //     name: "",
-    // });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const showModal = () => {
+      setIsModalOpen(true);
+    };
+    const handleOk = () => {
+
+        handleClickBtn();
+      setIsModalOpen(false);
+    };
+    const handleCancel = () => {
+      setIsModalOpen(false);
+    };
 
    
-    // hứng kết quả Promise là gì ? sử dụng async và await
+   
     const handleClickBtn =  async () => {
        const res = await  createUserAPI(name, email, password, address )
        if(res.data){ 
@@ -48,15 +53,27 @@ const UserForm = () => {
 
     return (
         <>
-            <div className="user-form" style={{ margin: "20px 0 " }}>
-                <div
-                    style={{
+          
+           <div style={{ display: "flex", justifyContent: "space-between"}}>
+                        <h3> Table User</h3>
+            <Button type="primary" onClick={showModal}>
+                  + ADD User 
+                </Button>
+                    <Modal title="ADD User" 
+                    open={isModalOpen}
+                    onOk={handleOk}
+                      onCancel={handleCancel}
+                      maskClosable={false}
+                      okText={"Create"}
+                      >
+
+                    <div className="user-form" style={{ margin: "20px 0 " }}>
+                <div style={{
                         display: "flex",
                         marginLeft: "10px",
                         gap: "10px",
                         flexDirection: "column"
-                    }}
-                >
+                    }}>
                     <div>
                         <span> Full Name </span>
                         <Input
@@ -91,65 +108,20 @@ const UserForm = () => {
                         />
                     </div>
 
-                    {/* các trường bổ sung  */}
+                   
+        
 
-                    {/* <div>
-                        <span> Age </span>
-                        <Input
-                            placeholder=""
-                            onChange={(event) => setAge(event.target.value)}
-                            value={age}
-                        />
-                    </div>
-                    <div>
-                        <span> Gender </span>
-                        <Input
-                            placeholder=""
-                            onChange={(event) => setGender(event.target.value)}
-                            value={gender}
-                        />
-                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between"}}>
+                        <h3></h3>
+                  
 
-                    <div>
-                        <span> Role </span>
-                        <Input
-                            placeholder=""
-                            onChange={(event) => setRole(event.target.value)}
-                            value={role}
-                        />
-                    </div>
-
-                
-                    <div>
-                        <span> Company Id  </span>
-                        <Input
-                            placeholder="Enter _id"
-                            onChange={(event) =>
-                                handleCompanyChange("_id", event.target.value)
-                            }
-                            value={company._id}
-                        />
-                    </div>
-                    <div>
-                        <span> Company Name </span>
-                        <Input
-                            placeholder="Enter company name"
-                            onChange={(event) =>
-                                handleCompanyChange("name", event.target.value)
-                            }
-                            value={company.name}
-                        />
-                    </div> */}
-
-                    
-
-                    <div>
-                        <Button type="primary" onClick={handleClickBtn}>
-                            Create User
-                        </Button>
+              
+                        
                     </div>
                 </div>
             </div>
+                    </Modal>
+                    </div>
         </>
     );
 };

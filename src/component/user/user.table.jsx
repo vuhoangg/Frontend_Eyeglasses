@@ -2,18 +2,10 @@ import { Space, Table, Tag } from 'antd';
 import React from 'react';
 import { fetchAllUserAPI } from '../../services/api.service';
 import { useState, useEffect} from 'react';
-
+import  {  Button, Modal  } from 'antd';
 const UserTable =()=> {
 
-    const [dataUsers , setDataUser ] = useState([
-      {
-            id: '1',
-            name: 'John Brown',
-            email : 'email',
-            address: 'New York No. 1 Lake Park',
-           
-          },
-    ]);
+    const [dataUsers , setDataUser ] = useState([]);
     // empty array => run once 
      useEffect(() => {
       console.log('Effect is running 111 ');
@@ -59,12 +51,16 @@ const UserTable =()=> {
       // loadUser();
       console.log(">> run render 000");
 
-      return (
+ 
 
+      return (
+          <>
+          
           <Table 
           columns={columns} 
           dataSource={dataUsers}
           rowKey= {dataUsers.id} />
+          </>
       );
       
     }
