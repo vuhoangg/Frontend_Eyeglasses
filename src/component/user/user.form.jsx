@@ -5,7 +5,11 @@ import axios from 'axios';
 import { createUserAPI } from '../../services/api.service';
 import success from 'react';
 import { notification } from 'antd';
-const UserForm = () => {
+const UserForm = (props) => {
+    
+    // console.log("check props ", props );
+    const {loadUser} = props ;
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -32,12 +36,14 @@ const UserForm = () => {
        setEmail("");
        setPassword("");
        setAddress("");
+      
        if(res.data){ 
         notification.success({
             message: "create user ",
             description : " tạo user thành công "
          
         })
+        await loadUser();
        }else{
         {
             notification.error({

@@ -3,15 +3,12 @@ import React from 'react';
 import { fetchAllUserAPI } from '../../services/api.service';
 import { useState, useEffect} from 'react';
 import  {  Button, Modal  } from 'antd';
-const UserTable =()=> {
 
-    const [dataUsers , setDataUser ] = useState([]);
-    // empty array => run once 
-     useEffect(() => {
-      console.log('Effect is running 111 ');
-      loadUser();
-    }, []
-    );
+const UserTable =(props)=> {
+
+  const {dataUsers} = props ;
+
+   
 
 
     const columns = [
@@ -40,18 +37,7 @@ const UserTable =()=> {
        
       ];
       
-      const loadUser = async () =>{
-        // console.log( " Start ");
-        const res = await fetchAllUserAPI();
-        setDataUser( res.data.data);
-        // console.log ("check data ", res.data.data )
-        // console.log( " End  ");
-      }
-
-      // loadUser();
-      console.log(">> run render 000");
-
- 
+    
 
       return (
           <>
