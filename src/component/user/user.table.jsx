@@ -3,7 +3,8 @@ import React from 'react';
 import { fetchAllUserAPI } from '../../services/api.service';
 import { useState, useEffect} from 'react';
 import  {  Button, Modal  } from 'antd';
-
+import { DeleteOutlined , EditOutlined } from '@ant-design/icons';
+import UpdateUserModal from './user.update';
 const UserTable =(props)=> {
 
   const {dataUsers} = props ;
@@ -14,9 +15,12 @@ const UserTable =(props)=> {
     const columns = [
       {
         title: 'Id',
-        dataIndex: 'id',
-        key: 'id',
+        dataIndex: '_id',
+        render: (_, record) => {
+          return (<a href='#'>{record._id} </a>);
+        }
       },
+
         {
           title: 'Name',
           dataIndex: 'name',
@@ -33,6 +37,19 @@ const UserTable =(props)=> {
           dataIndex: 'address',
           key: 'address',
         },
+        {
+          title: 'Action 2',
+          width: 90,
+         
+          render: () =>( <EditOutlined style={{ cursor : "pointer", color: "orange"}} />
+            )
+        },
+        {
+          title: 'Action 3',
+          fixed: 'right',
+          width: 90,
+          render: () => (<DeleteOutlined style={{ cursor : "pointer", color: "red"}}  /> )
+        },
        
        
       ];
@@ -46,7 +63,10 @@ const UserTable =(props)=> {
           columns={columns} 
           dataSource={dataUsers}
           rowKey= {dataUsers.id} />
+
+          <UpdateUserModal/>
           </>
+          
       );
       
     }

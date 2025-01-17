@@ -1,21 +1,20 @@
 import { Input } from 'antd';
 import { Button, Modal} from 'antd';
 import { useState } from 'react';
-import axios from 'axios';
 import { createUserAPI } from '../../services/api.service';
-import success from 'react';
 import { notification } from 'antd';
-const UserForm = (props) => {
-    
+const UpdateUserModal =()=>{
+
+     
     // console.log("check props ", props );
-    const {loadUser} = props ;
+    // const {loadUser} = props ;
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [address, setAddress] = useState("");
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(true);
     const showModal = () => {
       setIsModalOpen(true);
     };
@@ -43,7 +42,7 @@ const UserForm = (props) => {
             description : " tạo user thành công "
          
         })
-        await loadUser();
+        // await loadUser();
        }else{
         {
             setIsModalOpen(true);
@@ -56,20 +55,14 @@ const UserForm = (props) => {
        }
     }
    
-
     return (
         <>
-           <div style={{ display: "flex", justifyContent: "space-between"}}>
-                        <h3> Table User</h3>
-            <Button type="primary" onClick={showModal}>
-                  + ADD User 
-                </Button>
-                    <Modal title="ADD User" 
+                    <Modal title="Update  User" 
                     open={isModalOpen}
                     onOk={handleOk}
                       onCancel={handleCancel}
                       maskClosable={false}
-                      okText={"Create"}
+                      okText={"Update"}
                       >
 
                     <div className="user-form" style={{ margin: "20px 0 " }}>
@@ -113,22 +106,15 @@ const UserForm = (props) => {
                         />
                     </div>
 
-                   
-        
-
                     <div style={{ display: "flex", justifyContent: "space-between"}}>
                         <h3></h3>
-                  
-
-              
-                        
                     </div>
                 </div>
             </div>
                     </Modal>
-                    </div>
+                  
         </>
-    );
-};
 
-export default UserForm;
+    );
+}
+export default UpdateUserModal ;

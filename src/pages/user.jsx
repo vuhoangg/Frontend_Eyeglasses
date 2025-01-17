@@ -17,7 +17,7 @@ const UserPage = () =>{
         // console.log( " Start ");
         const res = await fetchAllUserAPI();
         setDataUser( res.data.data);
-        // console.log ("check data ", res.data.data )
+        console.log ("check data ", res.data.data )
         // console.log( " End  ");
       }
 
