@@ -28,10 +28,15 @@ const UserForm = () => {
    
     const handleClickBtn =  async () => {
        const res = await  createUserAPI(name, email, password, address )
+       setName("");
+       setEmail("");
+       setPassword("");
+       setAddress("");
        if(res.data){ 
         notification.success({
             message: "create user ",
             description : " tạo user thành công "
+         
         })
        }else{
         {
@@ -49,6 +54,7 @@ const UserForm = () => {
             ...prevCompany,
             [field]: value
         }));
+   
     };
 
     return (
