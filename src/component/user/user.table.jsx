@@ -8,7 +8,7 @@ import UpdateUserModal from './user.update';
 const UserTable =(props)=> {
 
   
-  const {dataUsers} = props ;
+  const {dataUsers, loadUser } = props ;
   const [isModalUpdate, setIsModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(null)
 
@@ -66,7 +66,7 @@ const UserTable =(props)=> {
       ];
       
     
-      // console.log(">> check data update ",dataUpdate )
+      // console.log(">> check data update   ",dataUpdate )
       return (
           <>
           
@@ -80,6 +80,7 @@ const UserTable =(props)=> {
             setIsModalUpdate = {setIsModalUpdate}
             dataUpdate={dataUpdate}
             setDataUpdate={setDataUpdate}
+            loadUser={loadUser}
           />
           </>
           

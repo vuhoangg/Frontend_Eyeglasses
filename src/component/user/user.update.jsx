@@ -1,7 +1,7 @@
 import { Input } from 'antd';
 import { Button, Modal} from 'antd';
 import { useEffect, useState } from 'react';
-import { createUserAPI } from '../../services/api.service';
+import { updateUserAPI } from '../../services/api.service';
 import { notification } from 'antd';
 const UpdateUserModal =(props)=>{
 
@@ -14,7 +14,7 @@ const UpdateUserModal =(props)=>{
      
     // console.log("check props ", props );
     // const {loadUser} = props ;
-    const {isModalUpdate, setIsModalUpdate, dataUpdate, setDataUpdate} = props;
+    const {isModalUpdate, setIsModalUpdate, dataUpdate, setDataUpdate, loadUser} = props;
 
     useEffect(()=> {
         console.log( "check data update props useEffect ", dataUpdate)
@@ -44,22 +44,24 @@ const UpdateUserModal =(props)=>{
     };
 
    
-   
+    
     const handleClickBtn =  async () => {
-       const res = await  createUserAPI(name, email, password, address )
+        console.log("check id ", id )
+        console.log("check dataUpdate id ", dataUpdate._id  )
+
+       const res = await  updateUserAPI(id , name, email, address)
        setId("");
        setName("");
        setEmail("");
-       setPassword("");
+    //    setPassword("");
        setAddress("");
       
        if(res.data){ 
         notification.success({
             message: "create user ",
             description : " tạo user thành công "
-         
         })
-        // await loadUser();
+        await loadUser();
        }else{
         {
             setIsModalUpdate(true);
@@ -71,6 +73,7 @@ const UpdateUserModal =(props)=>{
         } 
        }
     }
+
     console.log(">> check data update prop ",dataUpdate )
     return (
         <>
@@ -128,16 +131,8 @@ const UpdateUserModal =(props)=>{
                             value={address}
                         />
                     </div>
-
-                   
-        
-
                     <div style={{ display: "flex", justifyContent: "space-between"}}>
-                        <h3></h3>
-                  
-
-              
-                        
+                        <h3></h3> 
                     </div>
                 </div>
             </div>

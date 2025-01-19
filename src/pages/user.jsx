@@ -20,7 +20,6 @@ const UserPage = () =>{
         console.log ("check data ", res.data.data )
         // console.log( " End  ");
       }
-
       // loadUser();
       console.log(">> run render 000");
     
@@ -32,6 +31,7 @@ const UserPage = () =>{
             />
             <UserTable
             dataUsers={dataUsers}
+            loadUser={loadUser}
             />
         </div>
         </>
