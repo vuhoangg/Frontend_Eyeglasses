@@ -1,9 +1,7 @@
 import { Input } from 'antd';
 import { Button, Modal} from 'antd';
 import { useState } from 'react';
-import axios from 'axios';
 import { createUserAPI } from '../../services/api.service';
-import success from 'react';
 import { notification } from 'antd';
 const UserForm = (props) => {
     
@@ -72,25 +70,23 @@ const UserForm = (props) => {
                       okText={"Create"}
                       >
 
-                    <div className="user-form" style={{ margin: "20px 0 " }}>
-                <div style={{
+                    <div className="user-form" style={{ margin: "20px 20px " }}>
+                        <div style={{
                         display: "flex",
                         marginLeft: "10px",
                         gap: "10px",
                         flexDirection: "column"
                     }}>
                     <div>
-                        <span> Full Name </span>
+                        <div>Name</div>
                         <Input
                             placeholder=""
-                            type="text"
                             onChange={(event) => setName(event.target.value)}
                             value={name}
                         />
                     </div>
-
                     <div>
-                        <span> Email </span>
+                        <div>Email</div>
                         <Input
                             placeholder=""
                             onChange={(event) => setEmail(event.target.value)}
@@ -98,14 +94,15 @@ const UserForm = (props) => {
                         />
                     </div>
                     <div>
-                        <span> PassWord </span>
+                        <div>PassWord</div>
                         <Input.Password
+                          placeholder=""
                             onChange={(event) => setPassword(event.target.value)}
                             value={password}
                         />
                     </div>
                     <div>
-                        <span> Address </span>
+                        <div>Address</div>
                         <Input
                             placeholder=""
                             onChange={(event) => setAddress(event.target.value)}

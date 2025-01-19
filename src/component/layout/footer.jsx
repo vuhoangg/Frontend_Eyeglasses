@@ -1,5 +1,5 @@
 
-// import './header.css'
+
 const FooterLayout =()=>{
     return(
         <>

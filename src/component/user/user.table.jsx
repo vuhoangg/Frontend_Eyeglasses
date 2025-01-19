@@ -1,13 +1,17 @@
 import { Space, Table, Tag } from 'antd';
 import React from 'react';
 import { fetchAllUserAPI } from '../../services/api.service';
-import { useState, useEffect} from 'react';
 import  {  Button, Modal  } from 'antd';
+import {useState } from 'react';
 import { DeleteOutlined , EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from './user.update';
 const UserTable =(props)=> {
 
+  
   const {dataUsers} = props ;
+  const [isModalUpdate, setIsModalUpdate] = useState(false);
+  const [dataUpdate, setDataUpdate] = useState(null)
+
 
    
 
@@ -37,15 +41,22 @@ const UserTable =(props)=> {
           dataIndex: 'address',
           key: 'address',
         },
+
         {
-          title: 'Action 2',
+          title: 'Action 1',
           width: 90,
          
-          render: () =>( <EditOutlined style={{ cursor : "pointer", color: "orange"}} />
+          render: (_, record ) =>( <EditOutlined 
+            onClick={ () => {
+              setDataUpdate(record);
+              setIsModalUpdate(true)
+              }
+            } 
+          style={{ cursor : "pointer", color: "orange"}} />
             )
         },
         {
-          title: 'Action 3',
+          title: 'Action 2',
           fixed: 'right',
           width: 90,
           render: () => (<DeleteOutlined style={{ cursor : "pointer", color: "red"}}  /> )
@@ -55,7 +66,7 @@ const UserTable =(props)=> {
       ];
       
     
-
+      // console.log(">> check data update ",dataUpdate )
       return (
           <>
           
@@ -64,7 +75,12 @@ const UserTable =(props)=> {
           dataSource={dataUsers}
           rowKey= {dataUsers.id} />
 
-          <UpdateUserModal/>
+          <UpdateUserModal
+            isModalUpdate= {isModalUpdate}
+            setIsModalUpdate = {setIsModalUpdate}
+            dataUpdate={dataUpdate}
+            setDataUpdate={setDataUpdate}
+          />
           </>
           
       );
