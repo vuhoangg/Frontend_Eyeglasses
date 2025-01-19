@@ -1,7 +1,7 @@
-import { Space, Table, Tag } from 'antd';
+import { Space, Table, Tag,  notification } from 'antd';
 import React from 'react';
-import { fetchAllUserAPI } from '../../services/api.service';
-import  {  Button, Modal  } from 'antd';
+import { deleteUserAPI, fetchAllUserAPI } from '../../services/api.service';
+import  {  Button, Modal, message, Popconfirm  } from 'antd';
 import {useState } from 'react';
 import { DeleteOutlined , EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from './user.update';
@@ -15,6 +15,41 @@ const UserTable =(props)=> {
   const [dataDetail, setDataDetail] = useState({})
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   console.log("check isDetailOpen ", isDetailOpen);
+
+  // Popconfirm 
+  const confirm = (e) => {
+    handleDeleteUser()
+    console.log(e);
+    // message.success('Click on Yes');
+
+  };
+  const cancel = (e) => {
+    console.log(e);
+    message.error('Click on No');
+  };
+
+  const handleDeleteUser= async () => {
+ 
+    console.log("check dataUpdate id ", dataUpdate._id  )
+    const res = await deleteUserAPI(dataUpdate._id )
+    console.log("Check api xoá ", res )
+   if(res.data){ 
+    notification.success({
+        message: " Xoa thành công  ",
+        description : " xoá  user thành công "
+    })
+    await loadUser();
+   }else{
+    {
+        // setIsModalUpdate(true);
+        notification.error({
+            message: "Error delete user ",
+            description:JSON.stringify(res.message)
+        })
+
+    } 
+   }
+}
 
     const columns = [
       {
@@ -63,7 +98,24 @@ const UserTable =(props)=> {
           title: 'Action 2',
           fixed: 'right',
           width: 90,
-          render: () => (<DeleteOutlined style={{ cursor : "pointer", color: "red"}}  /> )
+          render: (_, record) => (
+            <Popconfirm
+            title="Delete the task"
+              placement="left"
+            description="Are you sure to delete this task?"
+            onConfirm={confirm}
+            onCancel={cancel}
+            okText="Yes"
+            cancelText="No">
+
+          <DeleteOutlined style={{ cursor : "pointer", color: "red"}}
+          onClick={ () => {
+            setDataUpdate(record)
+            }
+          } 
+            /> 
+          </Popconfirm>
+        )
         },
        
        
