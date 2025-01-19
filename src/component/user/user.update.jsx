@@ -31,9 +31,9 @@ const UpdateUserModal =(props)=>{
 
 
 
-    const showModal = () => {
-      setIsModalUpdate(true);
-    };
+    // const showModal = () => {
+    //   setIsModalUpdate(true);
+    // };
     const handleOk = () => {
 
         handleClickBtn();
