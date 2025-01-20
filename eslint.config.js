@@ -21,6 +21,8 @@ export default [
     plugins: {
       react,
       'react-hooks': reactHooks,
+      'react/prop-types':'off',
+      'no-unused-vars' :'off',
       'react-refresh': reactRefresh,
     },
     rules: {
