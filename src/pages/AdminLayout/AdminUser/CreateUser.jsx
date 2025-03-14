@@ -36,8 +36,8 @@ const CreateUser = () => {
   const handleSubmit = async () => {
     try {
       const response = await createUserAPI(username, email, password, phone, firstName, lastName, address, roles);
-      console.log("Response:", response.data.data);
-      if(response.data.data)
+      console.log("Response:", response.data);
+      if(response.data)
       notification.success({
         message: "Create User", description: "Create User Success "
     })

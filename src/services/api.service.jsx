@@ -25,8 +25,7 @@ const createUserAPI = ( username,email,password,phone,firstName,lastName,address
 }
 
 const fetchAllUserAPI = () =>{
-    const URL_BACKEND = "http://localhost:8082/user";
-    // const data = {name : name ,email: email ,password : password , address: address ,}
+    const URL_BACKEND = "/user";
     return axios.get(URL_BACKEND);
 }
 const updateUserAPI = (_id, name, email, address) =>

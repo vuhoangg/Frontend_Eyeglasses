@@ -1,54 +1,60 @@
 
-import React from 'react';
-import { Space, Table, Tag } from 'antd';
 
+import { Space, Table, Tag } from 'antd';
+import { fetchAllUserAPI } from '../../../services/api.service';
+import React, { useState, useEffect } from "react";
+
+
+
+const ManageUser = () =>{
+const [dataUsers, setDataUsers ]= useState([]);
 const columns = [
   {
+    title: 'Id',
+    dataIndex: 'id',
+    render: (_, record) => {
+      return (<a href='#'>
+        {record.id} </a>);
+    }
+  },
+  {
     title: 'Name',
-    dataIndex: 'name',
+    dataIndex: 'username',
     key: 'name',
     render: (text) => <a>{text}</a>,
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
+    title: 'Email',
+    dataIndex: 'email',
+    key: 'email',
+  },
+  {
+    title: 'firstName',
+    dataIndex: 'firstName',
+    key: 'email',
+  },
+  {
+    title: 'lastName',
+    dataIndex: 'lastName',
+    key: 'email',
   },
   {
     title: 'Address',
     dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Tags',
-    key: 'tags',
-    dataIndex: 'tags',
-    render: (_, { tags }) => (
-      <>
-        {tags.map((tag) => {
-          let color = tag.length > 5 ? 'geekblue' : 'green';
-          if (tag === 'loser') {
-            color = 'volcano';
-          }
-          return (
-            <Tag color={color} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          );
-        })}
-      </>
-    ),
+    // key: 'address',
   },
   {
     title: 'Action',
     key: 'action',
     render: (_, record) => (
       <Space size="middle">
-        <a>Invite {record.name}</a>
+        <a>Update {record.name}</a>
         <a>Delete</a>
       </Space>
     ),
   },
+
+
 ];
 const data = [
   {
@@ -73,7 +79,29 @@ const data = [
     tags: ['cool', 'teacher'],
   },
 ];
-const ManageUser = () => <Table columns={columns} dataSource={data} />;
+
+// gọi api 
+const loadUser = async ()=>{
+    console.log(">> run loadUser Start ")
+    const res = await fetchAllUserAPI()
+    console.log(">> run loadUser End ", res.data.data )
+    setDataUsers(res.data.data)
+
+}
+
+  // useEffect để gọi API khi component mount
+  useEffect(() => {
+    loadUser();
+  }, []); // if second prams is [] programging run the one 
+
+
+    return(
+     <>
+     <Table columns={columns} dataSource={dataUsers} />
+     </>
+    
+    );
+}; 
 
 
 

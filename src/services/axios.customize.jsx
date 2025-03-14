@@ -28,7 +28,7 @@ instance.interceptors.response.use(function (response) {
     // check inside response 
    
     if(response.data && response.data.data ){
-        return response;
+        return response.data;
     }
     return response;
   }, function (error) {
