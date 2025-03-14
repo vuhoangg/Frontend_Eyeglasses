@@ -1,14 +1,31 @@
 import axios from './axios.customize';
-const createUserAPI = (name, email, password, address ) =>
+
+// const createUserAPI = (name, email, password, address ) =>
+// {
+//     const URL_BACKEND = "/api/v1/users";
+//     const data = {name : name ,email: email ,password : password ,address: address ,}
+//     return axios.post(URL_BACKEND, data );
+
+// }
+const createUserAPI = ( username,email,password,phone,firstName,lastName,address,roles, ) =>
 {
-    const URL_BACKEND = "/api/v1/users";
-    const data = {name : name ,email: email ,password : password ,address: address ,}
+    const URL_BACKEND = "http://localhost:8082/user";
+    const data = {
+        username : username ,
+        email: email ,
+        password : password ,
+        phone: phone,
+        firstName: firstName,
+        lastName: lastName, 
+        address: address ,
+        roles: roles,
+    }
     return axios.post(URL_BACKEND, data );
 
 }
 
 const fetchAllUserAPI = () =>{
-    const URL_BACKEND = "/api/v1/users";
+    const URL_BACKEND = "http://localhost:8082/user";
     // const data = {name : name ,email: email ,password : password , address: address ,}
     return axios.get(URL_BACKEND);
 }

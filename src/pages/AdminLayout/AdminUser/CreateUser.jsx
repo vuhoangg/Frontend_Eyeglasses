@@ -1,6 +1,7 @@
-import { Form, Input, Button, Select, Row, Col } from "antd";
+import { Form, Input, Button, Select, Row, Col, notification } from "antd";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { createUserAPI } from "../../../services/api.service";
 
 const CreateUser = () => {
   // State cho từng trường input
@@ -35,21 +36,12 @@ const CreateUser = () => {
 
   const handleSubmit = async () => {
     try {
-      const URL_BACKEND = "http://localhost:8082/user";
-      const userData = {
-        username,
-        email,
-        password,
-        phone,
-        firstName,
-        lastName,
-        address,
-        roles,
-      };
-  
-      const response = await axios.post(URL_BACKEND, userData);
-      console.log("Response:", response.data);
-      alert("User created successfully!");
+      const response = await createUserAPI(username, email, password, phone, firstName, lastName, address, roles);
+      console.log("Response:", response.data.data);
+      if(response.data && response.data.data)
+      notification.success({
+        message: "Create User", description: "Create User Success "
+    })
     } catch (error) {
       console.error("Lỗi khi lưu quyền:", error);
     }
