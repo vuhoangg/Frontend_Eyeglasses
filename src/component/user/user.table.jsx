@@ -1,7 +1,7 @@
-import { Space, Table, Tag,  notification } from 'antd';
+import {  Table,  notification } from 'antd';
 import React from 'react';
 import { deleteUserAPI, fetchAllUserAPI } from '../../services/api.service';
-import  {  Button, Modal, message, Popconfirm  } from 'antd';
+import  { message, Popconfirm  } from 'antd';
 import {useState } from 'react';
 import { DeleteOutlined , EditOutlined } from '@ant-design/icons';
 import UpdateUserModal from './user.update';
@@ -101,7 +101,7 @@ const UserTable =(props)=> {
           render: (_, record) => (
             <Popconfirm
             title="Delete the task"
-              placement="left"
+            placement="left"
             description="Are you sure to delete this task?"
             onConfirm={confirm}
             onCancel={cancel}

@@ -14,14 +14,10 @@ const UserPage = () =>{
     );
 
     const loadUser = async () =>{
-        // console.log( " Start ");
         const res = await fetchAllUserAPI();
         setDataUser( res.data.data);
         console.log ("check data ", res.data.data )
-        // console.log( " End  ");
       }
-      // loadUser();
-      console.log(">> run render 000");
     
     return(
         <>

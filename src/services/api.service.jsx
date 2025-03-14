@@ -8,7 +8,7 @@ const createUserAPI = (name, email, password, address ) =>
 }
 
 const fetchAllUserAPI = () =>{
-    const URL_BACKEND = "/api/v2/users";
+    const URL_BACKEND = "/api/v1/users";
     // const data = {name : name ,email: email ,password : password , address: address ,}
     return axios.get(URL_BACKEND);
 }

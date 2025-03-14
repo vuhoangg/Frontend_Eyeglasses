@@ -110,15 +110,8 @@ const UserForm = (props) => {
                         />
                     </div>
 
-                   
-        
-
                     <div style={{ display: "flex", justifyContent: "space-between"}}>
-                        <h3></h3>
-                  
-
-              
-                        
+                        <h3></h3>  
                     </div>
                 </div>
             </div>
