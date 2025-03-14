@@ -9,7 +9,7 @@ import axios from './axios.customize';
 // }
 const createUserAPI = ( username,email,password,phone,firstName,lastName,address,roles, ) =>
 {
-    const URL_BACKEND = "http://localhost:8082/user";
+    const URL_BACKEND = "/user";
     const data = {
         username : username ,
         email: email ,

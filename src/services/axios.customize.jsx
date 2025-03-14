@@ -3,7 +3,7 @@ import axios from "axios";
  console.log("check VITE_URL_Backend ", import.meta.env.VITE_BACKEND_URL)
   const instance = axios.create({
     // baseURL: import.meta.env.VITE_BACKEND_URL
-    baseURL: "http://localhost:8081"
+    baseURL: "http://localhost:8082"
   });
   
   // Alter defaults after instance has been created

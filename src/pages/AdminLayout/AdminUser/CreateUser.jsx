@@ -1,5 +1,4 @@
 import { Form, Input, Button, Select, Row, Col, notification } from "antd";
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { createUserAPI } from "../../../services/api.service";
 
@@ -38,12 +37,15 @@ const CreateUser = () => {
     try {
       const response = await createUserAPI(username, email, password, phone, firstName, lastName, address, roles);
       console.log("Response:", response.data.data);
-      if(response.data && response.data.data)
+      if(response.data.data)
       notification.success({
         message: "Create User", description: "Create User Success "
     })
     } catch (error) {
-      console.error("Lỗi khi lưu quyền:", error);
+      notification.error({
+        message: "Create User", description: "Create User Error "
+    })
+      
     }
   };
 
