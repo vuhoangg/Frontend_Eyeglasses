@@ -21,7 +21,6 @@ const UserTable =(props)=> {
     handleDeleteUser()
     console.log(e);
     // message.success('Click on Yes');
-
   };
   const cancel = (e) => {
     console.log(e);
@@ -46,7 +45,6 @@ const UserTable =(props)=> {
             message: "Error delete user ",
             description:JSON.stringify(res.message)
         })
-
     } 
    }
 }

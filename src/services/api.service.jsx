@@ -28,16 +28,24 @@ const fetchAllUserAPI = () =>{
     const URL_BACKEND = "/user";
     return axios.get(URL_BACKEND);
 }
-const updateUserAPI = (_id, name, email, address) =>
+const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,roles,) =>
 {
-    const URL_BACKEND = `/api/v1/users/${_id}`;
-    const data = {name : name ,email: email, address: address }
+    const URL_BACKEND = `/user/${id}`;
+    const data = {
+        username : username ,
+        email: email ,
+        phone: phone,
+        firstName: firstName,
+        lastName: lastName, 
+        address: address ,
+        roles: roles,
+    }
     return axios.patch(URL_BACKEND, data );
 
 }
-const deleteUserAPI = (_id) =>
+const deleteUserAPI = (id) =>
 {
-    const URL_BACKEND = `/api/v1/users/${_id}`;
+    const URL_BACKEND = `/user/${id}`;
     return axios.delete(URL_BACKEND);
 
 }
