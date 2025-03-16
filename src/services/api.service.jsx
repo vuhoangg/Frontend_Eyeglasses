@@ -24,10 +24,10 @@ const createUserAPI = ( username,email,password,phone,firstName,lastName,address
 
 }
 
-const fetchAllUserAPI = () =>{
-    const URL_BACKEND = "/user";
+const fetchAllUserAPI = (page, limit) => {
+    const URL_BACKEND = `/user?limit=${limit}&page=${page}`;
     return axios.get(URL_BACKEND);
-}
+};
 const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,roles,) =>
 {
     const URL_BACKEND = `/user/${id}`;

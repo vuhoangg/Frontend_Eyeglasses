@@ -12,12 +12,12 @@ import RegisterPage from './pages/register.jsx';
 import UserPage from '../src/pages/AdminLayout/AdminUser/user.jsx';
 import ProductPage from './pages/product.jsx';
 import TodoApp from './component/todolist/TodoApp.jsx';
-import ErrorPage from './pages/userRouterError.jsx'
 import IntroducePage from './pages/introduce.jsx';
 import Client from './Client.jsx'
 import AdminLayout from './pages/AdminLayout/AdminLayout.jsx';
 import CreateUser from './pages/AdminLayout/AdminUser/CreateUser.jsx';
 import ManageUser from './pages/AdminLayout/AdminUser/ManageUser.jsx';
+import ErrorPage from './pages/Error/Error.jsx';
 
 const router = createBrowserRouter([
   {
