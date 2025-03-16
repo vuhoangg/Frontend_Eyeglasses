@@ -1,15 +1,18 @@
 
 import React, { useState } from 'react';
-import HeaderLayout from './component/layout/header';
-import FooterLayout from './component/layout/footer';
+
+
 import { Outlet } from 'react-router-dom';
+import Header from './pages/ClientLayout/Header';
+import Footer from './pages/ClientLayout/Footer';
 
 const App =() => {
   return(
     <>
-    <HeaderLayout />
+    <Header/>
     <Outlet/>
-    {/* <FooterLayout/> */}
+    <Footer/>
+
     </>
   );
 }

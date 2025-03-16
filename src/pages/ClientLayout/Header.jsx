@@ -6,28 +6,26 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 
 // You would need to create this component separately
 const TopMenu = ({ user }) => {
   return (
     <div className="top_menu">
       <div className="welcome">
-        {user ? `Xin chào, ${user.name}` : 'Chào mừng đến với Lily Eyewear'}
+        {user ? `Xin chào, ${user.name}` : 'CHÀO MÙNG ĐẾN VỚI HUNO EYEWEAR'}
       </div>
       <div className="contact">
-        Hotline: 0909.534.036 | Email: care@kinhmatlily.com
+        Hotline: 0909.534.036 | Email: care@kinhmathuno.com
       </div>
     </div>
   );
 };
 
 const Header = () => {
-  const dataCart = useSelector((state) => state.shopcart?.listCartItem) || [];
-  
+//   const dataCart = useSelector((state) => state.shopcart?.listCartItem) || [];
   const [user, setUser] = useState({});
   const [current, setCurrent] = useState("");
-
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("userData"));
     setUser(userData);
@@ -39,7 +37,7 @@ const Header = () => {
       key: "home",
     },
     {
-      label: <Link to={"/shop"}>CỬA HÀNG</Link>,
+      label: <Link to={"/product"}>CỬA HÀNG</Link>,
       key: "shop",
     },
     {
@@ -51,7 +49,7 @@ const Header = () => {
       key: "voucher",
     },
     {
-      label: <Link to={"/about"}>GIỚI THIỆU</Link>,
+      label: <Link to={"/about_us_page"}>GIỚI THIỆU</Link>,
       key: "about",
     },
   ];
@@ -67,8 +65,8 @@ const Header = () => {
         <Col span={10}>
           <Link to="/">
             <img 
-              src="/logo.png" 
-              alt="Lily Eyewear" 
+              src="src/resources/imagelayout/Logo_HUNO.webp" 
+              alt="HUNO Eyewear" 
               style={{ width: "220px" }} 
             />
           </Link>
@@ -86,11 +84,13 @@ const Header = () => {
           <Link to="/" type="text" onClick={() => console.log("Nhắn tin")}>
             <MessageOutlined className="style_icon" />
           </Link>
-          <Link to="./shopcart">
+
+          {/* <Link to="./shopcart">
             <Badge count={dataCart.length} size="small">
               <ShoppingCartOutlined className="style_icon" />
             </Badge>
-          </Link>
+          </Link> */}
+
           <Link to="/login">
             <UserOutlined className="style_icon" />
           </Link>
