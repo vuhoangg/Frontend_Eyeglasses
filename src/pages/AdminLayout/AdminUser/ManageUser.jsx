@@ -1,8 +1,10 @@
-import { Space, Table, Popconfirm, notification, message } from 'antd'; 
+import { Space, Table, Popconfirm, notification, message , Row,
+  Col, } from 'antd'; 
 import { fetchAllUserAPI, deleteUserAPI } from '../../../services/api.service'; 
 import React, { useState, useEffect } from "react"; 
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'; 
 import UpdateUser from './UpdateUser';  // Import the UpdateUser component
+import FormSearch from '../../../component/SearchForm';
 
 const ManageUser = () => {
   // 1. UseState  
@@ -14,6 +16,7 @@ const ManageUser = () => {
     limit: 6,
     total: 0, 
   });
+  const [keyword, setKeyword] = useState("");
 
   // 2. Handle Service
   // Popconfirm
@@ -45,6 +48,9 @@ const ManageUser = () => {
       });
     }
   };
+
+
+
   
   // Handle Show Update Modal  
   const handleShowUpdateModal = (record) => {
@@ -52,8 +58,8 @@ const ManageUser = () => {
     setIsModalUpdateOpen(true); 
   };
   
-  const loadUser = async (page = 1, limit = 6) => {
-    const res = await fetchAllUserAPI(page, limit);
+  const loadUser = async (page = 1, limit = 6,  keyword = "") => {
+    const res = await fetchAllUserAPI(page, limit, keyword);
     
     if (res.data) {
       setDataUsers(res.data.data);
@@ -64,10 +70,16 @@ const ManageUser = () => {
       });
     }
   };
+
+  const handleSearch = (value) => {
+    // Khi người dùng search, cập nhật keyword và gọi loadUser
+    setKeyword(value);
+    loadUser(1, pagination.limit, value); // Reset về trang 1 khi search
+  };
   
   const handleTableChange = (paginationInfo) => {
     // Antd table passes pagination object with current and pageSize
-    loadUser(paginationInfo.current, paginationInfo.pageSize);
+    loadUser(paginationInfo.current, paginationInfo.pageSize, keyword);
   };
   
   // 3. Const Array  
@@ -124,6 +136,21 @@ const ManageUser = () => {
   
   return (
     <>
+
+<Row justify="space-between" style={{ marginBottom: "30px" }}>
+        
+        <Col span={10}>
+          <FormSearch
+            keyword={keyword}
+            setKeyword={setKeyword}
+            placeholder="Tìm kiếm băng rôn"
+            onSearch={handleSearch} // Thêm prop onSearch
+          />
+        </Col>
+
+      
+      </Row>
+
       <Table
         columns={columns}
         dataSource={dataUsers}

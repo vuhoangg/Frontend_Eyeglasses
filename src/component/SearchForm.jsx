@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, Space } from "antd";
 const { Search } = Input;
 
 const SearchForm = (props) => {
   const [keyword, setKeyWord] = useState("");
 
-  const handleOnChange = (keyword) => {
-    setKeyWord(keyword);
+  const handleOnChange = (e) => {
+    const newKeyword = e.target.value;
+    setKeyWord(newKeyword);
+    props.setKeyword(newKeyword); // Cập nhật state ở component cha
   };
 
-  const handleSearch = () => {
-    console.log("Test");
+  const handleSearch = (value) => {
+     props.onSearch(value); // Kích hoạt tìm kiếm
   };
   return (
     <>
@@ -19,8 +21,8 @@ const SearchForm = (props) => {
         enterButton
         allowClear
         value={keyword}
-        onChange={(e) => handleOnChange(e.target.value)}
-        onSearch={handleSearch}
+        onChange={(e) => handleOnChange(e)}
+        onSearch={handleSearch} // Gọi handleSearch khi search
       />
     </>
   );
