@@ -10,8 +10,6 @@ import './styles/global.css'
 import LoginPage from './pages/login.jsx';
 import RegisterPage from './pages/register.jsx';
 import UserPage from '../src/pages/AdminLayout/AdminUser/user.jsx';
-import IntroducePage from './pages/introduce.jsx';
-import Client from './pages/ClientLayout/HomePage.jsx'
 import AdminLayout from './pages/AdminLayout/AdminLayout.jsx';
 import CreateUser from './pages/AdminLayout/AdminUser/CreateUser.jsx';
 import ManageUser from './pages/AdminLayout/AdminUser/ManageUser.jsx';
@@ -23,6 +21,8 @@ import ProductDetailPage from './pages/ClientLayout/ProductDetailPage.jsx';
 import CartPage from './pages/ClientLayout/CartPage.jsx';
 
 const router = createBrowserRouter([
+
+
   // Manager Client 
   {
     path: "/",
@@ -30,6 +30,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children:[
       { index: true,  element: <HomePage/>,},
+
       { path: "/user", element: <UserPage />},
       { path: "/product", element: <ProductPage/>},
       { path: "/product_detail", element: <ProductDetailPage/>},
@@ -37,11 +38,8 @@ const router = createBrowserRouter([
       { path: "/cart_page", element: <CartPage/>}
     ],
   },
-
   // Manager Login 
-  { path: "/client",element: <Client/>},
   { path: "/login", element: <LoginPage/>},
-  { path: "/introduce", element: <IntroducePage/>},
   { path: "/register", element: <RegisterPage />},
 
   // Admin 

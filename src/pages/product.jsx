@@ -1,4 +1,4 @@
-import HeaderLayout from "../component/layout/header";
+
 
 const ProductPage = () =>{
     return(
