@@ -7,8 +7,6 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import './styles/global.css'
-import LoginPage from './pages/login.jsx';
-import RegisterPage from './pages/register.jsx';
 import AdminLayout from './pages/AdminLayout/AdminLayout.jsx';
 import CreateUser from './pages/AdminLayout/AdminUser/CreateUser.jsx';
 import ManageUser from './pages/AdminLayout/AdminUser/ManageUser.jsx';
@@ -38,8 +36,7 @@ const router = createBrowserRouter([
     ],
   },
   // Manager Login 
-  { path: "/login", element: <LoginPage/>},
-  { path: "/register", element: <RegisterPage />},
+
 
   // Admin 
   {
@@ -53,7 +50,7 @@ const router = createBrowserRouter([
       { path: "list-user", element: <ManageUser/>  },
       {path: "add-user", element: <CreateUser/> },
 
-      
+
     ]
   },
  
