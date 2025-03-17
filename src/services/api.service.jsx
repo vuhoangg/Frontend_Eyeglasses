@@ -7,7 +7,7 @@ import axios from './axios.customize';
 //     return axios.post(URL_BACKEND, data );
 
 // }
-const createUserAPI = ( username,email,password,phone,firstName,lastName,address,roles, ) =>
+const createUserAPI = ( username,email,password,phone,firstName,lastName,address, avartar ,roles, ) =>
 {
     const URL_BACKEND = "/user";
     const data = {
@@ -18,6 +18,7 @@ const createUserAPI = ( username,email,password,phone,firstName,lastName,address
         firstName: firstName,
         lastName: lastName, 
         address: address ,
+        address: avartar ,
         roles: roles,
     }
     return axios.post(URL_BACKEND, data );
@@ -31,7 +32,7 @@ const fetchAllUserAPI = (page, limit, keyword = "") => {
       }
     return axios.get(URL_BACKEND);
 };
-const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,roles,) =>
+const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,avartar ,roles,) =>
 {
     const URL_BACKEND = `/user/${id}`;
     const data = {
@@ -41,6 +42,7 @@ const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,roles
         firstName: firstName,
         lastName: lastName, 
         address: address ,
+        address: avartar ,
         roles: roles,
     }
     return axios.patch(URL_BACKEND, data );

@@ -28,8 +28,8 @@ const {isDetailOpen, setIsDetailOpen, dataDetail, setDataDetail} = props;
             {/* <p>{dataDetail.roles}</p><br/> */}
             <p>Avatar: </p><br/>
             <div>
-                <img  width={"260px"} height={"260px"} 
-                src="https://png.pngtree.com/png-clipart/20190924/original/pngtree-user-vector-avatar-png-image_4830521.jpg"/>
+                <img  width={"220px"} height={"280px"} 
+                src={`http://localhost:8082/images/user/${dataDetail.avartar}`}/>
 {/* src={`${import.meta.env.VITE_BACKEND_URL}/images/avatar/${dataDetail.avatar}`} */}
             </div>
            
