@@ -51,8 +51,24 @@ import {
           <Menu
             theme="dark"
             mode="inline"
-            defaultSelectedKeys={["1"]}
+            defaultSelectedKeys={["0"]}
             items={[
+              {
+                key: "0",
+                icon: <UserOutlined />,
+                label: (
+                  <Link
+                    to="/admin"
+                    style={{
+                      textDecoration: "none",
+                      color: "inherit",
+                    }}
+                  >
+                    DashBoard
+                  </Link>
+                ),
+
+              },
               {
                 key: "g1",
                 icon: <UserOutlined />,
