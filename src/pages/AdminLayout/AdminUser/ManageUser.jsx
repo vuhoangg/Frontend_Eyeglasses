@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'; 
 import UpdateUser from './UpdateUser';  // Import the UpdateUser component
 import FormSearch from '../../../component/SearchForm';
+import UserDetail from './UserDetail';
 
 const ManageUser = () => {
   // 1. UseState  
@@ -17,6 +18,10 @@ const ManageUser = () => {
     total: 0, 
   });
   const [keyword, setKeyword] = useState("");
+
+
+  const [dataDetail, setDataDetail] = useState({})
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // 2. Handle Service
   // Popconfirm
@@ -88,7 +93,12 @@ const ManageUser = () => {
       title: 'Id',
       dataIndex: 'id',
       render: (_, record) => {
-        return (<a href='#'>{record.id}</a>);
+        return (<a href='#'
+          onClick={()=>{
+            setDataDetail(record);
+            setIsDetailOpen(true);
+          }}>
+          {record.id}</a>);
       }
     },
     {title: 'Name', dataIndex: 'username', key: 'name', render: (text) => <a>{text}</a>},
@@ -172,6 +182,16 @@ const ManageUser = () => {
         userData={dataUpdate}
         reloadUsers={() => loadUser(pagination.page, pagination.limit)}
       />
+
+      <UserDetail
+          isDetailOpen={isDetailOpen} 
+          setIsDetailOpen={setIsDetailOpen}
+          dataDetail={dataDetail}
+          setDataDetail={setDataDetail}
+         
+          />
+
+      
     </>
   );
 };
