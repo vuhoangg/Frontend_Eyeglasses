@@ -20,6 +20,7 @@ import HomePage from './pages/ClientLayout/HomePage.jsx';
 import ProductPage from './pages/ClientLayout/Product.jsx';
 import AboutUsPage from './pages/ClientLayout/AboutUsPage.jsx';
 import ProductDetailPage from './pages/ClientLayout/ProductDetailPage.jsx';
+import CartPage from './pages/ClientLayout/CartPage.jsx';
 
 const router = createBrowserRouter([
   // Manager Client 
@@ -32,7 +33,8 @@ const router = createBrowserRouter([
       { path: "/user", element: <UserPage />},
       { path: "/product", element: <ProductPage/>},
       { path: "/product_detail", element: <ProductDetailPage/>},
-      { path: "/about_us_page", element: <AboutUsPage/>}
+      { path: "/about_us_page", element: <AboutUsPage/>},
+      { path: "/cart_page", element: <CartPage/>}
     ],
   },
 

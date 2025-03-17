@@ -259,7 +259,7 @@ const AboutUsPage = () => {
                         </Col>
                         <Col xs={24} sm={24} md={12}>
                             <Image
-                                src="src/resources/imagelayout/1-1.jpeg"
+                                src="src/resources/imagelayout/anh_cuahang1.webp"
                                 alt="LilyAnna store"
                                 style={{ borderRadius: 8, boxShadow: '0 8px 16px rgba(0,0,0,0.1)', width: '100%', objectFit: 'cover', height: 400 }}
                             />

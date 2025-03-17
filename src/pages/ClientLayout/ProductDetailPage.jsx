@@ -63,6 +63,38 @@ const ProductDetailPage = () => {
     const [selectedLensType, setSelectedLensType] = useState('standard');
     const [relatedProducts, setRelatedProducts] = useState([]);
 
+
+   
+
+    const handleAddToCart = () => {
+        // Load existing cart items from local storage
+        const storedCart = localStorage.getItem('cartItems');
+        const cartItems = storedCart ? JSON.parse(storedCart) : [];
+
+        // Check if the item already exists in the cart
+        const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
+
+        if (existingItemIndex > -1) {
+            // If the item exists, update the quantity
+            cartItems[existingItemIndex].quantity += quantity;
+            cartItems[existingItemIndex].quantity = Math.min(cartItems[existingItemIndex].quantity, product.stock[product.selectedColor][product.selectedSize]) // Makes sure quantity does not exceed stock amount
+        } else {
+            // If the item doesn't exist, add it to the cart
+            cartItems.push({
+                ...product,
+                quantity: quantity,
+                selectedColor: selectedColor,
+                selectedSize: selectedSize,
+                selectedLensType: selectedLensType
+            });
+        }
+
+        // Save the updated cart items to local storage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+        message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+    };
+
     // Fetch product data
     useEffect(() => {
         const fetchProductData = async () => {
@@ -180,9 +212,9 @@ const ProductDetailPage = () => {
         }
     }, [productId, product]);
 
-    const handleAddToCart = () => {
-        message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
-    };
+    // const handleAddToCart = () => {
+    //     message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+    // };
 
     const handleBuyNow = () => {
         message.info('Chuyển đến trang thanh toán...');
@@ -415,6 +447,7 @@ const ProductDetailPage = () => {
                                         icon={<ShoppingCartOutlined />}
                                         size="large"
                                         onClick={handleAddToCart}
+                                        
                                         disabled={!isCurrentSizeAvailable()}
                                     >
                                         Thêm vào giỏ hàng
