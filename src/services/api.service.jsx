@@ -42,7 +42,7 @@ const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,avart
         firstName: firstName,
         lastName: lastName, 
         address: address ,
-        address: avartar ,
+        avartar: avartar ,
         roles: roles,
     }
     return axios.patch(URL_BACKEND, data );
@@ -55,7 +55,38 @@ const deleteUserAPI = (id) =>
 
 }
 
+const handleUploadFile = (file, folder )=>{
+    const URL_BACKEND = `/files/upload`;
+    let config = {
+        headers: {
+            "folder_type": folder,
+            "Content-Type": "multipart/form-data",
+        }
+    }
+    const bodyFormData = new FormData();
+    bodyFormData.append("fileUpload", file )
+    return axios.post(URL_BACKEND, bodyFormData, config )
+}
 
-export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI }
+// const updateUserAvatarAPI = (id , avartar ,username,email,phone,firstName,lastName,address,avartar ,roles,) =>
+//     {
+//         const URL_BACKEND = `/user/${id}`;
+//         const data = {
+//             avartar : avartar,
+//             username : username ,
+//             email: email ,
+//             phone: phone,
+//             firstName: firstName,
+//             lastName: lastName, 
+//             address: address ,
+//             address: avartar ,
+//             roles: roles,
+//         }
+//         return axios.patch(URL_BACKEND, data );
+    
+//     }
+
+
+export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,}
 
 

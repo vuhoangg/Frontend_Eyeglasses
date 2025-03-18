@@ -188,6 +188,7 @@ const ManageUser = () => {
           setIsDetailOpen={setIsDetailOpen}
           dataDetail={dataDetail}
           setDataDetail={setDataDetail}
+          reloadUsers={() => loadUser(pagination.page, pagination.limit)}
          
           />
 
