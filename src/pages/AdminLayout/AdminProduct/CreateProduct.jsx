@@ -158,7 +158,7 @@ const CreateProduct = () => {
                   id='btnUpload'
                   type="file"
                   onChange={(event) => handleOnChangeFile(event)} 
-                  accept="image/png, image/jpeg"  style={{ position: "absolute",
+                  style={{ position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
@@ -178,45 +178,7 @@ const CreateProduct = () => {
           </Col>
         </Row>
 
-        {/* <Row gutter={16}>
-          <Col span={12}>
-              <div style={{ position: "relative" }} >
-                <label htmlFor="btnUpload" style={{
-                  display: "block",
-                  width: "fit-content",
-                  marginTop: "15px",
-                  padding: "5px 10px ",
-                  background: "orange",
-                  borderRadius: "5px",
-                  cursor: "pointer"
-                }}>
-                  Upload Image
-                </label>
-                <input
-                  hidden
-                  id='btnUpload'
-                  type="file"
-                  onChange={(event) => handleOnChangeFile(event)} 
-                  accept="image/png, image/jpeg"  style={{ position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0, // Ẩn input file
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-        
-
-            {preview && (
-              <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc" }}>
-                <img style={{ height: "100%", width: "100%", objectFit: "contain" }} src={preview} alt="Product Preview" />
-              </div>
-            )}
-          </Col>
-        </Row> */}
-
+      
 
         <Form.Item>
           <Button type="primary" htmlType="submit" onClick={handleSubmit} disabled={!selectedFile}>

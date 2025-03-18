@@ -106,7 +106,7 @@ const [preview, setPreview] = useState(null)
                 </label>
             <input hidden id='btnUpload' type="file"
              onChangeCapture={(event)=> handleOnChangeFile(event)}
-             accept="image/png, image/jpeg" />
+             />
             </div>
 
 
