@@ -17,6 +17,8 @@ import AboutUsPage from './pages/ClientLayout/AboutUsPage.jsx';
 import ProductDetailPage from './pages/ClientLayout/ProductDetailPage.jsx';
 import CartPage from './pages/ClientLayout/CartPage.jsx';
 import AdminDashboard from './pages/AdminLayout/AdminDashboard.jsx';
+import CreateProduct from './pages/AdminLayout/AdminProduct/CreateProduct.jsx';
+import ManageProduct from './pages/AdminLayout/AdminProduct/ManagerProduct.jsx';
 
 const router = createBrowserRouter([
 
@@ -47,8 +49,15 @@ const router = createBrowserRouter([
       { index: true, element:  <AdminDashboard/>  },
 
       // router user
-      { path: "list-user", element: <ManageUser/>  },
+      {path: "list-user", element: <ManageUser/>},
       {path: "add-user", element: <CreateUser/> },
+
+      // reuter product 
+      { path: "list-product", element: <ManageProduct/>},
+      {path: "add-product", element: <CreateProduct/> },
+
+
+
 
 
     ]

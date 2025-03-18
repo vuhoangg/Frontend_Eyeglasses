@@ -68,23 +68,7 @@ const handleUploadFile = (file, folder )=>{
     return axios.post(URL_BACKEND, bodyFormData, config )
 }
 
-// const updateUserAvatarAPI = (id , avartar ,username,email,phone,firstName,lastName,address,avartar ,roles,) =>
-//     {
-//         const URL_BACKEND = `/user/${id}`;
-//         const data = {
-//             avartar : avartar,
-//             username : username ,
-//             email: email ,
-//             phone: phone,
-//             firstName: firstName,
-//             lastName: lastName, 
-//             address: address ,
-//             address: avartar ,
-//             roles: roles,
-//         }
-//         return axios.patch(URL_BACKEND, data );
-    
-//     }
+
 
 
 export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,}
