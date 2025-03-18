@@ -1,6 +1,6 @@
 import { Form, Input, Button, Row, Col, notification, InputNumber } from "antd";
 import React, { useState } from "react";
-import { createProductAPI } from "../../../services/api.product";
+import { createProductAPI, handleUploadFile } from "../../../services/api.product";
 
 const CreateProduct = () => {
   const [name, setName] = useState("");
@@ -9,8 +9,11 @@ const CreateProduct = () => {
   const [stock_quantity, setStockQuantity] = useState(0);
   const [category_id, setCategoryId] = useState(0);
   const [brand_id, setBrandId] = useState(0);
-  const [imageProduct, setImageProduct] = useState("");
+  // const [imageProduct, setImageProduct] = useState(""); // Không cần nữa
   const [sku, setSku] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+
 
   const [form] = Form.useForm();
 
@@ -18,17 +21,58 @@ const CreateProduct = () => {
     console.log("Form Data:", values);
   };
 
+  const handleOnChangeFile = (event) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      setSelectedFile(null);
+      setPreview(null);
+      return;
+    }
+
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async () => {
     try {
-      const response = await createProductAPI(name, description, price, stock_quantity, category_id, brand_id, imageProduct, sku);
-      console.log("Response:", response.data);
-
-      if (response.data) {
-        notification.success({
+      if (!selectedFile) {
+        notification.error({
           message: "Create Product",
-          description: "Product created successfully!",
+          description: "Please upload an image for the product.",
         });
-        form.resetFields(); // Clear form after successful creation
+        return; // Dừng nếu không có ảnh
+      }
+
+      // Upload ảnh trước
+      const resUpload = await handleUploadFile(selectedFile, "product");
+      if (resUpload.data) {
+        const imageProduct = resUpload.data.fileName; // Lấy tên file ảnh từ response
+          //console.log("imageProduct", imageProduct)
+        // Tạo sản phẩm với tên file ảnh
+        const response = await createProductAPI(name, description, price, stock_quantity, category_id, brand_id, imageProduct, sku);
+        console.log("Response:", response.data);
+
+        if (response.data) {
+          notification.success({
+            message: "Create Product",
+            description: "Product created successfully!",
+          });
+          form.resetFields();
+          setSelectedFile(null);
+          setPreview(null); // Xóa preview sau khi tạo thành công
+        } else {
+          notification.error({
+            message: "Create Product",
+            description: "Failed to create product.",
+          });
+        }
+      } else {
+        notification.error({
+          message: "Create Product",
+          description: "Failed to upload image.",
+        });
       }
     } catch (error) {
       notification.error({
@@ -92,19 +136,90 @@ const CreateProduct = () => {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Image Product" name="imageProduct" rules={[{ required: true, message: "Please enter image URL" }]}>
-              <Input placeholder="Enter image URL" onChange={(e) => setImageProduct(e.target.value)} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
             <Form.Item label="SKU" name="sku" rules={[{ required: true, message: "Please enter SKU" }]}>
               <Input placeholder="Enter SKU" onChange={(e) => setSku(e.target.value)} />
             </Form.Item>
           </Col>
+          <Col span={12}>
+              <div style={{ marginTop: "30px", position: "relative" }} >
+                <label htmlFor="btnUpload" style={{
+                  display: "block",
+                  width: "fit-content",
+                  marginTop: "15px",
+                  padding: "5px 10px ",
+                  background: "orange",
+                  borderRadius: "5px",
+                  cursor: "pointer"
+                }}>
+                  Upload Image
+                </label>
+                <input
+                  hidden
+                  id='btnUpload'
+                  type="file"
+                  onChange={(event) => handleOnChangeFile(event)} 
+                  accept="image/png, image/jpeg"  style={{ position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    opacity: 0, // Ẩn input file
+                    cursor: "pointer",
+                  }}
+                />
+              </div>
+        
+
+            {preview && (
+              <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc" }}>
+                <img style={{ height: "100%", width: "100%", objectFit: "contain" }} src={preview} alt="Product Preview" />
+              </div>
+            )}
+          </Col>
         </Row>
 
+        {/* <Row gutter={16}>
+          <Col span={12}>
+              <div style={{ position: "relative" }} >
+                <label htmlFor="btnUpload" style={{
+                  display: "block",
+                  width: "fit-content",
+                  marginTop: "15px",
+                  padding: "5px 10px ",
+                  background: "orange",
+                  borderRadius: "5px",
+                  cursor: "pointer"
+                }}>
+                  Upload Image
+                </label>
+                <input
+                  hidden
+                  id='btnUpload'
+                  type="file"
+                  onChange={(event) => handleOnChangeFile(event)} 
+                  accept="image/png, image/jpeg"  style={{ position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    opacity: 0, // Ẩn input file
+                    cursor: "pointer",
+                  }}
+                />
+              </div>
+        
+
+            {preview && (
+              <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc" }}>
+                <img style={{ height: "100%", width: "100%", objectFit: "contain" }} src={preview} alt="Product Preview" />
+              </div>
+            )}
+          </Col>
+        </Row> */}
+
+
         <Form.Item>
-          <Button type="primary" htmlType="submit" onClick={handleSubmit}>
+          <Button type="primary" htmlType="submit" onClick={handleSubmit} disabled={!selectedFile}>
             Create Product
           </Button>
         </Form.Item>
