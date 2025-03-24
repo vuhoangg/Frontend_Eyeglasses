@@ -60,6 +60,19 @@ const deleteProductAPI = (id) => {
   return axios.delete(URL_BACKEND);
 };
 
+const fetchProductByIdAPI = (id) => {
+  const URL_BACKEND = `/product/${id}`;
+  return axios.get(URL_BACKEND)
+      .then(response => {
+          console.log("Data from API:", response.data); // Log data
+          return response;  // Return the entire response
+      })
+      .catch(error => {
+          console.error("Error fetching product:", error);
+          throw error; // Re-throw the error
+      });
+};
+
 const handleUploadFile = (file, folder )=>{
     const URL_BACKEND = `/files/upload`;
     let config = {
@@ -73,4 +86,4 @@ const handleUploadFile = (file, folder )=>{
     return axios.post(URL_BACKEND, bodyFormData, config )
 }
 
-export { createProductAPI, fetchAllProductAPI, updateProductAPI, deleteProductAPI, handleUploadFile };
+export { createProductAPI, fetchAllProductAPI, updateProductAPI, deleteProductAPI, handleUploadFile,  fetchProductByIdAPI  };

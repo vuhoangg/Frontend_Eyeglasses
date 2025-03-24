@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout,
+import {
+    Layout,
     Breadcrumb,
     Typography,
     Row,
@@ -28,7 +29,7 @@ import {
     SortAscendingOutlined,
     SortDescendingOutlined
 } from '@ant-design/icons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import qs from 'query-string';
 import { fetchAllProductAPI } from '../../services/api.product'; // Import API function
 
@@ -61,6 +62,8 @@ const ProductPage = () => {
     // Categories and Brands (replace with API data in real application)
     const [categories, setCategories] = useState([]); // Danh sách categories
     const [brands, setBrands] = useState([]); // Danh sách brands
+
+    const navigate = useNavigate();
 
     // Hàm useEffect để lấy danh sách categories và brands từ API khi component mount
     useEffect(() => {
@@ -207,6 +210,7 @@ const ProductPage = () => {
 
     // Component con để hiển thị thông tin sản phẩm
     const ProductCard = ({ product }) => (
+        
         <Badge.Ribbon
             text={product.discount > 0 ? `${product.discount}% GIẢM` : ''} // Hiển thị tag giảm giá nếu có
             color={product.discount > 0 ? 'red' : 'green'}
@@ -214,7 +218,8 @@ const ProductPage = () => {
         >
             <Card
                 hoverable
-                className={viewType === 'list' ? 'product-card-list' : 'product-card-grid'} // Class CSS tùy thuộc vào loại hiển thị
+                className={viewType === 'list' ? 'product-card-list' : 'product-card-grid'} 
+                onClick={() => navigate(`/product/${product.id}`)} // Điều hướng khi click// Class CSS tùy thuộc vào loại hiển thị
                 cover={
                     <div style={{ position: 'relative' }}>
                         <img
@@ -255,8 +260,9 @@ const ProductPage = () => {
                     </Button>
                 ]}
             >
+
                 <Meta
-                    title={<Link to={`/product/${product.id}`}>{product.name}</Link>} // Title là link đến trang chi tiết sản phẩm
+                    title={<Link to={`/product_detail/${product.id}`}>{product.name}</Link>} // Title là link đến trang chi tiết sản phẩm
                     
                     description={
                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
