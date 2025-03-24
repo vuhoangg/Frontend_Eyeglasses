@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Layout,
+import { Layout,
     Breadcrumb,
     Typography,
     Row,
@@ -12,7 +11,6 @@ import {
     Pagination,
     Select,
     Checkbox,
-    Radio,
     Slider,
     Rate,
     Badge,
@@ -24,16 +22,15 @@ import {
 import {
     ShoppingOutlined,
     HeartOutlined,
-    FilterOutlined,
     AppstoreOutlined,
     UnorderedListOutlined,
-    StarFilled,
     ReloadOutlined,
     SortAscendingOutlined,
     SortDescendingOutlined
 } from '@ant-design/icons';
 import { Link, useLocation } from 'react-router-dom';
 import qs from 'query-string';
+import { fetchAllProductAPI } from '../../services/api.product'; // Import API function
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -42,158 +39,190 @@ const { Option } = Select;
 const { Search } = Input;
 
 const ProductPage = () => {
-    // States for filters
-    const [priceRange, setPriceRange] = useState([0, 5000000]);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedBrands, setSelectedBrands] = useState([]);
-    const [viewType, setViewType] = useState('grid'); // 'grid' or 'list'
-    const [sortBy, setSortBy] = useState('popular');
-    const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 12; // Number of products per page
+    // Các state để lưu trữ trạng thái của bộ lọc
+    const [priceRange, setPriceRange] = useState([0, 5000000]); // Khoảng giá sản phẩm
+    const [selectedCategories, setSelectedCategories] = useState([]); // Danh sách các category được chọn
+    const [selectedBrands, setSelectedBrands] = useState([]); // Danh sách các brand được chọn
+    const [viewType, setViewType] = useState('grid'); // Loại hiển thị sản phẩm ('grid' hoặc 'list')
+    const [sortBy, setSortBy] = useState('popular'); // Tiêu chí sắp xếp sản phẩm
 
-    // Mock data
-    const [products, setProducts] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // State để quản lý phân trang
+    const [pagination, setPagination] = useState({
+        page: 1, // Trang hiện tại
+        limit: 6, // Số lượng sản phẩm trên mỗi trang
+        total: 0, // Tổng số sản phẩm
+    });
+
+    // Products
+    const [products, setProducts] = useState([]); // Danh sách tất cả sản phẩm lấy từ API
+    const [filteredProducts, setFilteredProducts] = useState([]); // Danh sách sản phẩm sau khi áp dụng bộ lọc
+    const [loading, setLoading] = useState(true); // Trạng thái loading khi gọi API
 
     // Categories and Brands (replace with API data in real application)
-    const [categories, setCategories] = useState([
-        { id: 1, name: 'Gọng kính cận' },
-        { id: 2, name: 'Gọng kính kim loại' },
-        { id: 3, name: 'Gọng kính nhựa' },
-        { id: 4, name: 'Gọng kính titan' },
-        { id: 5, name: 'Gọng kính phối' },
-        { id: 6, name: 'Gọng kính đạn rỗng' }
-    ]);
+    const [categories, setCategories] = useState([]); // Danh sách categories
+    const [brands, setBrands] = useState([]); // Danh sách brands
 
-    const [brands, setBrands] = useState([
-        { id: 1, name: 'LilyAnna' },
-        { id: 2, name: 'RayBan' },
-        { id: 3, name: 'Charmant' },
-        { id: 4, name: 'Elle' },
-        { id: 5, name: 'Gucci' },
-        { id: 6, name: 'Dior' }
-    ]);
-
-    // Generate sample products
+    // Hàm useEffect để lấy danh sách categories và brands từ API khi component mount
     useEffect(() => {
-        const generateProducts = async () => {
-            setLoading(true);  // start loading
+        const fetchCategoriesAndBrands = async () => {
             try {
-
-                const sampleProducts = [];
-                for (let i = 1; i <= 50; i++) {
-                    const categoryId = Math.floor(Math.random() * categories.length) + 1;
-                    const brandId = Math.floor(Math.random() * brands.length) + 1;
-                    const randomPrice = Math.floor(Math.random() * 3000000) + 500000;
-                    const hasDiscount = Math.random() > 0.7;
-                    const discountPercent = hasDiscount ? Math.floor(Math.random() * 30) + 10 : 0;
-                    const oldPrice = hasDiscount ? Math.floor(randomPrice * (100 / (100 - discountPercent))) : null;
-
-                    sampleProducts.push({
-                        id: i,
-                        name: `${brands.find(b => b.id === brandId)?.name || "Unknown"} ${categoryId === 1 ? 'Gọng kính cận' : 'Kính mắt'} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 900) + 100}`,
-                        price: randomPrice,
-                        oldPrice: oldPrice,
-                        discount: hasDiscount ? discountPercent : 0,
-                        image: `https://via.placeholder.com/300x200?text=Product+${i}`,
-                        categoryId: categoryId,
-                        brandId: brandId,
-                        rating: (Math.random() * 2 + 3).toFixed(1),
-                        reviews: Math.floor(Math.random() * 100) + 5,
-                        inStock: Math.random() > 0.1,
-                        isNew: Math.random() > 0.8,
-                        isBestseller: Math.random() > 0.85
-                    });
+                // Fetch categories
+                const categoriesResponse = await fetchAllProductAPI(1, 100); // Lấy tất cả categories (điều chỉnh limit nếu cần)
+                if (categoriesResponse && categoriesResponse.data) {
+                    // Trích xuất các category duy nhất từ sản phẩm
+                    const uniqueCategories = Array.from(new Set(categoriesResponse.data.data.map(p => JSON.stringify(p.category)))).map(JSON.parse);
+                    setCategories(uniqueCategories);
+                } else {
+                    console.error("Failed to fetch categories:", categoriesResponse);
+                    message.error("Failed to fetch categories.");
                 }
 
-                setProducts(sampleProducts);
-                setFilteredProducts(sampleProducts);
+                // Fetch brands
+                const brandsResponse = await fetchAllProductAPI(1, 100); // Lấy tất cả brands (điều chỉnh limit nếu cần)
+                if (brandsResponse && brandsResponse.data) {
+                    // Trích xuất các brand duy nhất từ sản phẩm
+                    const uniqueBrands = Array.from(new Set(brandsResponse.data.data.map(p => JSON.stringify(p.brand)))).map(JSON.parse);
+                    setBrands(uniqueBrands);
+                } else {
+                    console.error("Failed to fetch brands:", brandsResponse);
+                    message.error("Failed to fetch brands.");
+                }
             } catch (error) {
-                message.error("Failed to load products.");
-            } finally {
-                setLoading(false);
+                console.error("Error fetching categories and brands:", error);
+                message.error("Error fetching categories and brands.");
             }
-
         };
 
-        generateProducts();
-    }, []);  // The empty array ensures this runs only once on mount
+        fetchCategoriesAndBrands();
+    }, []);
 
 
-    // Apply filters
+
+    // Hàm useEffect để lấy danh sách sản phẩm từ API
+    const fetchProducts = async () => {
+        setLoading(true); // Bật trạng thái loading
+        try {
+            const res = await fetchAllProductAPI(
+                pagination.page,
+                pagination.limit,
+                "", // Keyword (tạm thời để trống)
+                selectedCategories.length > 0 ? selectedCategories.join(',') : null, // category_id (nếu có chọn)
+                selectedBrands.length > 0 ? selectedBrands.join(',') : null   // brand_id (nếu có chọn)
+            ); // Gọi API để lấy sản phẩm
+
+            if (res && res.data) {
+                setProducts(res.data.data); // Cập nhật danh sách sản phẩm
+                setFilteredProducts(res.data.data); // Cập nhật danh sách sản phẩm đã lọc (ban đầu giống danh sách sản phẩm gốc)
+                setPagination({
+                    ...pagination,
+                    total: res.data.total, // Cập nhật tổng số sản phẩm
+                });
+            } else {
+                message.error("Failed to load products."); // Hiển thị thông báo lỗi
+                setProducts([]); // Đặt danh sách sản phẩm thành rỗng
+                setFilteredProducts([]); // Đặt danh sách sản phẩm đã lọc thành rỗng
+                setPagination({ ...pagination, total: 0 }); // Đặt tổng số sản phẩm thành 0
+            }
+        } catch (error) {
+            message.error("Failed to load products."); // Hiển thị thông báo lỗi
+            console.error(error); // Ghi log lỗi
+            setProducts([]); // Đặt danh sách sản phẩm thành rỗng
+            setFilteredProducts([]); // Đặt danh sách sản phẩm đã lọc thành rỗng
+            setPagination({ ...pagination, total: 0 }); // Đặt tổng số sản phẩm thành 0
+        } finally {
+            setLoading(false); // Tắt trạng thái loading
+        }
+    };
+
+    // Hàm useEffect để gọi API khi trang, limit, category hoặc brand thay đổi
     useEffect(() => {
-        let result = [...products];
+        fetchProducts();
+    }, [pagination.page, pagination.limit, selectedCategories, selectedBrands]);
+
+
+    // Hàm useEffect để áp dụng các bộ lọc (category, brand, price range, sort)
+    useEffect(() => {
+        let result = [...products]; // Tạo bản sao của danh sách sản phẩm gốc
 
         // Filter by category
         if (selectedCategories.length > 0) {
-            result = result.filter(product => selectedCategories.includes(product.categoryId));
+            result = result.filter(product => selectedCategories.includes(product.category_id)); // Lọc theo category
         }
 
         // Filter by brand
         if (selectedBrands.length > 0) {
-            result = result.filter(product => selectedBrands.includes(product.brandId));
+            result = result.filter(product => selectedBrands.includes(product.brand_id)); // Lọc theo brand
         }
 
         // Filter by price range
         result = result.filter(
-            product => product.price >= priceRange[0] && product.price <= priceRange[1]
+            product => product.price >= priceRange[0] && product.price <= priceRange[1] // Lọc theo khoảng giá
         );
 
         // Apply sorting
         switch (sortBy) {
             case 'priceLowToHigh':
-                result.sort((a, b) => a.price - b.price);
+                result.sort((a, b) => a.price - b.price); // Sắp xếp giá từ thấp đến cao
                 break;
             case 'priceHighToLow':
-                result.sort((a, b) => b.price - a.price);
+                result.sort((a, b) => b.price - a.price); // Sắp xếp giá từ cao đến thấp
                 break;
             case 'newest':
-                result.sort((a, b) => (a.isNew === b.isNew) ? 0 : a.isNew ? -1 : 1);
+                result.sort((a, b) => new Date(b.creationDate) - new Date(a.creationDate)); // Sắp xếp theo ngày tạo mới nhất
                 break;
             case 'popular':
             default:
-                result.sort((a, b) => b.reviews - a.reviews);
+                result.sort((a, b) => b.stock_quantity - a.stock_quantity);  // Sắp xếp theo số lượng tồn kho (tạm coi là độ phổ biến)
                 break;
         }
 
-        setFilteredProducts(result);
-        setCurrentPage(1); // Reset to first page when filters change
-
+        setFilteredProducts(result); // Cập nhật danh sách sản phẩm đã lọc
     }, [selectedCategories, selectedBrands, priceRange, sortBy, products]);
 
+    // Hàm để reset tất cả các bộ lọc
     const resetFilters = () => {
-        setSelectedCategories([]);
-        setSelectedBrands([]);
-        setPriceRange([0, 5000000]);
-        setSortBy('popular');
-        setCurrentPage(1);
+        setSelectedCategories([]); // Xóa danh sách category đã chọn
+        setSelectedBrands([]); // Xóa danh sách brand đã chọn
+        setPriceRange([0, 5000000]); // Đặt lại khoảng giá
+        setSortBy('popular'); // Đặt lại tiêu chí sắp xếp
+        setPagination({ ...pagination, page: 1 }); // Đặt lại trang về trang 1
     };
 
 
-    // Change page handler
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
+  
+
+    const handlePaginationChange = (page, pageSize) => {
+        const newLimit = parseInt(pageSize, 10); // Convert size to a number
+    
+        console.log("New Limit: ", newLimit);
+        console.log("New Page: ", page);
+    
+        setPagination({
+            page: page,
+            limit: newLimit,
+            total: pagination.total
+        });
     };
 
 
+    // Component con để hiển thị thông tin sản phẩm
     const ProductCard = ({ product }) => (
         <Badge.Ribbon
-            text={product.discount > 0 ? `${product.discount}% GIẢM` : product.isNew ? 'MỚI' : product.isBestseller ? 'BÁN CHẠY' : ''}
-            color={product.discount > 0 ? 'red' : product.isNew ? 'blue' : 'green'}
-            style={{ display: (product.discount > 0 || product.isNew || product.isBestseller) ? 'block' : 'none' }}
+            text={product.discount > 0 ? `${product.discount}% GIẢM` : ''} // Hiển thị tag giảm giá nếu có
+            color={product.discount > 0 ? 'red' : 'green'}
+            style={{ display: product.discount > 0 ? 'block' : 'none' }}
         >
             <Card
                 hoverable
-                className={viewType === 'list' ? 'product-card-list' : 'product-card-grid'}
+                className={viewType === 'list' ? 'product-card-list' : 'product-card-grid'} // Class CSS tùy thuộc vào loại hiển thị
                 cover={
                     <div style={{ position: 'relative' }}>
                         <img
                             alt={product.name}
-                            src={product.image}
-                            style={{ height: viewType === 'list' ? 150 : 200, objectFit: 'cover', width: '100%' }}
+                            src={`http://localhost:8082/images/product/${product.imageProduct}`} // URL ảnh sản phẩm
+                            style={{ height: viewType === 'list' ? 150 : 200, objectFit: 'cover', width: '100%' }} // Style cho ảnh
                         />
-                        {!product.inStock && (
+                        {!product.isActive && (
                             <div style={{
                                 position: 'absolute',
                                 top: 0,
@@ -214,25 +243,26 @@ const ProductPage = () => {
                     <Button
                         type="primary"
                         icon={<ShoppingOutlined />}
-                        disabled={!product.inStock}
+                        disabled={!product.isActive} // Disable button nếu sản phẩm không active
                     >
-                        {viewType === 'list' ? 'Thêm vào giỏ' : ''}
+                        {viewType === 'list' ? 'Thêm vào giỏ' : ''} 
                     </Button>,
                     <Button
                         type="default"
                         icon={<HeartOutlined />}
                     >
-                        {viewType === 'list' ? 'Yêu thích' : ''}
+                        {viewType === 'list' ? 'Yêu thích' : ''} 
                     </Button>
                 ]}
             >
                 <Meta
-                    title={<Link to={`/product/${product.id}`}>{product.name}</Link>}
+                    title={<Link to={`/product/${product.id}`}>{product.name}</Link>} // Title là link đến trang chi tiết sản phẩm
+                    
                     description={
                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
                             <Space>
-                                {product.oldPrice && <Text delete type="secondary">{product.oldPrice.toLocaleString('vi-VN')}đ</Text>}
-                                <Text strong style={{ color: '#ff4d4f', fontSize: 16 }}>{product.price.toLocaleString('vi-VN')}đ</Text>
+                                {/* {product.oldPrice && <Text delete type="secondary">{product.oldPrice.toLocaleString('vi-VN')}đ</Text>} */}
+                                <Text strong style={{ color: '#ff4d4f', fontSize: 16 }}>{Number(product.price).toLocaleString('vi-VN')}đ</Text> 
                             </Space>
                             <div>
                                 <Rate
@@ -241,31 +271,29 @@ const ProductPage = () => {
                                     allowHalf
                                     style={{ fontSize: 14 }}
                                 />
-                                <Text type="secondary"> ({product.reviews})</Text>
+                                <Text type="secondary"> {product.reviews}</Text>
                             </div>
                             <div>
-                                <Tag color="blue">{categories.find(c => c.id === product.categoryId)?.name || "Unknown"}</Tag>
-                                <Tag color="purple">{brands.find(b => b.id === product.brandId)?.name || "Unknown"}</Tag>
+                                <Tag color="blue">{product.category?.name || "Unknown"}</Tag> 
+                                <Tag color="purple">{product.brand?.name || "Unknown"}</Tag> 
                             </div>
                         </Space>
                     }
                 />
             </Card>
+
         </Badge.Ribbon>
     );
 
 
+
+
+    // Hàm format giá tiền
     const formatPrice = value => `${value.toLocaleString('vi-VN')}đ`;
-
-    // Calculate the products to display based on the current page
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const productsToDisplay = filteredProducts.slice(startIndex, endIndex);
-
 
     return (
         <Layout>
-            <Content style={{ padding: '0 50px', maxWidth: 1200, margin: '0 auto' }}>
+            <Content style={{ padding: '0 50px', maxWidth: 1600, margin: '0 auto' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item><Link to="/">Trang chủ</Link></Breadcrumb.Item>
                     <Breadcrumb.Item>Gọng kính cận</Breadcrumb.Item>
@@ -382,7 +410,7 @@ const ProductPage = () => {
                                 </Col>
                             ) : (
                                 <Row gutter={[16, 16]}>
-                                    {productsToDisplay.map(product => (
+                                    {filteredProducts.map(product => (
                                         <Col key={product.id} xs={24} sm={12} md={viewType === 'list' ? 24 : 8} lg={viewType === 'list' ? 24 : 8}>
                                             <ProductCard product={product} />
                                         </Col>
@@ -392,12 +420,14 @@ const ProductPage = () => {
 
                             {/* Pagination */}
                             <div style={{ marginTop: 24, textAlign: 'center' }}>
-                                <Pagination
-                                    current={currentPage}
-                                    onChange={handlePageChange}
-                                    total={filteredProducts.length}
-                                    pageSize={pageSize}
-                                    showSizeChanger={false}
+                            <Pagination
+                                current={pagination.page}
+                                total={pagination.total}
+                                pageSize={pagination.limit}
+                                showSizeChanger
+                                pageSizeOptions={['5', '6', '10', '20', '50']}
+                                onChange={handlePaginationChange}
+                                onShowSizeChange={handlePaginationChange}
                                 />
                             </div>
                         </Col>

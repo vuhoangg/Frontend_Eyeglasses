@@ -15,11 +15,28 @@ const createProductAPI = (name, description, price, stock_quantity, category_id,
   return axios.post(URL_BACKEND, data);
 };
 
-const fetchAllProductAPI = (page, limit, keyword = "") => {
+// const fetchAllProductAPI = (page, limit, keyword = "") => {
+//   let URL_BACKEND = `/product?page=${page}&limit=${limit}`;
+//   if (keyword) {
+//     URL_BACKEND += `&name=${keyword}`;  // Tìm kiếm theo tên sản phẩm
+//   }
+//   return axios.get(URL_BACKEND);
+// };
+
+const fetchAllProductAPI = (page, limit, keyword = "", category_id = null, brand_id = null) => {
   let URL_BACKEND = `/product?page=${page}&limit=${limit}`;
   if (keyword) {
-    URL_BACKEND += `&name=${keyword}`;  // Tìm kiếm theo tên sản phẩm
+      URL_BACKEND += `&name=${keyword}`;  // Tìm kiếm theo tên sản phẩm
   }
+
+  if (category_id) {
+      URL_BACKEND += `&category_id=${category_id}`; // Filter by category
+  }
+
+  if (brand_id) {
+      URL_BACKEND += `&brand_id=${brand_id}`;   // Filter by brand
+  }
+
   return axios.get(URL_BACKEND);
 };
 
