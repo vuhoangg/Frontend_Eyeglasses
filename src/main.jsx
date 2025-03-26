@@ -19,6 +19,8 @@ import CartPage from './pages/ClientLayout/CartPage.jsx';
 import AdminDashboard from './pages/AdminLayout/AdminDashboard.jsx';
 import CreateProduct from './pages/AdminLayout/AdminProduct/CreateProduct.jsx';
 import ManageProduct from './pages/AdminLayout/AdminProduct/ManagerProduct.jsx';
+import LoginPage from './pages/LoginLayout/login.jsx';
+import RegisterPage from './pages/LoginLayout/register.jsx';
 
 const router = createBrowserRouter([
 
@@ -34,11 +36,15 @@ const router = createBrowserRouter([
       { path: "/product", element: <ProductPage/>},
       { path: "/product/:id", element: <ProductDetailPage/>},
       { path: "/about_us_page", element: <AboutUsPage/>},
-      { path: "/cart_page", element: <CartPage/>} // Add this line
+      { path: "/cart_page", element: <CartPage/>}, // Add this line
+
+
     ],
   },
   // Manager Login 
 
+  { path: "/login", element: <LoginPage/> },  
+{ path: "/register", element: <RegisterPage/> },
 
   // Admin 
   {
