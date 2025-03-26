@@ -34,7 +34,7 @@ const router = createBrowserRouter([
       { path: "/product", element: <ProductPage/>},
       { path: "/product/:id", element: <ProductDetailPage/>},
       { path: "/about_us_page", element: <AboutUsPage/>},
-      { path: "/cart_page", element: <CartPage/>}
+      { path: "/cart_page", element: <CartPage/>} // Add this line
     ],
   },
   // Manager Login 

@@ -1,3 +1,4 @@
+// ProductDetailPage.jsx (Chỉ phần cần sửa)
 import React, { useState, useEffect } from 'react';
 import {
     Layout,
@@ -70,6 +71,24 @@ const ProductDetailPage = () => {
     }, [productId]);
 
     const handleAddToCart = () => {
+        // Load existing cart items from local storage
+        const storedCart = localStorage.getItem('cartItems');
+        const cartItems = storedCart ? JSON.parse(storedCart) : [];
+
+        // Check if the item already exists in the cart
+        const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
+
+        if (existingItemIndex > -1) {
+            // If the item exists, update the quantity
+            cartItems[existingItemIndex].quantity += quantity;
+        } else {
+            // If the item doesn't exist, add it to the cart
+            cartItems.push({ ...product, quantity: quantity });
+        }
+
+        // Save the updated cart items to local storage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
         message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
     };
 

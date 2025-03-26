@@ -1,3 +1,4 @@
+// Header.jsx (Chỉ phần cần sửa)
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Col, Menu, Row } from "antd";
@@ -26,6 +27,16 @@ const Header = () => {
 //   const dataCart = useSelector((state) => state.shopcart?.listCartItem) || [];
   const [user, setUser] = useState({});
   const [current, setCurrent] = useState("");
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const storedCart = localStorage.getItem('cartItems');
+        if (storedCart) {
+            const cartItems = JSON.parse(storedCart);
+            setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
+        }
+    }, []);
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("userData"));
     setUser(userData);
@@ -85,11 +96,11 @@ const Header = () => {
             <MessageOutlined className="style_icon" />
           </Link>
 
-          {/* <Link to="./shopcart">
-            <Badge count={dataCart.length} size="small">
+          <Link to="/cart_page">
+            <Badge count={cartCount} size="small">
               <ShoppingCartOutlined className="style_icon" />
             </Badge>
-          </Link> */}
+          </Link>
 
           <Link to="/login">
             <UserOutlined className="style_icon" />

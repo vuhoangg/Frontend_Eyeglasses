@@ -1,263 +1,118 @@
+// CartPage.jsx
 import React, { useState, useEffect } from 'react';
-import {
-    Layout,
-    Typography,
-    Row,
-    Col,
-    Table,
-    Button,
-    InputNumber,
-    Space,
-    Card,
-    Divider,
-    Empty,
-    message,
-    Breadcrumb,
-    Image,
-    Popconfirm,
-    Input
-} from 'antd';
-import {
-    DeleteOutlined,
-    ShoppingOutlined,
-    ArrowLeftOutlined,
-    ShoppingCartOutlined,
-    CreditCardOutlined
-} from '@ant-design/icons';
+import { Layout, Typography, Row, Col, Button, InputNumber, message, Table, Space } from 'antd';
 import { Link } from 'react-router-dom';
 
-const { Title, Text } = Typography;
 const { Content } = Layout;
+const { Title, Text, Paragraph } = Typography;  // Thêm Paragraph vào đây
 
 const CartPage = () => {
-    const [cartItems, setCartItems] = useState(() => {
-        const storedCart = localStorage.getItem('cartItems');
-        return storedCart ? JSON.parse(storedCart) : [];
-    });
-    const [couponCode, setCouponCode] = useState('');
-    const [discount, setDiscount] = useState(0);
-    const [shippingFee, setShippingFee] = useState(30000);
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    }, [cartItems]);
-
-    const handleQuantityChange = (id, newQuantity) => {
-        if (newQuantity < 1) return;
-        setCartItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            )
-        );
-        message.success('Đã cập nhật số lượng');
-    };
-
-    const handleRemoveItem = (id) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-        message.success('Đã xóa sản phẩm khỏi giỏ hàng');
-    };
-
-    const handleClearCart = () => {
-        setCartItems([]);
-        message.success('Đã xóa tất cả sản phẩm khỏi giỏ hàng');
-    };
-
-    const handleApplyCoupon = () => {
-        if (couponCode === 'WELCOME10') {
-            setDiscount(10);
-            message.success('Áp dụng mã giảm giá thành công: Giảm 10%');
-        } else if (couponCode === 'FREESHIP') {
-            setShippingFee(0);
-            message.success('Áp dụng mã giảm giá thành công: Miễn phí vận chuyển');
-        } else {
-            message.error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+        // Load cart items from localStorage
+        const storedCart = localStorage.getItem('cartItems');
+        if (storedCart) {
+            setCartItems(JSON.parse(storedCart));
         }
+    }, []);
+
+    const updateQuantity = (productId, quantity) => {
+        if (quantity <= 0) {
+            removeFromCart(productId);
+            return;
+        }
+
+        const updatedCart = cartItems.map(item =>
+            item.id === productId ? { ...item, quantity: quantity } : item
+        );
+
+        setCartItems(updatedCart);
+        localStorage.setItem('cartItems', JSON.stringify(updatedCart));
     };
 
-    const formatPrice = (value) => `${value.toLocaleString('vi-VN')}đ`;
-
-    const calculateItemTotal = (item) => (item.price * item.quantity);
-
-    const calculateSubtotal = () => {
-        return cartItems.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+    const removeFromCart = (productId) => {
+        const updatedCart = cartItems.filter(item => item.id !== productId);
+        setCartItems(updatedCart);
+        localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+        message.success('Sản phẩm đã được xóa khỏi giỏ hàng.');
     };
 
-    const calculateDiscountAmount = () => {
-        return (calculateSubtotal() * discount) / 100;
+    const clearCart = () => {
+        setCartItems([]);
+        localStorage.removeItem('cartItems');
+        message.success('Giỏ hàng đã được làm trống.');
     };
 
-    const calculateTotal = () => {
-        return calculateSubtotal() - calculateDiscountAmount() + shippingFee;
+    const calculateTotalPrice = () => {
+        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
     };
+
+    const formatPrice = (value) => `${Number(value).toLocaleString('vi-VN')} VNĐ`;
 
     const columns = [
         {
             title: 'Sản phẩm',
             dataIndex: 'name',
             key: 'name',
-            render: (_, record) => (
-                <Space>
-                    <Image src={record.image} alt={record.name} width={70} height={50} preview={false}/>
-                    <Space direction="vertical" size={0}>
-                        <Link to={`/product/${record.id}`}>
-                            <Text strong>{record.name}</Text>
-                        </Link>
-                        <Text type="secondary">Màu: {record.color}, Size: {record.size}</Text>
-                    </Space>
-                </Space>
-            ),
+            render: (text, record) => <Link to={`/product_detail/${record.id}`}>{text}</Link>,
         },
         {
-            title: 'Đơn giá',
+            title: 'Giá',
             dataIndex: 'price',
             key: 'price',
-            render: (_, record) => formatPrice(record.price),
+            render: (price) => formatPrice(price),
         },
         {
             title: 'Số lượng',
-            dataIndex: 'quantity',
             key: 'quantity',
-            render: (_, record) => (
+            render: (text, record) => (
                 <InputNumber
                     min={1}
-                    max={10}
-                    value={record.quantity}
-                    onChange={(value) => handleQuantityChange(record.id, value)}
-                    style={{ width: 70 }}
+                    defaultValue={record.quantity}
+                    onChange={(value) => updateQuantity(record.id, value)}
                 />
             ),
         },
         {
-            title: 'Thành tiền',
+            title: 'Tổng cộng',
             key: 'total',
-            render: (record) => formatPrice(calculateItemTotal(record)),
+            render: (text, record) => formatPrice(record.price * record.quantity),
         },
         {
-            title: 'Thao tác',
+            title: 'Hành động',
             key: 'action',
-            render: (_, record) => (
-                <Popconfirm
-                    title="Xóa sản phẩm này?"
-                    onConfirm={() => handleRemoveItem(record.id)}
-                    okText="Xóa"
-                    cancelText="Hủy"
-                >
-                    <Button type="text" danger icon={<DeleteOutlined/>}/>
-                </Popconfirm>
+            render: (text, record) => (
+                <Button type="danger" onClick={() => removeFromCart(record.id)}>
+                    Xóa
+                </Button>
             ),
         },
     ];
 
     return (
         <Layout>
-            <Content style={{ padding: '0 50px', maxWidth: 1600,   width: 'auto'  , margin: '0 auto' }}>
-                <Breadcrumb style={{ margin: '16px 0' }}
-                            items={[
-                                {
-                                    title: <Link to="/">Trang chủ</Link>,
-                                },
-                                {
-                                    title: 'Giỏ hàng',
-                                },
-                            ]}
-                />
-
-                <div style={{ background: '#fff', padding: 24, minHeight:'auto', minWidth: 100 }}>
-                    <Title level={2}>
-                        <ShoppingCartOutlined /> Giỏ hàng của bạn
-                    </Title>
-
-                    <Row gutter={[24, 24]}>
-                        <Col xs={24} lg={16}>
-                            {cartItems.length === 0 ? (
-                                <Empty
-                                    description={
-                                        <span>Giỏ hàng của bạn đang trống</span>
-                                    }
-                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                >
-                                    <Button type="primary" icon={<ShoppingOutlined />}>
-                                        <Link to="/product">Tiếp tục mua sắm</Link>
-                                    </Button>
-                                </Empty>
-                            ) : (
-                                <Table
-                                    columns={columns}
-                                    dataSource={cartItems}
-                                    pagination={false}
-                                    rowKey="id"
-                                    bordered
-                                />
-                            )}
-
-                            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between' }}>
-                                <Button type="default" icon={<ArrowLeftOutlined />}>
-                                    <Link to="/product">Tiếp tục mua sắm</Link>
-                                </Button>
-                                <Popconfirm
-                                    title="Xóa tất cả sản phẩm?"
-                                    onConfirm={handleClearCart}
-                                    okText="Xóa tất cả"
-                                    cancelText="Hủy"
-                                >
-                                    <Button danger>Xóa tất cả</Button>
-                                </Popconfirm>
-                            </div>
-                        </Col>
-
-                        <Col xs={24} lg={8}>
-                            <Card title="Tóm tắt đơn hàng" bordered style={{ marginBottom: 24 }}>
-                                <div style={{ marginBottom: 16 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                        <Text>Tạm tính ({cartItems.length} sản phẩm):</Text>
-                                        <Text strong>{formatPrice(calculateSubtotal())}</Text>
-                                    </div>
-                                    {discount > 0 && (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                            <Text>Giảm giá ({discount}%):</Text>
-                                            <Text strong style={{ color: '#52c41a' }}>
-                                                -{formatPrice(calculateDiscountAmount())}
-                                            </Text>
-                                        </div>
-                                    )}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Text>Phí vận chuyển:</Text>
-                                        <Text strong>
-                                            {shippingFee > 0 ? formatPrice(shippingFee) : 'Miễn phí'}
-                                        </Text>
-                                    </div>
-                                </div>
-
-                                <Divider style={{ margin: '16px 0' }} />
-
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                                    <Title level={4}>Tổng cộng:</Title>
-                                    <Title level={4} style={{ color: '#ff4d4f' }}>
-                                        {formatPrice(calculateTotal())}
-                                    </Title>
-                                </div>
-
-                                <Button type="primary" block size="large" icon={<CreditCardOutlined />}>
-                                    Tiến hành thanh toán
-                                </Button>
-                            </Card>
-
-                             <Card title="Mã giảm giá" bordered>
-                                <Space direction="vertical" style={{ width: '100%' }}>
-                                    <Space.Compact style={{ width: '100%' }}>
-                                        <Input
-                                            placeholder="Nhập mã giảm giá"
-                                            value={couponCode}
-                                            onChange={(e) => setCouponCode(e.target.value)}
-                                        />
-                                        <Button type="primary" onClick={handleApplyCoupon}>Áp dụng</Button>
-                                    </Space.Compact>
-                                    <Text type="secondary">Nhập mã giảm giá của bạn để được hưởng ưu đãi</Text>
-                                </Space>
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
+            <Content style={{ padding: '0 50px', maxWidth: 1200, margin: '0 auto' }}>
+                <Title level={2}>Giỏ hàng của bạn</Title>
+                {cartItems.length === 0 ? (
+                    <>
+                        <Paragraph>Giỏ hàng của bạn đang trống.</Paragraph>
+                        <Button type="primary"><Link to="/product">Tiếp tục mua sắm</Link></Button>
+                    </>
+                ) : (
+                    <>
+                        <Table dataSource={cartItems} columns={columns} rowKey="id" />
+                        <Row justify="space-between" style={{ marginTop: 20 }}>
+                            <Col>
+                                <Button onClick={clearCart}>Xóa giỏ hàng</Button>
+                            </Col>
+                            <Col>
+                                <Title level={4}>Tổng cộng: {formatPrice(calculateTotalPrice())}</Title>
+                                <Button type="primary">Thanh toán</Button>
+                            </Col>
+                        </Row>
+                    </>
+                )}
             </Content>
         </Layout>
     );
