@@ -1,8 +1,11 @@
+// LoginPage.jsx
 import React, { useState } from 'react';
 import { Layout, Form, Input, Button, Typography, message, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../services/api.auth';
+import * as jwt_decode from 'jwt-decode'; // Sửa cách import
+import { fetchAllCartItemsAPI } from '../../services/api.cartItems'; // Import API
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -24,16 +27,25 @@ const LoginPage = () => {
             
             // More robust response checking
             if (response?.data?.token) {
+                // Giải mã token để lấy userId
+                const decodedToken = jwt_decode.jwtDecode(response.data.token); // Sửa cách sử dụng
+                const userId = decodedToken.userId; // Giả sử userId nằm trong thuộc tính 'userId' của token
+
                 // Success scenario
                 message.success(response.data.message || "Đăng nhập thành công");
 
                 // Store user data securely
-                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('access_token', response.data.token);
                 localStorage.setItem('userData', JSON.stringify({
                     username: response.data.username || '',
                     email: values.email,
-                    role: response.data.role || 'user'
+                    phone: response.data.phone || '', // Lưu phone vào localStorage
+                    role: response.data.role || 'user',
+                    id: userId // Lưu userId vào localStorage
                 }));
+
+                // Lấy và lưu cartItems từ backend
+                fetchCartItems(userId);
 
                 // Navigate to home page
                 navigate('/', { replace: true });
@@ -53,6 +65,25 @@ const LoginPage = () => {
             setLoading(false);
         }
     };
+      const fetchCartItems = async (userId) => {
+          try {
+              // Gọi API để lấy thông tin giỏ hàng từ backend
+              const response = await fetchAllCartItemsAPI(1, 100, userId); // Thay cartId bằng userId (nếu backend trả về giỏ hàng theo userId)
+
+              if (response && response.data && response.data.data) {
+                  // Lưu thông tin giỏ hàng vào localStorage
+                  localStorage.setItem('cartItems', JSON.stringify(response.data.data));
+                //    message.success("Đã tải lại giỏ hàng từ hệ thống.");
+              } else {
+                  localStorage.setItem("cartItems", JSON.stringify([]));
+                   message.info("Không có sản phẩm nào trong giỏ hàng.");
+              }
+          } catch (error) {
+              console.error("Lỗi khi lấy thông tin giỏ hàng:", error);
+              message.error("Có lỗi xảy ra khi tải lại giỏ hàng.");
+              localStorage.setItem("cartItems", JSON.stringify([]));
+          }
+      };
 
     return (
         <Layout>

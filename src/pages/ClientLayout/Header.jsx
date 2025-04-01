@@ -1,158 +1,388 @@
-// Header.jsx (Chỉ phần cần sửa)
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Badge, Col, Menu, Row } from "antd";
+// Header.jsx
+import React, { useEffect, useState, useCallback } from "react"; // Thêm useCallback
+import { Link, useNavigate } from "react-router-dom";
+import { Badge, Col, Menu, Row, Popover, Button, Modal, Form, Input, message } from "antd"; // Bỏ Upload vì chưa dùng
 import {
-  MessageOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
+    // MessageOutlined, // Tạm ẩn nếu chưa dùng
+    ShoppingCartOutlined,
+    UserOutlined,
+    LogoutOutlined,
+    EditOutlined,
+    LockOutlined
 } from "@ant-design/icons";
-// import { useSelector } from "react-redux";
+import { updateUserAPI } from "../../services/api.service"; // Đảm bảo đường dẫn đúng
 
-// You would need to create this component separately
+// --- Top Menu Component ---
 const TopMenu = ({ user }) => {
-  return (
-    <div className="top_menu">
-      <div className="welcome">
-        {user ? `Xin chào, ${user.name}` : 'CHÀO MÙNG ĐẾN VỚI HUNO EYEWEAR'}
-      </div>
-      <div className="contact">
-        Hotline: 0909.534.036 | Email: care@kinhmathuno.com
-      </div>
-    </div>
-  );
+    return (
+        <div className="top_menu">
+            <div className="welcome">
+                {user ? `Xin chào, ${user.username}` : 'CHÀO MÙNG ĐẾN VỚI HUNO EYEWEAR'}
+            </div>
+            <div className="contact">
+                Hotline: 0909.534.036 | Email: care@kinhmathuno.com
+            </div>
+        </div>
+    );
 };
 
+// --- Main Header Component ---
 const Header = () => {
-//   const dataCart = useSelector((state) => state.shopcart?.listCartItem) || [];
-  const [user, setUser] = useState({});
-  const [current, setCurrent] = useState("");
+    const [user, setUser] = useState(null); // Khởi tạo là null
+    const [current, setCurrent] = useState(""); // Key cho menu item active
     const [cartCount, setCartCount] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [form] = Form.useForm();
+    const navigate = useNavigate(); // Hook useNavigate phải được gọi bên trong component
+    const [loading, setLoading] = useState(false); // State cho nút loading update
 
+    // Hàm cập nhật cart count từ localStorage
+    const updateCartCount = useCallback(() => {
+        try {
+            const storedCart = localStorage.getItem('cartItems');
+            if (storedCart) {
+                const cartItems = JSON.parse(storedCart);
+                // Đếm tổng số lượng sản phẩm, không phải số loại sản phẩm
+                setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
+            } else {
+                setCartCount(0);
+            }
+        } catch (error) {
+            console.error('Error parsing cart items for count:', error);
+            setCartCount(0);
+        }
+    }, []); // useCallback để không tạo lại hàm mỗi lần render
+
+    // Cập nhật cart count khi mount và khi storage thay đổi
     useEffect(() => {
-        const storedCart = localStorage.getItem('cartItems');
-        if (storedCart) {
-            const cartItems = JSON.parse(storedCart);
-            setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
-        }
-    }, []);
+        updateCartCount(); // Cập nhật lần đầu
 
-  useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    setUser(userData);
-  }, []);
+        // Lắng nghe sự kiện 'storage' từ các tab khác hoặc chính nó
+        window.addEventListener('storage', updateCartCount);
 
-  const items = [
-    {
-      label: <Link to={"/"}>TRANG CHỦ</Link>,
-      key: "home",
-    },
-    {
-      label: <Link to={"/product"}>CỬA HÀNG</Link>,
-      key: "shop",
-    },
-    {
-      label: <Link to={"/blog"}>TIN TỨC</Link>,
-      key: "blog",
-    },
-    {
-      label: <Link to={"/voucher"}>GIẢM GIÁ</Link>,
-      key: "voucher",
-    },
-    {
-      label: <Link to={"/about_us_page"}>GIỚI THIỆU</Link>,
-      key: "about",
-    },
-  ];
+        // Cleanup listener khi unmount
+        return () => {
+            window.removeEventListener('storage', updateCartCount);
+        };
+    }, [updateCartCount]); // Phụ thuộc vào updateCartCount
 
-  const onClick = (e) => {
-    setCurrent(e.key);
-  };
+    // Lấy thông tin user từ localStorage khi mount
+    useEffect(() => {
+        try {
+            const userData = localStorage.getItem("userData");
+            if (userData) {
+                const parsedUserData = JSON.parse(userData);
+                setUser(parsedUserData);
+                // Set giá trị cho form khi user data đã load và modal mở
+                // (Có thể set ở showModal thay vì ở đây để đảm bảo form có giá trị mới nhất)
+            } else {
+                setUser(null);
+            }
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            setUser(null);
+        }
+    }, []); // Chỉ chạy 1 lần khi mount
 
-  return (
-    <>
-      <TopMenu user={user} />
-      <Row className="main_menu">
-        <Col span={10}>
-          <Link to="/">
-            <img 
-              src="src/resources/imagelayout/Logo_HUNO.webp" 
-              alt="HUNO Eyewear" 
-              style={{ width: "220px" }} 
-            />
-          </Link>
-        </Col>
-        <Col span={10}>
-          <Menu
-            onClick={onClick}
-            selectedKeys={[current]}
-            mode="horizontal"
-            items={items}
-            style={{ borderBottom: "none" }}
-          />
-        </Col>
-        <Col span={4}>
-          <Link to="/" type="text" onClick={() => console.log("Nhắn tin")}>
-            <MessageOutlined className="style_icon" />
-          </Link>
+    // --- Menu Items ---
+    const items = [
+        {
+            label: <Link to={"/"}>TRANG CHỦ</Link>,
+            key: "home",
+        },
+        {
+            label: <Link to={"/product"}>CỬA HÀNG</Link>,
+            key: "shop",
+        },
+        {
+            label: <Link to={"/blog"}>TIN TỨC</Link>,
+            key: "blog",
+        },
+        {
+            label: <Link to={"/voucher"}>GIẢM GIÁ</Link>,
+            key: "voucher",
+        },
+        {
+            label: <Link to={"/about_us_page"}>GIỚI THIỆU</Link>,
+            key: "about",
+        },
+    ];
 
-          <Link to="/cart_page">
-            <Badge count={cartCount} size="small">
-              <ShoppingCartOutlined className="style_icon" />
-            </Badge>
-          </Link>
+    // --- Event Handlers ---
+    const onClickMenu = (e) => {
+        setCurrent(e.key);
+    };
 
-          <Link to="/login">
-            <UserOutlined className="style_icon" />
-          </Link>
-        </Col>
-      </Row>
+    const showModal = () => {
+        if (user) {
+            // Set giá trị form với thông tin user hiện tại trước khi mở modal
+            form.setFieldsValue({
+                username: user.username,
+                email: user.email,
+                phone: user.phone,
+            });
+            setIsModalOpen(true);
+        }
+    };
 
-      <style jsx>{`
-        .main_menu {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 10px 20px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("userData");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("cartItems"); // Xóa cart local khi logout
+        setUser(null); // Cập nhật state user
+        setCartCount(0); // Reset cart count
+        message.success("Đăng xuất thành công");
+        navigate("/login");
+    };
+
+    const handleUpdate = async () => {
+        try {
+            const values = await form.validateFields();
+            setLoading(true);
+
+            // Lấy các giá trị không thay đổi từ state user hiện tại (đảm bảo user không null)
+            if (!user || !user.id) {
+                 message.error("Không tìm thấy thông tin người dùng để cập nhật.");
+                 setLoading(false);
+                 return;
+            }
+
+            // Gọi API update user với đủ tham số yêu cầu
+            const response = await updateUserAPI(
+                user.id, // id
+                values.username,    // username mới
+                values.email,       // email mới
+                values.phone,       // phone mới
+                user.firstName || '', // giữ nguyên firstName
+                user.lastName || '',  // giữ nguyên lastName
+                user.address || '',   // giữ nguyên address
+                user.avatar || null, // giữ nguyên avatar (API của bạn có 'avartar'?) - Sửa lại nếu cần
+                user.role || ['customer'] // giữ nguyên roles (API của bạn có 'roles'?) - Sửa lại nếu cần
+            );
+
+
+            if (response && (response.statusCode === 200 || response.status === 200)) {
+                message.success("Cập nhật tài khoản thành công");
+                // Cập nhật lại thông tin user trong localStorage và state
+                // Chỉ cập nhật các trường đã thay đổi trên form vào object user hiện tại
+                const updatedUserData = {
+                    ...user, // Giữ lại các trường cũ như id, firstName, lastName, address, avatar, role
+                    username: values.username,
+                    email: values.email,
+                    phone: values.phone
+                };
+                localStorage.setItem("userData", JSON.stringify(updatedUserData));
+                setUser(updatedUserData); // Cập nhật state user
+                setIsModalOpen(false);
+            } else {
+                 const errorMsg = response?.message || response?.data?.message || 'Có lỗi xảy ra khi cập nhật tài khoản';
+                message.error(errorMsg);
+            }
+        } catch (error) {
+             if (error.name === 'ValidateError') {
+                message.warning('Vui lòng kiểm tra lại thông tin.');
+            } else {
+                console.error("Lỗi khi cập nhật tài khoản:", error);
+                const errorMsg = error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật tài khoản. Vui lòng thử lại.';
+                message.error(errorMsg);
+            }
+        } finally {
+            setLoading(false);
         }
-        
-        .main_menu img {
-          width: 100%;
-          max-width: 300px;
-          height: auto;
-          margin: 0 auto;
-        }
-        
-        .main_menu a {
-          font-size: 15px;
-          text-decoration: none;
-        }
-        
-        .main_menu a:before {
-          display: none;
-        }
-        
-        .style_icon {
-          font-size: 20px;
-          color: rgb(59, 55, 55);
-          margin: 0 10px;
-        }
-        
-        .style_icon:hover {
-          color: #1677ff;
-        }
-        
-        .top_menu {
-          display: flex;
-          justify-content: space-between;
-          padding: 5px 20px;
-          background-color: #f5f5f5;
-          font-size: 14px;
-        }
-      `}</style>
-    </>
-  );
+    };
+
+    // --- Popover Content ---
+    const content = (
+        <div>
+            <Button type="text" icon={<EditOutlined />} onClick={showModal}>
+                Quản lý tài khoản
+            </Button>
+            <br />
+            {/* Nút đổi mật khẩu chưa có chức năng */}
+            <Button type="text" icon={<LockOutlined />} disabled>
+                Đổi mật khẩu
+            </Button>
+            <br />
+            <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
+                Đăng xuất
+            </Button>
+        </div>
+    );
+
+    // --- Render JSX ---
+    return (
+        <>
+            <TopMenu user={user} />
+            <Row className="main_menu" align="middle" justify="space-between"> {/* Căn chỉnh Row */}
+                <Col xs={8} sm={6} md={5} lg={4}> {/* Responsive Logo */}
+                    <Link to="/">
+                        <img
+                            // Đảm bảo đường dẫn này đúng từ thư mục gốc của dự án hoặc thư mục public
+                            src="/src/resources/imagelayout/Logo_HUNO.webp"
+                            alt="HUNO Eyewear"
+                            style={{ width: "100%", maxWidth: "180px", height: "auto" }} // Giới hạn max-width
+                        />
+                    </Link>
+                </Col>
+                <Col xs={0} sm={12} md={14} lg={15}> {/* Menu ẩn trên xs */}
+                    <Menu
+                        onClick={onClickMenu} // Sửa tên hàm để tránh trùng với biến onClick
+                        selectedKeys={[current]}
+                        mode="horizontal"
+                        items={items}
+                        style={{ borderBottom: "none", display: 'flex', justifyContent: 'center' }} // Căn giữa Menu items
+                    />
+                </Col>
+                <Col xs={16} sm={6} md={5} lg={5} style={{ textAlign: 'right' }}> {/* Icons căn phải */}
+                    {/* Icon Message tạm ẩn
+                    <Link to="/" type="text">
+                        <MessageOutlined className="style_icon" />
+                    </Link>
+                    */}
+
+                    <Link to="/cart_page" style={{ marginRight: '15px' }}> {/* Tăng khoảng cách */}
+                        <Badge count={cartCount} size="small">
+                            <ShoppingCartOutlined className="style_icon" />
+                        </Badge>
+                    </Link>
+
+                    {user ? ( // Hiển thị Popover nếu đã đăng nhập
+                         <Popover content={content} trigger="click" placement="bottomRight">
+                             <UserOutlined className="style_icon" />
+                         </Popover>
+                    ) : ( // Hiển thị Link tới Login nếu chưa đăng nhập
+                         <Link to="/login">
+                              <UserOutlined className="style_icon" />
+                         </Link>
+                    )}
+                </Col>
+            </Row>
+
+            {/* Modal Quản lý tài khoản */}
+            <Modal
+                title="Quản lý tài khoản"
+                open={isModalOpen}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="cancel" onClick={handleCancel}>
+                        Hủy
+                    </Button>,
+                    <Button key="update" type="primary" loading={loading} onClick={handleUpdate}>
+                        Cập nhật
+                    </Button>,
+                ]}
+                destroyOnClose // Xóa state của Form khi đóng Modal
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    // initialValues không nên đặt ở đây nếu bạn set giá trị trong showModal
+                >
+                    <Form.Item
+                        name="username"
+                        label="Tên hiển thị"
+                        rules={[{ required: true, message: "Vui lòng nhập tên hiển thị!" }]}
+                    >
+                        <Input placeholder="Tên hiển thị" />
+                    </Form.Item>
+                    <Form.Item
+                        name="email"
+                        label="Email"
+                        rules={[
+                            { required: true, message: "Vui lòng nhập email!" },
+                            { type: "email", message: "Email không hợp lệ!" },
+                        ]}
+                    >
+                        <Input placeholder="Email" />
+                    </Form.Item>
+                    <Form.Item
+                        name="phone"
+                        label="Số điện thoại"
+                        // Bỏ rule required nếu số điện thoại không bắt buộc
+                    >
+                        <Input placeholder="Số điện thoại" />
+                    </Form.Item>
+                 </Form>
+            </Modal>
+
+            {/* Style component */}
+            <style jsx>{`
+                .main_menu {
+                    padding: 5px 20px; /* Giảm padding */
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* Shadow nhẹ hơn */
+                    background: #fff;
+                    position: sticky; /* Làm cho header dính khi cuộn */
+                    top: 0;
+                    z-index: 1000; /* Đảm bảo header nằm trên các thành phần khác */
+                    width: 100%;
+                }
+                .main_menu .ant-menu-horizontal { /* Căn giữa các menu item */
+                    border-bottom: none; /* Bỏ đường viền dưới của menu Antd */
+                    line-height: inherit; /* Kế thừa line-height */
+                }
+                .main_menu .ant-menu-item { /* Style cho menu item */
+                    margin: 0 10px; /* Khoảng cách giữa các item */
+                }
+                 .style_icon {
+                    font-size: 22px; /* Tăng kích thước icon */
+                    color: #333; /* Màu đậm hơn */
+                    margin: 0 8px; /* Giảm margin ngang */
+                    vertical-align: middle; /* Căn icon thẳng hàng */
+                    cursor: pointer;
+                    transition: color 0.3s;
+                }
+                 .style_icon:hover {
+                    color: #1890ff;
+                }
+                 .top_menu {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center; /* Căn giữa theo chiều dọc */
+                    padding: 8px 20px; /* Tăng padding */
+                    background-color: #f0f2f5; /* Màu nền nhạt hơn */
+                    font-size: 13px; /* Giảm font size */
+                    color: #555; /* Màu chữ tối hơn */
+                    border-bottom: 1px solid #e8e8e8; /* Thêm đường viền dưới */
+                }
+                 .welcome {
+                    font-weight: 500; /* Đậm hơn một chút */
+                 }
+                 .contact {
+                    /* Có thể thêm style nếu cần */
+                 }
+
+                /* Responsive adjustments */
+                @media (max-width: 768px) {
+                    .main_menu {
+                        padding: 5px 10px; /* Giảm padding trên mobile */
+                    }
+                    .main_menu .ant-col { /* Điều chỉnh cột trên mobile */
+                       /* Có thể cần điều chỉnh thêm */
+                    }
+                     .style_icon {
+                        font-size: 20px;
+                        margin: 0 5px;
+                    }
+                }
+                 @media (max-width: 576px) {
+                    .top_menu {
+                        flex-direction: column; /* Chuyển thành cột trên màn hình rất nhỏ */
+                        align-items: flex-start;
+                        padding: 5px 10px;
+                        font-size: 12px;
+                    }
+                     .welcome {
+                        margin-bottom: 3px;
+                    }
+                 }
+
+            `}</style>
+        </>
+    );
 };
 
-export default Header;
+export default Header; // Dòng export phải nằm cuối cùng sau khi định nghĩa component hoàn tất

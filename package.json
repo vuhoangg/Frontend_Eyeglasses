@@ -15,6 +15,8 @@
     "@reduxjs/toolkit": "^2.6.1",
     "antd": "5.23.1",
     "axios": "1.7.9",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "query-string": "^9.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
