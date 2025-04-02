@@ -14,6 +14,11 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const reloadApp = () => {
+        // Xóa cache của trình duyệt
+        window.location.reload(true);
+    };
+
     const onFinish = async (values) => {
         // Validate input
         if (!values.email || !values.password) {
@@ -28,8 +33,8 @@ const LoginPage = () => {
             // More robust response checking
             if (response?.data?.token) {
                 // Giải mã token để lấy userId
-                const decodedToken = jwt_decode.jwtDecode(response.data.token); // Sửa cách sử dụng
-                const userId = decodedToken.userId; // Giả sử userId nằm trong thuộc tính 'userId' của token
+                const decodedToken = jwt_decode.jwtDecode(response.data.token);
+                const userId = decodedToken.userId;
 
                 // Success scenario
                 message.success(response.data.message || "Đăng nhập thành công");
@@ -39,22 +44,23 @@ const LoginPage = () => {
                 localStorage.setItem('userData', JSON.stringify({
                     username: response.data.username || '',
                     email: values.email,
-                    phone: response.data.phone || '', // Lưu phone vào localStorage
+                    phone: response.data.phone || '',
                     role: response.data.role || 'user',
-                    id: userId // Lưu userId vào localStorage
+                    id: userId
                 }));
 
                 // Lấy và lưu cartItems từ backend
-                fetchCartItems(userId);
+                await fetchCartItems(userId);
 
-                // Navigate to home page
+                // Chuyển hướng đến trang chủ và reload toàn bộ ứng dụng
                 navigate('/', { replace: true });
+                setTimeout(() => {
+                    reloadApp();
+                }, 100);
             } else {
-                // Handle unexpected response structure
                 message.error("Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.");
             }
         } catch (error) {
-            // More detailed error handling
             const errorMessage = error.response?.data?.message 
                 || error.message 
                 || "Đã xảy ra lỗi khi đăng nhập";

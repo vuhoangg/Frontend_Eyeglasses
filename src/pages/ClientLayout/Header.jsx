@@ -304,12 +304,11 @@ const Header = () => {
                     </Link>
                     */}
 
-                    <Link to="/cart_page" style={{ marginRight: '15px' }}>
-                        {/* Badge sẽ hiển thị giá trị của state cartCount */}
-                        <Badge count={cartCount} size="small" overflowCount={99}> {/* Thêm overflowCount nếu muốn giới hạn số hiển thị */}
-                            <ShoppingCartOutlined className="style_icon" />
-                        </Badge>
-                    </Link>
+<Link to="/cart_page" style={{ marginRight: '15px' }}>
+    <Badge count={cartCount || 0} showZero size="small" overflowCount={99}>
+        <ShoppingCartOutlined className="style_icon" />
+    </Badge>
+</Link>
 
                     {user ? ( // Hiển thị Popover nếu đã đăng nhập
                          <Popover content={content} trigger="click" placement="bottomRight">
