@@ -1,20 +1,49 @@
 // pages/ClientLayout/OrderSuccessPage.jsx
-import React from 'react';
-import { Layout, Typography, Result, Button, Card, Divider, Row, Col, List, Avatar } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Typography, Result, Button, Card, Divider, Row, Col, List, Avatar, Spin } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircleOutlined, HomeOutlined, HistoryOutlined } from '@ant-design/icons';
+import { fetchAllOrderItemsAPI } from '../../services/api.orderItem'; // Import API to fetch order items
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const OrderSuccessPage = () => {
     const location = useLocation();
-    const { orderData, orderNumber } = location.state || { 
-        orderData: null, 
-        orderNumber: Math.floor(Math.random() * 1000000) 
+    const { orderData, orderNumber } = location.state || {
+        orderData: null,
+        orderNumber: Math.floor(Math.random() * 1000000)
     };
+    const [orderItems, setOrderItems] = useState(null); // State to hold fetched order items
+    const [loadingOrderItems, setLoadingOrderItems] = useState(false); // Loading state for order items
+
+    useEffect(() => {
+        const fetchOrderItems = async () => {
+            if (orderNumber) {
+                setLoadingOrderItems(true);
+                try {
+                    const response = await fetchAllOrderItemsAPI(1, 100, orderNumber);
+                    console.log("Phản hồi API:", response.data.data); // Thêm dòng này để xem phản hồi API
+                    if (response && response.data) {
+                        // Truy cập đúng mảng dữ liệu từ response.data.data.data
+                        setOrderItems(response.data.data); // <--- Thay đổi dòng này
+                    } else {
+                        console.error("Không thể lấy dữ liệu chi tiết đơn hàng hoặc phản hồi không hợp lệ:", response);
+                        setOrderItems([]);
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi lấy dữ liệu chi tiết đơn hàng:", error);
+                    setOrderItems([]);
+                } finally {
+                    setLoadingOrderItems(false);
+                }
+            }
+        };
     
-    // If no order data is provided, show fallback content
+        fetchOrderItems();
+    }, [orderNumber]);
+
+    // Fallback content if no order data is provided (or while fetching)
     if (!orderData) {
         return (
             <Content style={{ padding: '24px', maxWidth: 1200, margin: '0 auto', background: '#f5f5f5' }}>
@@ -65,8 +94,8 @@ const OrderSuccessPage = () => {
                             <Text>Địa chỉ: {orderData.shippingAddress}</Text>
                             <br />
                             <Text>Phương thức thanh toán: {
-                                orderData.paymentMethod === 'cash' 
-                                    ? 'Thanh toán khi nhận hàng' 
+                                orderData.paymentMethod === 'cash'
+                                    ? 'Thanh toán khi nhận hàng'
                                     : 'Chuyển khoản ngân hàng'
                             }</Text>
                         </div>
@@ -74,28 +103,43 @@ const OrderSuccessPage = () => {
                         <Divider />
 
                         <Title level={5}>Sản phẩm đã đặt</Title>
-                        <List
-                            itemLayout="horizontal"
-                            dataSource={orderData.cartItems}
-                            renderItem={item => (
-                                <List.Item>
-                                    <List.Item.Meta
-                                        avatar={<Avatar shape="square" size={64} src={item.image || "https://placehold.co/64x64"} />}
-                                        title={`Sản phẩm #${item.productId}`}
-                                        description={
-                                            <>
-                                                <Text>Số lượng: {item.quantity}</Text>
-                                                <br />
-                                                <Text type="secondary">{item.price.toLocaleString()} đ</Text>
-                                            </>
-                                        }
-                                    />
-                                    <div>
-                                        <Text strong>{(item.price * item.quantity).toLocaleString()} đ</Text>
-                                    </div>
-                                </List.Item>
-                            )}
-                        />
+                        {loadingOrderItems ? (
+                            <div style={{ textAlign: 'center', padding: '20px' }}>
+                                <Spin tip="Đang tải chi tiết sản phẩm..." />
+                            </div>
+                        ) : (
+                            <List
+                                itemLayout="horizontal"
+                                dataSource={orderItems || []} // Use fetched orderItems, default to empty array if null
+                                renderItem={item => (
+                                    <List.Item key={item.id}> {/* Thêm key prop ở đây, giả sử mỗi item có id duy nhất */}
+                                        <List.Item.Meta
+                                            avatar={
+                                                <Avatar
+                                                    shape="square"
+                                                    size={64}
+                                                    src={item.product?.imageProduct
+                                                        ? `http://localhost:8082/images/product/${item.product.imageProduct}`
+                                                        : "https://placehold.co/64x64"}
+                                                    alt={item.product?.name || 'Product Image'}
+                                                />
+                                            }
+                                            title={`Sản phẩm: ${item.product?.name || `ID #${item.product_id}`}`} // Use product name from fetched data
+                                            description={
+                                                <>
+                                                    <Text>Số lượng: {item.quantity}</Text>
+                                                    <br />
+                                                    <Text type="secondary">{Number(item.price).toLocaleString()} đ</Text>
+                                                </>
+                                            }
+                                        />
+                                        <div>
+                                            <Text strong>{(Number(item.price) * item.quantity).toLocaleString()} đ</Text>
+                                        </div>
+                                    </List.Item>
+                                )}
+                            />
+                        )}
                     </Col>
 
                     <Col xs={24} md={8}>
@@ -105,7 +149,7 @@ const OrderSuccessPage = () => {
                                     <Text>Tạm tính:</Text>
                                 </Col>
                                 <Col>
-                                    <Text>{orderData.totalAmount.toLocaleString()} đ</Text>
+                                    <Text>{Number(orderData.totalAmount).toLocaleString()} đ</Text>
                                 </Col>
                             </Row>
 
@@ -137,7 +181,7 @@ const OrderSuccessPage = () => {
                                 </Col>
                                 <Col>
                                     <Text style={{ fontSize: 18, color: '#f5222d', fontWeight: 'bold' }}>
-                                        {orderData.totalAmount.toLocaleString()} đ
+                                        {Number(orderData.totalAmount).toLocaleString()} đ
                                     </Text>
                                 </Col>
                             </Row>
