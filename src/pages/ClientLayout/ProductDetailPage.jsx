@@ -1,4 +1,4 @@
-// ProductDetailPage.jsx (Chỉ phần hàm handleAddToCart cần sửa)
+// ProductDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import {
     Layout,
@@ -21,10 +21,13 @@ import {
 import {
     ShoppingCartOutlined,
     HeartOutlined,
-    ShareAltOutlined
+    ShareAltOutlined,
+    ThunderboltOutlined
 } from '@ant-design/icons';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchProductByIdAPI } from '../../services/api.product';
+// Import API function để tạo cart item
+import { createCartItemAPI, updateCartItemAPI } from '../../services/api.cartItems';
 
 const { Title, Text, Paragraph } = Typography;
 const { Content } = Layout;
@@ -34,10 +37,20 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [userId, setUserId] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        if (userData && userData.id) {
+            setUserId(userData.id);
+        } else {
+            setUserId(null);
+        }
+    }, []);
 
 
     useEffect(() => {
-        // ... (useEffect hiện tại không thay đổi) ...
         console.log("ProductId:", productId);
 
         const fetchProductDetails = async () => {
@@ -70,10 +83,102 @@ const ProductDetailPage = () => {
         }
     }, [productId]);
 
-    // --- HÀM handleAddToCart ĐÃ ĐƯỢC CẬP NHẬT ---
-    const handleAddToCart = () => {
-        // Đảm bảo product đã được load và có id
+    // --- HÀM MUA NGAY ---
+    const handleBuyNow = async () => {
         if (!product || !product.id) {
+            message.error("Sản phẩm không hợp lệ hoặc chưa được tải.");
+            return;
+        }
+        if (!quantity || quantity <= 0) {
+             message.warn("Vui lòng chọn số lượng hợp lệ.");
+             return;
+        }
+
+        // 1. Load existing cart items from local storage
+        const storedCart = localStorage.getItem('cartItems');
+        let cartItems = [];
+         try {
+            const parsed = storedCart ? JSON.parse(storedCart) : [];
+            if (Array.isArray(parsed)) {
+                cartItems = parsed;
+            } else {
+                 console.warn("Cart data in localStorage was not an array. Resetting.");
+                 localStorage.removeItem('cartItems');
+            }
+        } catch (e) {
+            console.error("Error parsing cartItems from localStorage", e);
+            localStorage.removeItem('cartItems');
+            cartItems = [];
+        }
+
+        // 2. Check if the item already exists in the cart
+        const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
+        let updatedCartItems = [...cartItems];
+
+        if (existingItemIndex > -1) {
+            // 3a. If the item exists, update the quantity
+            updatedCartItems[existingItemIndex].quantity += quantity;
+        } else {
+            // 3b. If the item doesn't exist, add it
+             const newItem = {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                imageProduct: product.imageProduct,
+                quantity: quantity,
+                categoryName: product.category?.name,
+                brandName: product.brand?.name,
+             };
+             updatedCartItems.push(newItem);
+        }
+
+        // 4. Save the updated cart items to local storage
+        localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        window.dispatchEvent(new Event('storage'));
+
+        // 5. Đồng bộ giỏ hàng với DB nếu user đã đăng nhập
+        if (userId) {
+            message.loading("Đang xử lý...", 0);
+            try {
+                const itemInCart = updatedCartItems.find(item => item.id === product.id);
+                if (itemInCart) {
+                    const cartItemData = {
+                        productId: itemInCart.id,
+                        quantity: itemInCart.quantity,
+                        price: itemInCart.price,
+                        // Thêm các thuộc tính khác nếu cần như color, size
+                    };
+                    if (existingItemIndex > -1 && cartItems[existingItemIndex].cart_item_id) {
+                        // Cập nhật item đã có trong DB cart
+                        await updateCartItemAPI(cartItems[existingItemIndex].cart_item_id, itemInCart.quantity);
+                    } else {
+                        // Tạo mới item trong DB cart
+                        await createCartItemAPI(cartItemData.productId, cartItemData.quantity, cartItemData.price);
+                    }
+                }
+                message.destroy();
+                message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng và đồng bộ!`);
+                // 6. Chuyển hướng đến trang thanh toán ngay lập tức
+                navigate('/checkout');
+
+            } catch (error) {
+                message.destroy();
+                console.error("Lỗi khi đồng bộ giỏ hàng với DB:", error);
+                message.error("Lỗi khi đồng bộ giỏ hàng. Vui lòng thử lại sau.");
+                // Có thể cần cơ chế retry hoặc thông báo cho người dùng về việc giỏ hàng có thể chưa được đồng bộ
+            }
+        } else {
+            message.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+            // 6. Chuyển hướng đến trang thanh toán ngay lập tức (nếu không cần DB sync)
+            navigate('/checkout');
+        }
+    };
+    // --- KẾT THÚC HÀM handleBuyNow ---
+
+
+    const handleAddToCart = () => {
+        // ... (hàm handleAddToCart giữ nguyên) ...
+         if (!product || !product.id) {
             message.error("Sản phẩm không hợp lệ hoặc chưa được tải.");
             return;
         }
@@ -142,13 +247,11 @@ const ProductDetailPage = () => {
         // 6. *** QUAN TRỌNG: Dispatch sự kiện 'storage' để Header cập nhật ***
         window.dispatchEvent(new Event('storage'));
     };
-    // --- KẾT THÚC HÀM handleAddToCart ĐÃ CẬP NHẬT ---
 
 
     const formatPrice = value => `${Number(value).toLocaleString('vi-VN')} VNĐ`;
 
     if (loading) {
-        // ... (loading state không đổi) ...
         return (
             <Layout>
                 <Content style={{ padding: '50px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
@@ -159,7 +262,6 @@ const ProductDetailPage = () => {
     }
 
     if (!product) {
-        // ... (not found state không đổi) ...
         return (
             <Layout>
                 <Content style={{ padding: '50px', maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
@@ -175,7 +277,6 @@ const ProductDetailPage = () => {
     return (
         <Layout>
             <Content style={{ padding: '0 50px', maxWidth: 1200, margin: '0 auto' }}>
-                {/* ... (Breadcrumb không đổi) ... */}
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item><Link to="/">Trang chủ</Link></Breadcrumb.Item>
                     <Breadcrumb.Item><Link to="/product">Sản phẩm</Link></Breadcrumb.Item>
@@ -184,19 +285,15 @@ const ProductDetailPage = () => {
 
                 <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
                     <Row gutter={[32, 32]}>
-                        {/* Product Images */}
                         <Col xs={24} md={12}>
                             <img
-                                // src={`http://localhost:8082/images/product/${product.imageProduct}`}
-                                // ---- Sửa lại URL nếu cần hoặc dùng biến môi trường ----
                                 src={product.imageProduct ? `http://localhost:8082/images/product/${product.imageProduct}` : 'https://placehold.co/400x400?text=No+Image'}
                                 alt={product.name}
-                                style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', border: '1px solid #f0f0f0' }} // Thêm border nhẹ
-                                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x400?text=Error" }} // Xử lý lỗi ảnh
+                                style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', border: '1px solid #f0f0f0' }}
+                                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x400?text=Error" }}
                             />
                         </Col>
 
-                        {/* Product Info */}
                         <Col xs={24} md={12}>
                             <div className="product-info">
                                 <Title level={2}>{product.name}</Title>
@@ -205,40 +302,26 @@ const ProductDetailPage = () => {
                                     <Title level={3} style={{ color: '#ff4d4f', margin: '0', display: 'inline-block' }}>
                                         {formatPrice(product.price)}
                                     </Title>
-                                    {/* Có thể thêm giá gốc nếu có giảm giá */}
-                                    {/* {product.originalPrice && product.originalPrice > product.price && (
-                                        <Text delete type="secondary" style={{ marginLeft: 10 }}>
-                                            {formatPrice(product.originalPrice)}
-                                        </Text>
-                                    )} */}
                                 </div>
-
-                                {/* Có thể thêm Rating */}
-                                {/* <div style={{ marginBottom: 16 }}>
-                                    <Rate disabled allowHalf defaultValue={product.rating || 0} />
-                                    <Text type="secondary" style={{ marginLeft: 8 }}>({product.reviewsCount || 0} đánh giá)</Text>
-                                </div> */}
 
                                 <Divider />
 
                                 <div style={{ marginBottom: 16 }}>
                                     <Title level={5}>Mô tả:</Title>
-                                    {/* Sử dụng dangerouslySetInnerHTML nếu mô tả là HTML, nếu không thì dùng Paragraph */}
                                     <Paragraph>{product.description || 'Chưa có mô tả cho sản phẩm này.'}</Paragraph>
-                                    {/* <div dangerouslySetInnerHTML={{ __html: product.description || '<p>Chưa có mô tả.</p>' }} /> */}
                                 </div>
 
                                 <div style={{ marginBottom: 24 }}>
                                     <Title level={5} style={{ display: 'inline-block', marginRight: 10 }}>Số lượng:</Title>
                                     <InputNumber
                                         min={1}
-                                        max={product.stock_quantity || 10} // Giới hạn max bằng tồn kho (hoặc giá trị mặc định nếu stock_quantity không có)
+                                        max={product.stock_quantity || 10}
                                         defaultValue={1}
                                         value={quantity}
-                                        onChange={value => setQuantity(value || 1)} // Đảm bảo value không null/undefined, nếu có thì về 1
-                                        disabled={!product.isActive || product.stock_quantity === 0} // Disable nếu hết hàng
+                                        onChange={value => setQuantity(value || 1)}
+                                        disabled={!product.isActive || product.stock_quantity === 0}
                                     />
-                                     {product.stock_quantity !== undefined && ( // Chỉ hiển thị nếu có thông tin tồn kho
+                                     {product.stock_quantity !== undefined && (
                                         <Text type="secondary" style={{ marginLeft: 10 }}>
                                             ({product.stock_quantity} sản phẩm có sẵn)
                                         </Text>
@@ -246,54 +329,39 @@ const ProductDetailPage = () => {
                                     {!product.isActive && <Tag color="error" style={{ marginLeft: 10 }}>Hết hàng</Tag>}
                                 </div>
 
-                                {/* --- THÊM THUỘC TÍNH (Ví dụ Màu/Size) nếu có --- */}
-                                {/*
-                                <div style={{ marginBottom: 24 }}>
-                                    <Title level={5}>Màu sắc:</Title>
-                                    <Radio.Group onChange={(e) => setSelectedColor(e.target.value)} value={selectedColor}>
-                                        <Radio.Button value="Đen">Đen</Radio.Button>
-                                        <Radio.Button value="Trắng">Trắng</Radio.Button>
-                                        <Radio.Button value="Xám">Xám</Radio.Button>
-                                    </Radio.Group>
-                                </div>
-                                */}
-
-                                <Space wrap size="large"> {/* Tăng size để nút cách xa nhau hơn */}
+                                <Space wrap size="large">
                                     <Button
                                         type="primary"
                                         icon={<ShoppingCartOutlined />}
                                         size="large"
-                                        onClick={handleAddToCart} // Gọi hàm đã cập nhật
-                                        disabled={!product.isActive || product.stock_quantity === 0} // Disable nếu hết hàng
+                                        onClick={handleAddToCart}
+                                        disabled={!product.isActive || product.stock_quantity === 0}
                                     >
-                                        Thêm vào giỏ hàng
+                                        Thêm vào giỏ
                                     </Button>
                                     <Button
-                                        type="default" // Thay đổi thành default hoặc ghost
-                                        icon={<HeartOutlined />}
+                                        type="primary"
                                         size="large"
-                                        // onClick={handleAddToWishlist} // Thêm hàm xử lý yêu thích nếu có
+                                        onClick={handleBuyNow}
+                                        disabled={!product.isActive || product.stock_quantity === 0}
+                                        style={{ 
+                                            backgroundColor: '#ff4d4f', 
+                                            borderColor: '#ff4d4f',
+                                            fontWeight: 'bold'
+                                        }}
+                                        icon={<ThunderboltOutlined />}
                                     >
-                                        Yêu thích
+                                        Mua ngay
                                     </Button>
-                                    {/* Nút chia sẻ có thể không cần thiết */}
-                                    {/* <Button
-                                        icon={<ShareAltOutlined />}
-                                        size="large"
-                                        // onClick={handleShare} // Thêm hàm xử lý chia sẻ nếu có
-                                    >
-                                        Chia sẻ
-                                    </Button> */}
                                 </Space>
                             </div>
                         </Col>
                     </Row>
 
-                    {/* Product Details */}
                     <div style={{ marginTop: 48 }}>
                         <Title level={3}>Chi tiết sản phẩm</Title>
-                        <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }}> {/* Responsive columns */}
-                            <Descriptions.Item label="Tên sản phẩm" span={3}>{product.name}</Descriptions.Item> {/* Span 3 cho tên dài */}
+                        <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }}>
+                            <Descriptions.Item label="Tên sản phẩm" span={3}>{product.name}</Descriptions.Item>
                             <Descriptions.Item label="Giá">{formatPrice(product.price)}</Descriptions.Item>
                             <Descriptions.Item label="Thương hiệu">{product.brand?.name || "N/A"}</Descriptions.Item>
                             <Descriptions.Item label="Danh mục">{product.category?.name || "N/A"}</Descriptions.Item>
@@ -304,22 +372,11 @@ const ProductDetailPage = () => {
                                     : <Tag color="error">Hết hàng</Tag>
                                 }
                             </Descriptions.Item>
-                             {/* Có thể thêm các chi tiết khác như chất liệu, xuất xứ,... nếu có trong data */}
-                            {/* <Descriptions.Item label="Chất liệu">{product.material || 'N/A'}</Descriptions.Item> */}
-                            {/* <Descriptions.Item label="Xuất xứ">{product.origin || 'N/A'}</Descriptions.Item> */}
-
                              <Descriptions.Item label="Mô tả chi tiết" span={3}>
-                                {/* Có thể hiển thị lại mô tả hoặc mô tả chi tiết hơn nếu có */}
                                 {product.longDescription || product.description || 'Không có mô tả chi tiết.'}
                             </Descriptions.Item>
                         </Descriptions>
                     </div>
-
-                    {/* Có thể thêm phần đánh giá sản phẩm ở đây */}
-                    {/* <div style={{ marginTop: 48 }}>
-                        <Title level={3}>Đánh giá sản phẩm</Title>
-                        // Component Review...
-                    </div> */}
                 </div>
             </Content>
         </Layout>
