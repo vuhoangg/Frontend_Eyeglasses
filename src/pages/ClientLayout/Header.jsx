@@ -36,39 +36,30 @@ const Header = () => {
     const navigate = useNavigate(); // Hook useNavigate phải được gọi bên trong component
     const [loading, setLoading] = useState(false); // State cho nút loading update
 
-
-
-
     // Hàm cập nhật cart count từ localStorage
     const updateCartCount = useCallback(() => {
-        let totalQuantity = 0; // Khởi tạo tổng số lượng là 0
+        let totalQuantity = 0;
         try {
             const storedCart = localStorage.getItem('cartItems');
             if (storedCart) {
                 const parsedCart = JSON.parse(storedCart);
-                // Quan trọng: Kiểm tra xem dữ liệu parse ra có phải là mảng không
                 if (Array.isArray(parsedCart)) {
-                    // --- ĐÚNG LOGIC TÍNH TỔNG QUANTITY ---
+                    // Tính tổng quantity từ dữ liệu DB
                     totalQuantity = parsedCart.reduce((total, item) => {
-                        // Lấy quantity của item, đảm bảo là số và cộng vào tổng
-                        // Nếu quantity không hợp lệ hoặc thiếu, coi như là 0
-                        return total + (Number(item.quantity) || 0);
-                    }, 0); // Giá trị khởi tạo của total là 0
-                    // ----------------------------------------
+                        // Kiểm tra và lấy quantity từ cấu trúc dữ liệu DB
+                        const quantity = Number(item.quantity) || 0;
+                        return total + quantity;
+                    }, 0);
                 } else {
-                     console.warn("Dữ liệu cartItems trong localStorage không phải là một mảng.");
-                     // totalQuantity vẫn là 0
+                    console.warn("Dữ liệu cartItems trong localStorage không phải là một mảng.");
                 }
             }
-            // Nếu không có storedCart, totalQuantity vẫn là 0
         } catch (error) {
             console.error('Lỗi khi xử lý cartItems để đếm số lượng:', error);
-            // totalQuantity vẫn là 0 khi có lỗi
         } finally {
-             // Luôn cập nhật state, dù là 0 hay giá trị tính được
-             setCartCount(totalQuantity);
+            setCartCount(totalQuantity);
         }
-    }, []); // useCallback không cần dependency vì chỉ đọc localStorage
+    }, []);
 
     // Cập nhật cart count khi mount và khi storage thay đổi
     useEffect(() => {
@@ -81,7 +72,7 @@ const Header = () => {
         return () => {
             window.removeEventListener('storage', updateCartCount);
         };
-    }, [updateCartCount]); // Phụ thuộc vào updateCartCount
+    }, [updateCartCount]);
 
     // Lấy thông tin user từ localStorage khi mount
     useEffect(() => {
@@ -90,16 +81,68 @@ const Header = () => {
             if (userData) {
                 const parsedUserData = JSON.parse(userData);
                 setUser(parsedUserData);
-                // Set giá trị cho form khi user data đã load và modal mở
-                // (Có thể set ở showModal thay vì ở đây để đảm bảo form có giá trị mới nhất)
+                
+                // Cập nhật số lượng giỏ hàng khi user đăng nhập
+                const cartData = localStorage.getItem("cartItems");
+                if (cartData) {
+                    try {
+                        const parsedCart = JSON.parse(cartData);
+                        if (Array.isArray(parsedCart)) {
+                            const total = parsedCart.reduce((sum, item) => {
+                                return sum + (Number(item.quantity) || 0);
+                            }, 0);
+                            setCartCount(total);
+                        }
+                    } catch (error) {
+                        console.error('Lỗi khi parse dữ liệu giỏ hàng:', error);
+                        setCartCount(0);
+                    }
+                }
             } else {
                 setUser(null);
+                setCartCount(0);
             }
         } catch (error) {
             console.error('Error parsing user data:', error);
             setUser(null);
+            setCartCount(0);
         }
     }, []); // Chỉ chạy 1 lần khi mount
+
+    // Cập nhật cart count khi có thay đổi trong localStorage
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'cartItems') {
+                try {
+                    const cartData = localStorage.getItem('cartItems');
+                    if (cartData) {
+                        const parsedCart = JSON.parse(cartData);
+                        if (Array.isArray(parsedCart)) {
+                            const total = parsedCart.reduce((sum, item) => {
+                                return sum + (Number(item.quantity) || 0);
+                            }, 0);
+                            setCartCount(total);
+                        }
+                    } else {
+                        setCartCount(0);
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi xử lý cartItems:', error);
+                    setCartCount(0);
+                }
+            }
+        };
+
+        // Lắng nghe sự kiện storage
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Chạy một lần khi component mount để lấy giá trị ban đầu
+        handleStorageChange({ key: 'cartItems' });
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
 
     // --- Menu Items ---
     const items = [
