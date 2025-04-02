@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Typography, Row, Col, Button, Form, Input, Radio, message, Steps, Card, Divider, List, Avatar } from 'antd'; // Bỏ Tag nếu không dùng
 import { Link, useNavigate } from 'react-router-dom';
 import { createOrderAPI } from '../../services/api.order';
-import { deleteAllCartItemsForUserAPI } from '../../services/api.cartItems'; // Import hàm xóa cart DB
+import { clearMyCartAPI } from '../../services/api.cartItems'; // Import hàm xóa cart DB
 import { createOrderItemAPI } from '../../services/api.orderItem'; // Import API tạo OrderItem
 import {
     ShoppingCartOutlined,
@@ -145,42 +145,76 @@ const CheckoutPage = () => {
                 const orderId = orderResponse.data.id; // Lấy ID của Order vừa tạo
                 message.loading(`Đơn hàng #${orderId} đã được tạo. Đang lưu chi tiết...`, 1); // Thông báo tạm thời
 
-                // --- BƯỚC 2.1: Tạo từng OrderItem (THEO YÊU CẦU - KHÔNG KHUYẾN KHÍCH) ---
-                let allItemsSaved = true;
-                try {
-                    console.warn(`--- Starting Order Item Creation Loop for Order ID: ${orderId} (Not Recommended) ---`);
-                    // Sử dụng Promise.all để gửi request song song (cẩn thận quá tải server)
-                    // Hoặc dùng for...of để gửi tuần tự (an toàn hơn)
-                    const orderItemPromises = cartItems.map(item => {
-                        console.log(`Preparing createOrderItemAPI call - Order: ${orderId}, Product: ${item.id}, Qty: ${item.quantity}, Price: ${Number(item.price)}`);
-                        return createOrderItemAPI(
-                            orderId,
-                            item.id,        // productId
-                            item.quantity,
-                            Number(item.price) // Price
-                        );
-                    });
-                    // Chờ tất cả các request tạo OrderItem hoàn thành
-                    await Promise.all(orderItemPromises);
+               // --- BƯỚC 2.1: Tạo từng OrderItem ---
+let allItemsSaved = true;
+try {
+    console.warn(`--- Starting Order Item Creation Loop for Order ID: ${orderId} ---`);
 
-                    console.warn("--- Finished Order Item Creation Loop ---");
-                    message.success(`Đã lưu chi tiết các sản phẩm cho đơn hàng #${orderId}.`, 3);
+    const orderItemPromises = cartItems.map(item => {
+        // --- XÁC ĐỊNH ĐÚNG productId VÀ price ---
+        let productId;
+        let productPrice;
 
-                } catch (itemError) {
-                    allItemsSaved = false;
-                    console.error(`!!! Critical error creating OrderItem for Order ID ${orderId}:`, itemError.response?.data || itemError.message || itemError);
-                    // Cố gắng cung cấp thông tin lỗi cụ thể hơn
-                    let errorDetails = itemError.response?.data?.message || itemError.message || "Lỗi không xác định";
-                    message.error(`Lỗi nghiêm trọng khi lưu chi tiết sản phẩm (${errorDetails}). Đơn hàng #${orderId} có thể chưa hoàn chỉnh. Vui lòng liên hệ hỗ trợ!`, 10);
-                    setLoading(false);
-                    return; // Dừng ngay lập tức
-                }
+        if (item.product && item.product.id) {
+            // Cấu trúc loại 1: Item từ DB cart (có nested product)
+            productId = item.product.id;
+            productPrice = Number(item.product.price); // Lấy giá từ product bên trong
+             console.log(`Item structure type 1 detected. Product ID: ${productId}, Price: ${productPrice}`);
+        } else if (item.id) {
+             // Cấu trúc loại 2: Item thêm trực tiếp (id gốc là product_id)
+            productId = item.id;
+            productPrice = Number(item.price); // Lấy giá từ item gốc
+            console.log(`Item structure type 2 detected. Product ID: ${productId}, Price: ${productPrice}`);
+        } else {
+             // Trường hợp không xác định được productId
+             console.error("!!! Cannot determine Product ID for item:", item);
+             // Quyết định xử lý: Ném lỗi hoặc bỏ qua item này
+             // Ví dụ: Ném lỗi để dừng toàn bộ quá trình
+             throw new Error("Không thể xác định ID sản phẩm cho một mục trong giỏ hàng.");
+             // Hoặc return null/Promise.resolve() và lọc ra sau, nhưng không khuyến khích vì đơn hàng sẽ thiếu sót
+        }
+
+        // Kiểm tra lại giá trị trước khi gọi API
+        if (!productId || isNaN(productPrice) || !item.quantity) {
+             console.error(`!!! Invalid data for OrderItem - ProductID: ${productId}, Price: ${productPrice}, Quantity: ${item.quantity}`, item);
+             throw new Error("Dữ liệu không hợp lệ để tạo chi tiết đơn hàng.");
+        }
+
+        console.log(`Preparing createOrderItemAPI call - Order: ${orderId}, Product: ${productId}, Qty: ${item.quantity}, Price: ${productPrice}`);
+        return createOrderItemAPI(
+            orderId,
+            productId,     // <-- Đã sửa: Dùng productId đã xác định
+            item.quantity,
+            productPrice   // <-- Đã sửa: Dùng productPrice đã xác định
+        );
+    });
+
+    // Chờ tất cả các request tạo OrderItem hoàn thành
+    // Lưu ý: Nếu bạn return null ở trên cho item lỗi, bạn cần lọc ra trước Promise.all
+    // const validPromises = orderItemPromises.filter(p => p !== null);
+    // await Promise.all(validPromises);
+    await Promise.all(orderItemPromises); // Giả sử ném lỗi nếu có item không hợp lệ
+
+    console.warn("--- Finished Order Item Creation Loop ---");
+    message.success(`Đã lưu chi tiết các sản phẩm cho đơn hàng #${orderId}.`, 3);
+
+} catch (itemError) {
+    allItemsSaved = false;
+    // (Giữ nguyên phần xử lý lỗi còn lại)
+    console.error(`!!! Critical error during OrderItem creation for Order ID ${orderId}:`, itemError.response?.data || itemError.message || itemError);
+    let errorDetails = itemError.response?.data?.message || itemError.message || "Lỗi không xác định khi lưu chi tiết đơn hàng.";
+    message.error(`Lỗi nghiêm trọng: ${errorDetails}. Đơn hàng #${orderId} có thể chưa hoàn chỉnh. Vui lòng liên hệ hỗ trợ!`, 10);
+    setLoading(false);
+    return; // Dừng ngay lập tức
+}
+
 
                 // --- BƯỚC 3: Xóa giỏ hàng DB và LocalStorage (Chỉ khi tất cả Item được lưu) ---
                 if (allItemsSaved) {
                     try {
+                           // Xóa cứng giỏ hàng
                         console.log(`Clearing DB cart items for user ${userInfo.id} after successful order ${orderId}`);
-                        await deleteAllCartItemsForUserAPI(userInfo.id); // Gọi API xóa cart DB
+                        await clearMyCartAPI(); // Gọi hàm xóa cứng mới
                     } catch (clearError) {
                         console.error("Error clearing cart items after order:", clearError);
                         message.warning("Đặt hàng thành công nhưng có lỗi khi dọn dẹp giỏ hàng cũ.");

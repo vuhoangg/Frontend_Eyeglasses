@@ -39,23 +39,20 @@ const deleteCartItemAPI = (id) => { // id ở đây là cart_item_id
   return axios.delete(URL_BACKEND);
 };
 
-// --- NEW FUNCTION ---
-// Hàm này cần backend hỗ trợ endpoint tương ứng, ví dụ: DELETE /cart-items/user
-// Hoặc có thể lặp và gọi deleteCartItemAPI cho từng item nếu không có endpoint xóa hàng loạt
-const deleteAllCartItemsForUserAPI = (userId) => {
-  // Giả định endpoint là /cart-items/user/:userId
-  // Nếu không có, bạn cần lấy hết cart item ID của user rồi gọi deleteCartItemAPI lặp lại
-  const URL_BACKEND = `/cart-items/user/${userId}`; // Cần endpoint này trên backend
-  console.warn("deleteAllCartItemsForUserAPI assumes a backend endpoint DELETE /cart-items/user/:userId exists.");
+
+// --- HÀM XÓA CỨNG TẤT CẢ CART ITEMS CỦA USER (Đơn giản hóa) ---
+const clearMyCartAPI = () => {
+  const URL_BACKEND = `/cart-items/my-cart/clear`; // Endpoint xóa cứng mới
+  console.log(`Requesting hard cart deletion: ${URL_BACKEND}`);
   return axios.delete(URL_BACKEND);
 };
-// --- END NEW FUNCTION ---
-
+// --- KẾT THÚC HÀM MỚI ---
 
 export {
     fetchAllCartItemsAPI,
     createCartItemAPI,
     updateCartItemAPI,
     deleteCartItemAPI,
-    deleteAllCartItemsForUserAPI // Export hàm mới
+ 
+    clearMyCartAPI // Đổi tên hàm export cho phù hợp
 };

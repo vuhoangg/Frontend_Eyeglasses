@@ -36,22 +36,39 @@ const Header = () => {
     const navigate = useNavigate(); // Hook useNavigate phải được gọi bên trong component
     const [loading, setLoading] = useState(false); // State cho nút loading update
 
+
+
+
     // Hàm cập nhật cart count từ localStorage
     const updateCartCount = useCallback(() => {
+        let totalQuantity = 0; // Khởi tạo tổng số lượng là 0
         try {
             const storedCart = localStorage.getItem('cartItems');
             if (storedCart) {
-                const cartItems = JSON.parse(storedCart);
-                // Đếm tổng số lượng sản phẩm, không phải số loại sản phẩm
-                setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
-            } else {
-                setCartCount(0);
+                const parsedCart = JSON.parse(storedCart);
+                // Quan trọng: Kiểm tra xem dữ liệu parse ra có phải là mảng không
+                if (Array.isArray(parsedCart)) {
+                    // --- ĐÚNG LOGIC TÍNH TỔNG QUANTITY ---
+                    totalQuantity = parsedCart.reduce((total, item) => {
+                        // Lấy quantity của item, đảm bảo là số và cộng vào tổng
+                        // Nếu quantity không hợp lệ hoặc thiếu, coi như là 0
+                        return total + (Number(item.quantity) || 0);
+                    }, 0); // Giá trị khởi tạo của total là 0
+                    // ----------------------------------------
+                } else {
+                     console.warn("Dữ liệu cartItems trong localStorage không phải là một mảng.");
+                     // totalQuantity vẫn là 0
+                }
             }
+            // Nếu không có storedCart, totalQuantity vẫn là 0
         } catch (error) {
-            console.error('Error parsing cart items for count:', error);
-            setCartCount(0);
+            console.error('Lỗi khi xử lý cartItems để đếm số lượng:', error);
+            // totalQuantity vẫn là 0 khi có lỗi
+        } finally {
+             // Luôn cập nhật state, dù là 0 hay giá trị tính được
+             setCartCount(totalQuantity);
         }
-    }, []); // useCallback để không tạo lại hàm mỗi lần render
+    }, []); // useCallback không cần dependency vì chỉ đọc localStorage
 
     // Cập nhật cart count khi mount và khi storage thay đổi
     useEffect(() => {
@@ -244,8 +261,9 @@ const Header = () => {
                     </Link>
                     */}
 
-                    <Link to="/cart_page" style={{ marginRight: '15px' }}> {/* Tăng khoảng cách */}
-                        <Badge count={cartCount} size="small">
+                    <Link to="/cart_page" style={{ marginRight: '15px' }}>
+                        {/* Badge sẽ hiển thị giá trị của state cartCount */}
+                        <Badge count={cartCount} size="small" overflowCount={99}> {/* Thêm overflowCount nếu muốn giới hạn số hiển thị */}
                             <ShoppingCartOutlined className="style_icon" />
                         </Badge>
                     </Link>
