@@ -314,7 +314,7 @@ const HomePage = () => {
                 ]}
             >
                 <Meta
-                    title={<Link to={`/product_detail/${product.id}`} onClick={(e) => e.stopPropagation()}>{product.name || "Sản phẩm chưa có tên"}</Link>}
+                    title={<Link to={`/product/${product.id}`} onClick={(e) => e.stopPropagation()}>{product.name || "Sản phẩm chưa có tên"}</Link>}
                     description={
                         <Space direction="vertical" size="small">
                             <Space align="baseline">
@@ -337,7 +337,7 @@ const HomePage = () => {
     const CategoryCard = ({ category }) => (
         <Card
             hoverable
-            onClick={() => navigate(`/product-list?category=${category.id}`)} // Navigate to ProductPage with category filter
+            onClick={() => navigate(`/product?category=${category.id}`)} // Navigate to ProductPage with category filter
             // cover={<img alt={category.name} src={'https://placehold.co/200x200'} />} // Replace placeholder with actual category image if available
             bodyStyle={{ padding: '12px', textAlign: 'center' }}
         >
@@ -497,7 +497,7 @@ const HomePage = () => {
                                 <Title level={2} style={{ margin: 0 }}>SẢN PHẨM BÁN CHẠY</Title>
                                 <Divider style={{ borderTopColor: '#1890ff', width: 80, minWidth: 80, margin: '16px 0' }} />
                             </div>
-                            <Button type="link" onClick={() => navigate('/product-list?sortBy=best-selling')}>
+                            <Button type="link" onClick={() => navigate('/product')}>
                                 Xem tất cả <RightOutlined />
                             </Button>
                         </div>
@@ -547,7 +547,7 @@ const HomePage = () => {
                         <Paragraph style={{ fontSize: 18, color: '#fff' }}>
                             Đừng bỏ lỡ cơ hội sở hữu những mẫu kính mắt thời trang và chất lượng nhất từ LilyAnna. Ưu đãi đặc biệt chỉ trong tháng này!
                         </Paragraph>
-                        <Button type="primary" size="large">Xem ngay</Button>
+                        <Button type="primary" size="large" >Xem ngay</Button>
                     </div>
                 </div>
 
@@ -559,7 +559,7 @@ const HomePage = () => {
                                 <Title level={2} style={{ margin: 0 }}>SẢN PHẨM MỚI</Title>
                                 <Divider style={{ borderTopColor: '#1890ff', width: 80, minWidth: 80, margin: '16px 0' }} />
                             </div>
-                            <Button type="link" onClick={() => navigate('/product-list?sortBy=newest')}>
+                            <Button type="link" onClick={() => navigate('/product')}>
                                 Xem tất cả <RightOutlined />
                             </Button>
                         </div>

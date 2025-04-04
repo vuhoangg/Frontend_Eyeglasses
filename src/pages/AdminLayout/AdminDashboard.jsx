@@ -416,7 +416,7 @@ const AdminDashboard = () => {
             title={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <ShoppingCartOutlined style={{ color: '#1890ff', marginRight: 8 }} />
-                <span>Top 5 Sản phẩm bán chạy nhất</span>
+                <span>Top 8 Sản phẩm bán chạy nhất</span>
               </div>
             }
             bordered={false}
