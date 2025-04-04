@@ -53,6 +53,7 @@ const updateOrderAPI = (id, userId, orderStatusId, totalAmount, shippingAddress,
     return axios.patch(URL_BACKEND, data);
 };
 
+
 const deleteOrderAPI = (id) => {
     const URL_BACKEND = `/orders/${id}`;
     return axios.delete(URL_BACKEND);

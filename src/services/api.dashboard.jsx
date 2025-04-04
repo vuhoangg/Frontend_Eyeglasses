@@ -20,6 +20,9 @@ const fetchBestSellingProductsAPI = () => {
     return axios.get(URL_BACKEND);
 };
 
+
+
+
 const fetchMonthlyRevenueAPI = () => {
     const URL_BACKEND = `/orders/monthly-revenue`;
     return axios.get(URL_BACKEND);

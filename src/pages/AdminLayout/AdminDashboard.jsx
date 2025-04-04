@@ -26,6 +26,7 @@ import {
   fetchBestSellingProductsAPI,
   fetchMonthlyRevenueAPI
 } from '../../services/api.dashboard';
+import { formatNumber } from '../../utils/format'; // Import formatNumber utility
 
 const { Title, Text } = Typography;
 const { Countdown } = Statistic;
@@ -37,13 +38,13 @@ const AdminDashboard = () => {
   const [orderCount, setOrderCount] = useState(0);
   const [bestSellingProducts, setBestSellingProducts] = useState([]);
   const [monthlyRevenueData, setMonthlyRevenueData] = useState([]);
-  
+
   // State variables for displaying animation of counters
   const [userCountDisplay, setUserCountDisplay] = useState(0);
   const [productCountDisplay, setProductCountDisplay] = useState(0);
   const [orderCountDisplay, setOrderCountDisplay] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(false);
-  
+
   // Loading states for UI feedback
   const [loadingBasicStats, setLoadingBasicStats] = useState(true);
   const [loadingCharts, setLoadingCharts] = useState(true);
@@ -87,30 +88,30 @@ const AdminDashboard = () => {
   // Effect for animating the counter numbers
   useEffect(() => {
     if (loadingBasicStats) return;
-    
+
     // Reset counters when data changes
     setUserCountDisplay(0);
     setProductCountDisplay(0);
     setOrderCountDisplay(0);
     setAnimationComplete(false);
-    
+
     // Animation duration in milliseconds
     const animationDuration = 2000;
     // Number of steps in the animation
     const steps = 60;
     // Time between each step in milliseconds
     const stepTime = animationDuration / steps;
-    
+
     // Calculate increments for each counter
     const userIncrement = userCount / steps;
     const productIncrement = productCount / steps;
     const orderIncrement = orderCount / steps;
-    
+
     let currentStep = 0;
-    
+
     const animationInterval = setInterval(() => {
       currentStep++;
-      
+
       if (currentStep <= steps) {
         // Update display counters
         setUserCountDisplay(Math.floor(userIncrement * currentStep));
@@ -125,7 +126,7 @@ const AdminDashboard = () => {
         clearInterval(animationInterval);
       }
     }, stepTime);
-    
+
     // Clean up interval on component unmount
     return () => clearInterval(animationInterval);
   }, [loadingBasicStats, userCount, productCount, orderCount]);
@@ -133,9 +134,9 @@ const AdminDashboard = () => {
   // Enhanced configuration for the Best Selling Products Bar Chart
   const bestSellingProductsConfig = {
     data: bestSellingProducts,
-    xField: 'productName',
+    xField: 'name', // Use 'name' from the full product details now
     yField: 'quantitySold',
-    seriesField: 'productName',
+    seriesField: 'name', // Use 'name' here as well
     label: {
       position: 'top',
       style: { fill: '#666', fontSize: 12 },
@@ -162,18 +163,31 @@ const AdminDashboard = () => {
       { type: 'element-active' },
       { type: 'legend-highlight' },
     ],
-    // Improved tooltip
+    // Improved tooltip - Display more product info
     tooltip: {
       customContent: (value, items) => {
         if (!items || items.length === 0) return;
         const item = items[0];
+        const product = item?.data; // Access full product data
         return `
           <div style="padding: 8px; border-radius: 4px; background: rgba(255,255,255,0.95); box-shadow: 0 2px 8px rgba(0,0,0,0.15)">
-            <h4 style="margin-bottom:8px; color: #333; font-size: 14px;">${item?.data?.productName}</h4>
-            <div style="display: flex; align-items: center; padding: 4px 0;">
+            <h4 style="margin-bottom:8px; color: #333; font-size: 14px;">${product?.name}</h4>
+            <div style="padding: 4px 0;">
               <span style="display:inline-block; width: 100px; color: #666;">Số lượng đã bán:</span>
-              <span style="font-weight: bold; color: #1890ff;">${item?.data?.quantitySold}</span>
+              <span style="font-weight: bold; color: #1890ff;">${product?.quantitySold}</span>
             </div>
+            <div style="padding: 4px 0;">
+              <span style="display:inline-block; width: 100px; color: #666;">Giá:</span>
+              <span style="font-weight: bold; color: #52c41a;">${formatNumber(product?.price)} VNĐ</span>
+            </div>
+            ${product?.category ? `<div style="padding: 4px 0;">
+              <span style="display:inline-block; width: 100px; color: #666;">Danh mục:</span>
+              <span style="font-weight: bold;">${product.category.name}</span>
+            </div>` : ''}
+            ${product?.brand ? `<div style="padding: 4px 0;">
+              <span style="display:inline-block; width: 100px; color: #666;">Nhãn hiệu:</span>
+              <span style="font-weight: bold;">${product.brand.name}</span>
+            </div>` : ''}
           </div>`;
       },
     },
@@ -278,8 +292,8 @@ const AdminDashboard = () => {
   // Loading state for basic statistics cards
   if (loadingBasicStats) {
     return (
-      <div style={{ 
-        textAlign: 'center', 
+      <div style={{
+        textAlign: 'center',
         paddingTop: 100,
         height: '100vh',
         display: 'flex',
@@ -304,8 +318,8 @@ const AdminDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ 
-                backgroundColor: 'rgba(24, 144, 255, 0.1)', 
+              <div style={{
+                backgroundColor: 'rgba(24, 144, 255, 0.1)',
                 padding: '12px',
                 borderRadius: '8px',
                 marginRight: '12px'
@@ -314,9 +328,9 @@ const AdminDashboard = () => {
               </div>
               <Text type="secondary">Người dùng</Text>
             </div>
-            <div style={{ 
-              color: '#1890ff', 
-              fontWeight: 'bold', 
+            <div style={{
+              color: '#1890ff',
+              fontWeight: 'bold',
               fontSize: '24px',
               transition: 'all 0.3s'
             }}>
@@ -328,8 +342,8 @@ const AdminDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ 
-                backgroundColor: 'rgba(82, 196, 26, 0.1)', 
+              <div style={{
+                backgroundColor: 'rgba(82, 196, 26, 0.1)',
                 padding: '12px',
                 borderRadius: '8px',
                 marginRight: '12px'
@@ -338,9 +352,9 @@ const AdminDashboard = () => {
               </div>
               <Text type="secondary">Sản phẩm</Text>
             </div>
-            <div style={{ 
-              color: '#52c41a', 
-              fontWeight: 'bold', 
+            <div style={{
+              color: '#52c41a',
+              fontWeight: 'bold',
               fontSize: '24px',
               transition: 'all 0.3s'
             }}>
@@ -352,8 +366,8 @@ const AdminDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ 
-                backgroundColor: 'rgba(250, 173, 20, 0.1)', 
+              <div style={{
+                backgroundColor: 'rgba(250, 173, 20, 0.1)',
                 padding: '12px',
                 borderRadius: '8px',
                 marginRight: '12px'
@@ -362,9 +376,9 @@ const AdminDashboard = () => {
               </div>
               <Text type="secondary">Đơn hàng</Text>
             </div>
-            <div style={{ 
-              color: '#faad14', 
-              fontWeight: 'bold', 
+            <div style={{
+              color: '#faad14',
+              fontWeight: 'bold',
               fontSize: '24px',
               transition: 'all 0.3s'
             }}>
@@ -376,8 +390,8 @@ const AdminDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ 
-                backgroundColor: 'rgba(235, 47, 150, 0.1)', 
+              <div style={{
+                backgroundColor: 'rgba(235, 47, 150, 0.1)',
                 padding: '12px',
                 borderRadius: '8px',
                 marginRight: '12px'
@@ -386,7 +400,7 @@ const AdminDashboard = () => {
               </div>
               <Text type="secondary">Bài viết</Text>
             </div>
-            <Statistic 
+            <Statistic
               value={24} // Giá trị cố định (chưa có API)
               valueStyle={{ color: '#eb2f96', fontWeight: 'bold' }}
               prefix={<span />}
@@ -398,14 +412,14 @@ const AdminDashboard = () => {
       {/* Enhanced Charts Row */}
       <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
         <Col xs={24} lg={12}>
-          <Card 
+          <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <ShoppingCartOutlined style={{ color: '#1890ff', marginRight: 8 }} />
                 <span>Top 5 Sản phẩm bán chạy nhất</span>
               </div>
             }
-            bordered={false} 
+            bordered={false}
             style={{ borderRadius: '8px' }}
           >
             {loadingCharts ? (
@@ -423,14 +437,14 @@ const AdminDashboard = () => {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card 
+          <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <DollarCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
                 <span>Doanh thu hàng tháng (Năm hiện tại)</span>
               </div>
             }
-            bordered={false} 
+            bordered={false}
             style={{ borderRadius: '8px' }}
           >
             {loadingCharts ? (

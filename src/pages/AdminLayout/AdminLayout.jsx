@@ -188,64 +188,64 @@ import {
                   },
                 ],
               },
-              {
-                key: "g5",
-                icon: <NotificationOutlined />,
-                label: "Quản lý băng rôn",
-                children: [
-                  {
-                    key: "9",
-                    label: (
-                      <Link
-                        to="/admin/list-banner"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Danh sách băng rôn
-                      </Link>
-                    ),
-                  },
-                  {
-                    key: "10",
-                    label: (
-                      <Link
-                        to="/admin/add-banner"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Thêm băng rôn
-                      </Link>
-                    ),
-                  },
-                ],
-              },
-              {
-                key: "g6",
-                icon: <AppstoreOutlined />,
-                label: "Quản lý chủ đề",
-                children: [
-                  {
-                    key: "11",
-                    label: (
-                      <Link
-                        to="/admin/list-subject"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Danh sách chủ đề
-                      </Link>
-                    ),
-                  },
-                  {
-                    key: "12",
-                    label: (
-                      <Link
-                        to="/admin/add-subject"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Thêm chủ đề
-                      </Link>
-                    ),
-                  },
-                ],
-              },
+              // {
+              //   key: "g5",
+              //   icon: <NotificationOutlined />,
+              //   label: "Quản lý băng rôn",
+              //   children: [
+              //     {
+              //       key: "9",
+              //       label: (
+              //         <Link
+              //           to="/admin/list-banner"
+              //           style={{ textDecoration: "none", color: "inherit" }}
+              //         >
+              //           Danh sách băng rôn
+              //         </Link>
+              //       ),
+              //     },
+              //     {
+              //       key: "10",
+              //       label: (
+              //         <Link
+              //           to="/admin/add-banner"
+              //           style={{ textDecoration: "none", color: "inherit" }}
+              //         >
+              //           Thêm băng rôn
+              //         </Link>
+              //       ),
+              //     },
+              //   ],
+              // },
+              // {
+              //   key: "g6",
+              //   icon: <AppstoreOutlined />,
+              //   label: "Quản lý chủ đề",
+              //   children: [
+              //     {
+              //       key: "11",
+              //       label: (
+              //         <Link
+              //           to="/admin/list-subject"
+              //           style={{ textDecoration: "none", color: "inherit" }}
+              //         >
+              //           Danh sách chủ đề
+              //         </Link>
+              //       ),
+              //     },
+              //     {
+              //       key: "12",
+              //       label: (
+              //         <Link
+              //           to="/admin/add-subject"
+              //           style={{ textDecoration: "none", color: "inherit" }}
+              //         >
+              //           Thêm chủ đề
+              //         </Link>
+              //       ),
+              //     },
+              //   ],
+              // },
               // {
               //   key: "g7",
               //   icon: <SafetyCertificateOutlined />,
@@ -449,30 +449,20 @@ import {
                 icon: <InboxOutlined />,
                 label: "Quản lý đơn hàng",
                 children: [
-                  {
-                    key: "27",
-                    label: (
-                      <Link
-                        to="/admin/list-banner"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Danh sách băng rôn
-                      </Link>
-                    ),
-                  },
-                  {
-                    key: "28",
-                    label: (
-                      <Link
-                        to="/admin/add-banner"
-                        style={{ textDecoration: "none", color: "inherit" }}
-                      >
-                        Thêm băng rôn
-                      </Link>
-                    ),
-                  },
+                    {
+                        key: "27",
+                        label: (
+                            <Link
+                                to="/admin/list-order" // Updated link
+                                style={{ textDecoration: "none", color: "inherit" }}
+                            >
+                                Danh sách đơn hàng
+                            </Link>
+                        ),
+                    },
+                    // No "add-order" page as orders are created by customers
                 ],
-              },
+            },
             ]}
           />
         </Sider>

@@ -23,6 +23,11 @@ import LoginPage from './pages/LoginLayout/login.jsx';
 import RegisterPage from './pages/LoginLayout/register.jsx';
 import CheckoutPage from './pages/ClientLayout/CheckoutPage.jsx';
 import OrderSuccessPage from './pages/ClientLayout/OrderSuccessPage.jsx';
+import ManageCategory from './pages/AdminLayout/AdminCategory/ManageCategory.jsx';
+import CreateCategory from './pages/AdminLayout/AdminCategory/CreateCategory.jsx';
+import ManageBrand from './pages/AdminLayout/AdminBrand/ManageBrand.jsx';
+import CreateBrand from './pages/AdminLayout/AdminBrand/CreateBrand.jsx';
+import ManageOrder from './pages/AdminLayout/AdminOrder/ManageOrder.jsx';
 
 const router = createBrowserRouter([
 
@@ -68,6 +73,17 @@ const router = createBrowserRouter([
       // reuter product 
       { path: "list-product", element: <ManageProduct/>},
       {path: "add-product", element: <CreateProduct/> },
+
+       // router category
+       { path: "list-category", element: <ManageCategory/>},
+       {path: "add-category", element: <CreateCategory/> },
+ 
+       // router brand
+       { path: "list-brand", element: <ManageBrand/>},
+       {path: "add-brand", element: <CreateBrand/> },
+
+       // router order
+      { path: "list-order", element: <ManageOrder/>},
 
 
 

@@ -17,7 +17,7 @@ const SearchForm = (props) => {
   return (
     <>
       <Search
-        placeholder={`Tìm kiếm theo ${props.title} `}
+        placeholder={`Tìm kiếm  `}
         enterButton
         allowClear
         value={keyword}

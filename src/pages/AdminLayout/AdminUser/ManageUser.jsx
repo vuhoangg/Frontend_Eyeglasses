@@ -90,7 +90,7 @@ const ManageUser = () => {
   // 3. Const Array  
   const columns = [
     {
-      title: 'Id',
+      title: 'Mã tài khoản',
       dataIndex: 'id',
       render: (_, record) => {
         return (<a href='#'
@@ -101,14 +101,14 @@ const ManageUser = () => {
           {record.id}</a>);
       }
     },
-    {title: 'Name', dataIndex: 'username', key: 'name', render: (text) => <a>{text}</a>},
+    {title: 'Tên khoản', dataIndex: 'username', key: 'name', render: (text) => <a>{text}</a>},
     {title: 'Email', dataIndex: 'email', key: 'email'},
-    {title: 'firstName', dataIndex: 'firstName', key: 'firstName'},
-    {title: 'lastName', dataIndex: 'lastName', key: 'lastName'},
-    {title: 'Address', dataIndex: 'address'},
+    {title: 'Tên', dataIndex: 'firstName', key: 'firstName'},
+    {title: 'Họ', dataIndex: 'lastName', key: 'lastName'},
+    {title: 'Địa chỉ', dataIndex: 'address'},
     {
-      title: 'Action 1',
-      width: 90,
+      title: 'Cập nhật',
+      width: 120,
       render: (_, record) => (
         <EditOutlined
           onClick={() => handleShowUpdateModal(record)}
@@ -117,7 +117,7 @@ const ManageUser = () => {
       )
     },
     {
-      title: 'Action 2',
+      title: 'Xoá',
       fixed: 'right',
       width: 90,
       render: (_, record) => (

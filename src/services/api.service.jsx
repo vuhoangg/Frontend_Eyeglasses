@@ -32,6 +32,11 @@ const fetchAllUserAPI = (page, limit, keyword = "") => {
       }
     return axios.get(URL_BACKEND);
 };
+
+const fetchAllUsersAPI = () => { // Function to fetch all users for dropdown
+    const URL_BACKEND = `/user?page=1&limit=1000`; // Adjust limit as needed or remove pagination if backend supports fetching all
+    return axios.get(URL_BACKEND);
+};
 const updateUserAPI = (id ,username,email,phone,firstName,lastName,address,avartar ,roles,) =>
 {
     const URL_BACKEND = `/user/${id}`;
@@ -71,6 +76,6 @@ const handleUploadFile = (file, folder )=>{
 
 
 
-export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,}
+export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,  fetchAllUsersAPI}
 
 

@@ -86,4 +86,18 @@ const handleUploadFile = (file, folder )=>{
     return axios.post(URL_BACKEND, bodyFormData, config )
 }
 
-export { createProductAPI, fetchAllProductAPI, updateProductAPI, deleteProductAPI, handleUploadFile,  fetchProductByIdAPI  };
+const fetchLatestProductsAPI = () => { // New API call for latest products
+  const URL_BACKEND = `/product/latest`;
+  return axios.get(URL_BACKEND);
+};
+
+
+const fetchBestSellingProductsAPI = () => {
+  const URL_BACKEND = `/product/best-selling`;
+  return axios.get(URL_BACKEND);
+};
+
+export { createProductAPI, fetchAllProductAPI, updateProductAPI, deleteProductAPI, handleUploadFile,  fetchProductByIdAPI , 
+  fetchLatestProductsAPI, // Export new API call
+  fetchBestSellingProductsAPI,
+ };

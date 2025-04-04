@@ -58,9 +58,16 @@ const fetchOrderItemByIdAPI = (id) => {
     return axios.get(URL_BACKEND);
 };
 
+const fetchOrderItemsByOrderIdAPI = (orderId) => {
+    const URL_BACKEND = `/order-items/by-order/${orderId}`; // New endpoint
+    console.log(`Fetching order items by Order ID: ${URL_BACKEND}`);
+    return axios.get(URL_BACKEND);
+};
+
 
 export {
     createOrderItemAPI, // Export hàm tạo để gọi từ CheckoutPage
     fetchAllOrderItemsAPI,
     fetchOrderItemByIdAPI,
+    fetchOrderItemsByOrderIdAPI,
 };

@@ -1,12 +1,12 @@
 import { Drawer, Button,  notification, message  } from  'antd';
 import { useEffect, useState } from 'react';
-import { handleUploadFile , updateUserAPI} from '../../../services/api.service'
+import { handleUploadFile , updateBrandAPI} from '../../../services/api.brand'
 
 
-const UserDetail = (props) =>{
+const BrandDetail = (props) =>{
 
 
-const {isDetailOpen, setIsDetailOpen, dataDetail, setDataDetail, reloadUsers } = props;
+const {isDetailOpen, setIsDetailOpen, dataDetail, setDataDetail, reloadBrands } = props;
 const [selectedFile, setSelectedFile] = useState(null)
 const [preview, setPreview] = useState(null)
 
@@ -34,61 +34,58 @@ const [preview, setPreview] = useState(null)
         setPreview(URL.createObjectURL(file))
     }
     // console.log(">> check file :", file );
-   
-  }
-//   console.log(">> check file :", preview  );
 
-  const handleUpdateUserAvatar = async()=>{
-    // step 1: upload file 
- 
-        const resUpload = await handleUploadFile(selectedFile, "user");
+  }
+
+
+  const handleUpdateBrandLogo = async()=>{
+    // step 1: upload file
+
+        const resUpload = await handleUploadFile(selectedFile, "brand");
         console.log(">> check file :", resUpload);
         if(resUpload.data){
-            const newAvatar = resUpload.data.fileName;
-            const resUpdateAvartar = await updateUserAPI(dataDetail.id, dataDetail.username , dataDetail.email , dataDetail.phone ,dataDetail.firstName , dataDetail.lastName , dataDetail.address,  newAvatar, dataDetail.roles )
-            console.log(">> newAvatar :", newAvatar);
+            const newLogo = resUpload.data.fileName;
+            const resUpdateLogo = await updateBrandAPI(dataDetail.id, dataDetail.name , dataDetail.description , newLogo )
+            console.log(">> newLogo :", newLogo);
 
-            if (resUpdateAvartar.data){
+            if (resUpdateLogo.data){
                 setIsDetailOpen(false);
                 setSelectedFile(null)
                 setPreview(null)
-                reloadUsers();
+                reloadBrands();
                 notification.success({
-                    message: "Update user avatar ",
+                    message: "Update brand logo ",
                     description: "Cập nhật thành công"
                 })
             }else{
                 notification.error({
-                    message: "Error upload avatar  ",
+                    message: "Error upload logo  ",
                     description: "Cập nhật thật bại "
                 })
             }
         }
 
-  
 
 
-    // step 2: update user
+
+    // step 2: update product
 
   }
 
   return (
     <>
-      <Drawer width={"40vw"} title="Hồ sơ" onClose={onClose} open={isDetailOpen} maskClosable={false} >
+      <Drawer width={"40vw"} title="Brand Detail" onClose={onClose} open={isDetailOpen} maskClosable={false} >
         {dataDetail ? <>
-            <p>{dataDetail?.id}</p><br/>
-            <p>{dataDetail.username}</p><br/>
-            <p>{dataDetail.email}</p><br/>
-            <p>{dataDetail.address}</p><br/>
-            {/* <p>{dataDetail.roles}</p><br/> */}
-            <p>Avatar: </p><br/>
+            <p>Mã thương hiệu: {dataDetail?.id}</p><br/>
+            <p>Tên thương hiệu: {dataDetail.name}</p><br/>
+            <p>Mô tả: {dataDetail.description}</p><br/>
+            <p>Logo thương hiệu: </p><br/>
 
             <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc"}}>
                 <img  style={{  height: "100%", width: "100%", objectFit: "contain"}}
-                src={`http://localhost:8082/images/user/${dataDetail.avartar}`}/>
-{/* src={`${import.meta.env.VITE_BACKEND_URL}/images/avatar/${dataDetail.avatar}`} */}
+                src={`http://localhost:8082/images/brand/${dataDetail.logo}`}/>
             </div>
-           
+
             <div >
                 <label htmlFor="btnUpload" style={{
                     display :"block",
@@ -99,29 +96,28 @@ const [preview, setPreview] = useState(null)
                     borderRadius : "5px",
                     cursor: "pointer"
                 }}>
-                    Upload Avatar
+                    Upload Logo
                 </label>
             <input hidden id='btnUpload' type="file"
              onChangeCapture={(event)=> handleOnChangeFile(event)}
-
-             accept="image/png, image/jpeg" />
+             />
             </div>
 
 
-            {preview && 
+            {preview &&
                 <>
                     <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc"}}>
                         <img  style={{  height: "100%", width: "100%", objectFit: "contain"}}
                         src={preview}/>
                     </div>
-                    <Button type='primary' 
-                    onClick={()=> handleUpdateUserAvatar() }
+                    <Button type='primary'
+                    onClick={()=> handleUpdateBrandLogo() }
                      >Save</Button>
                 </>
             }
-            
-        </>: 
-        <> <p> không có dữ liệu nào </p>
+
+        </>:
+        <> <p> No data available </p>
         </>}
       </Drawer>
     </>
@@ -130,4 +126,4 @@ const [preview, setPreview] = useState(null)
 
 
 
-export default UserDetail;
+export default BrandDetail;

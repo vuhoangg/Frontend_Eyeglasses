@@ -119,7 +119,7 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
 
   return (
     <Modal
-      title="Update User"
+      title="Cập nhật người dùng"
       open={isModalOpen}
       onCancel={handleCancel}
       footer={null}
@@ -129,13 +129,13 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
       <Form form={form} onFinish={onFinish} layout="vertical">
         <Row gutter={16}>
         <Col span={12}>
-            <Form.Item label="ID" name="id" >
+            <Form.Item label="Mã tài khoản" name="id" >
             <Input disabled value={id} />
             </Form.Item>
           </Col>
 
           <Col span={12}>
-            <Form.Item label="Username" name="username" rules={[{ required: true, message: "Please enter username" }]}>
+            <Form.Item label="Tên tài khoản" name="username" rules={[{ required: true, message: "Please enter username" }]}>
               <Input placeholder="Enter username" onChange={(e) => setUserName(e.target.value)} />
             </Form.Item>
           </Col>
@@ -148,7 +148,7 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Phone" name="phone" rules={[{ required: true, message: "Please enter phone number" }]}>
+            <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true, message: "Please enter phone number" }]}>
               <Input placeholder="Enter phone number" onChange={(e) => setPhone(e.target.value)} />
             </Form.Item>
           </Col>
@@ -156,12 +156,12 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="First Name" name="firstName" rules={[{ required: true, message: "Please enter first name" }]}>
+            <Form.Item label="Tên" name="firstName" rules={[{ required: true, message: "Please enter first name" }]}>
               <Input placeholder="Enter first name" onChange={(e) => setFirstName(e.target.value)} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Last Name" name="lastName" rules={[{ required: true, message: "Please enter last name" }]}>
+            <Form.Item label="Họ" name="lastName" rules={[{ required: true, message: "Please enter last name" }]}>
               <Input placeholder="Enter last name" onChange={(e) => setLastName(e.target.value)} />
             </Form.Item>
           </Col>
@@ -169,7 +169,7 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Address" name="address" rules={[{ required: true, message: "Please enter address" }]}>
+            <Form.Item label="Địa chỉ" name="address" rules={[{ required: true, message: "Please enter address" }]}>
               <Input placeholder="Enter address" onChange={(e) => setAddress(e.target.value)} />
             </Form.Item>
           </Col>
@@ -191,11 +191,11 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
 
         <Row justify="end" gutter={16}>
           <Col>
-            <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleCancel}>Huỷ</Button>
           </Col>
           <Col>
             <Button type="primary" htmlType="submit">
-              Update User
+              Cập nhật Tài khoản
             </Button>
           </Col>
         </Row>
