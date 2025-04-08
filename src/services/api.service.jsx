@@ -18,7 +18,7 @@ const createUserAPI = ( username,email,password,phone,firstName,lastName,address
         firstName: firstName,
         lastName: lastName, 
         address: address ,
-        address: avartar ,
+        avartar: avartar ,
         roles: roles,
     }
     return axios.post(URL_BACKEND, data );

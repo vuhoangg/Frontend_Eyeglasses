@@ -180,7 +180,7 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
               rules={[{ required: true, message: "Vui lòng chọn ít nhất một vai trò" }]}
             >
               <Select
-                mode="multiple"
+                // mode="multiple"
                 placeholder="Chọn vai trò"
                 onChange={handleRoleChange}
                 options={roleOptions}

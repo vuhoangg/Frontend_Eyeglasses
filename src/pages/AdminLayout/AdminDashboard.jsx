@@ -363,7 +363,7 @@ const AdminDashboard = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={12}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
               <div style={{
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={12} lg={6}>
+        {/* <Col xs={24} sm={12} lg={6}>
           <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
               <div style={{
@@ -406,7 +406,7 @@ const AdminDashboard = () => {
               prefix={<span />}
             />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
 
       {/* Enhanced Charts Row */}

@@ -30,7 +30,7 @@ import {
   
     const menu = (
       <Menu>
-        <Menu.Item key="1">Tán thành</Menu.Item>
+        <Menu.Item key="1">Trang chủ</Menu.Item>
         <Menu.Item key="2">Đổi mật khẩu</Menu.Item>
         <Menu.Item key="3">Đăng xuất</Menu.Item>
       </Menu>
