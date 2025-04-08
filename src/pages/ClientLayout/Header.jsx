@@ -31,7 +31,6 @@ const Header = () => {
     const [user, setUser] = useState(null); // Khởi tạo là null
     const [current, setCurrent] = useState(""); // Key cho menu item active
     const [cartCount, setCartCount] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate(); // Hook useNavigate phải được gọi bên trong component
     const [loading, setLoading] = useState(false); // State cho nút loading update
@@ -173,21 +172,7 @@ const Header = () => {
         setCurrent(e.key);
     };
 
-    const showModal = () => {
-        if (user) {
-            // Set giá trị form với thông tin user hiện tại trước khi mở modal
-            form.setFieldsValue({
-                username: user.username,
-                email: user.email,
-                phone: user.phone,
-            });
-            setIsModalOpen(true);
-        }
-    };
-
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
+  
 
     const handleLogout = () => {
         localStorage.removeItem("userData");
@@ -255,21 +240,63 @@ const Header = () => {
         }
     };
 
-    // --- Popover Content ---
     const content = (
-        <div>
-            <Button type="text" icon={<EditOutlined />} onClick={showModal}>
+        <div className="account-popover">
+            <Button 
+                type="text" 
+                icon={<EditOutlined />} 
+                block
+                className="account-option"
+                onClick={() => navigate('/profile')}
+            >
                 Quản lý tài khoản
             </Button>
-            <br />
-            {/* Nút đổi mật khẩu chưa có chức năng */}
-            <Button type="text" icon={<LockOutlined />} disabled>
+            <Button 
+                type="text" 
+                icon={<LockOutlined />} 
+                block
+                className="account-option"
+                onClick={() => navigate('/password')}
+            >
                 Đổi mật khẩu
             </Button>
-            <br />
-            <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
+            <Button 
+                type="text" 
+                icon={<LogoutOutlined />} 
+                block
+                className="account-option"
+                onClick={handleLogout}
+            >
                 Đăng xuất
             </Button>
+            
+            <style jsx>{`
+                .account-popover {
+                    min-width: 180px;
+                }
+                .account-option {
+                    text-align: left;
+                    padding: 8px 12px;
+                    margin: 2px 0;
+                    width: 100%;
+                    transition: background-color 0.3s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    font-size: 14px;
+                }
+                .account-option:hover {
+                    background: #f5f5f5;
+                    color: #1890ff;
+                }
+                .account-option .anticon {
+                    margin-right: 8px;
+                    font-size: 16px;
+                }
+                .ant-btn-block.account-option span {
+                    text-align: left;
+                }
+            `}</style>
         </div>
     );
 
@@ -304,11 +331,11 @@ const Header = () => {
                     </Link>
                     */}
 
-<Link to="/cart_page" style={{ marginRight: '15px' }}>
-    <Badge count={cartCount || 0} showZero size="small" overflowCount={99}>
-        <ShoppingCartOutlined className="style_icon" />
-    </Badge>
-</Link>
+                        <Link to="/cart_page" style={{ marginRight: '15px' }}>
+                            <Badge count={cartCount || 0} showZero size="small" overflowCount={99}>
+                                <ShoppingCartOutlined className="style_icon" />
+                            </Badge>
+                        </Link>
 
                     {user ? ( // Hiển thị Popover nếu đã đăng nhập
                          <Popover content={content} trigger="click" placement="bottomRight">
@@ -322,52 +349,7 @@ const Header = () => {
                 </Col>
             </Row>
 
-            {/* Modal Quản lý tài khoản */}
-            <Modal
-                title="Quản lý tài khoản"
-                open={isModalOpen}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="cancel" onClick={handleCancel}>
-                        Hủy
-                    </Button>,
-                    <Button key="update" type="primary" loading={loading} onClick={handleUpdate}>
-                        Cập nhật
-                    </Button>,
-                ]}
-                destroyOnClose // Xóa state của Form khi đóng Modal
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    // initialValues không nên đặt ở đây nếu bạn set giá trị trong showModal
-                >
-                    <Form.Item
-                        name="username"
-                        label="Tên hiển thị"
-                        rules={[{ required: true, message: "Vui lòng nhập tên hiển thị!" }]}
-                    >
-                        <Input placeholder="Tên hiển thị" />
-                    </Form.Item>
-                    <Form.Item
-                        name="email"
-                        label="Email"
-                        rules={[
-                            { required: true, message: "Vui lòng nhập email!" },
-                            { type: "email", message: "Email không hợp lệ!" },
-                        ]}
-                    >
-                        <Input placeholder="Email" />
-                    </Form.Item>
-                    <Form.Item
-                        name="phone"
-                        label="Số điện thoại"
-                        // Bỏ rule required nếu số điện thoại không bắt buộc
-                    >
-                        <Input placeholder="Số điện thoại" />
-                    </Form.Item>
-                 </Form>
-            </Modal>
+           
 
             {/* Style component */}
             <style jsx>{`

@@ -1,3 +1,4 @@
+//main.jsx
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -28,6 +29,8 @@ import CreateCategory from './pages/AdminLayout/AdminCategory/CreateCategory.jsx
 import ManageBrand from './pages/AdminLayout/AdminBrand/ManageBrand.jsx';
 import CreateBrand from './pages/AdminLayout/AdminBrand/CreateBrand.jsx';
 import ManageOrder from './pages/AdminLayout/AdminOrder/ManageOrder.jsx';
+import UserProfile from './pages/ClientLayout/UserProfile.jsx';
+import ChangePassword from './pages/ClientLayout/ChangePassword.jsx';
 
 const router = createBrowserRouter([
 
@@ -47,7 +50,10 @@ const router = createBrowserRouter([
 
 
       { path: "/checkout",element: <CheckoutPage />,},
-      { path: "/order-success", element: <OrderSuccessPage/> }
+      { path: "/order-success", element: <OrderSuccessPage/> },
+
+      { path: "/profile", element: <UserProfile /> }, // Direct route to UserProfile
+      { path: "/password", element: <ChangePassword /> }, // Direct route to ChangePassword
 
 
 

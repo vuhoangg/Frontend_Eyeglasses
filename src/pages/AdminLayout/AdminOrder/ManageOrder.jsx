@@ -1,4 +1,4 @@
-import { Space, Table, Popconfirm, notification, message, Row, Col } from 'antd';
+import { Space, Table, Popconfirm, notification, message, Row, Col, Tag } from 'antd';
 import { fetchAllOrdersAPI, deleteOrderAPI } from '../../../services/api.order';
 import React, { useState, useEffect } from "react";
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -103,7 +103,16 @@ const ManageOrder = () => {
         { title: 'Tổng tiền', dataIndex: 'totalAmount', key: 'totalAmount' },
         { title: 'Địa chỉ giao hàng', dataIndex: 'shippingAddress', key: 'shippingAddress' },
         { title: 'Phương thực thành toán', dataIndex: 'paymentMethod', key: 'paymentMethod' },
-        { title: 'Tráng thái tạo', dataIndex: ['orderStatus', 'name'], key: 'orderStatus'  },
+        {
+            title: 'Tráng thái tạo',
+            dataIndex: ['orderStatus', 'name'],
+            key: 'orderStatus',
+            render: (status) => ( // Render function for status column
+                <Tag color={getStatusTagColorForTable(status)}>
+                    {status}
+                </Tag>
+            ),
+        },
         {
             title: 'Ngày tạo đơn',
             dataIndex: 'creationDate',
@@ -141,6 +150,20 @@ const ManageOrder = () => {
             )
         },
     ];
+
+    // Get status tag color for table column
+    const getStatusTagColorForTable = (status) => {
+        const statusMap = {
+            'Pending': 'orange',
+            'Processing': 'blue',
+            'Shipped': 'purple',
+            'Delivered': 'green',
+            'Cancelled': 'red',
+            'Completed': 'green'
+        };
+        return statusMap[status] || 'default';
+    };
+
 
     useEffect(() => {
         loadOrders();

@@ -60,6 +60,13 @@ const deleteUserAPI = (id) =>
 
 }
 
+// ... (other API functions)
+
+const fetchUserByIdAPI = (id) => {
+    const URL_BACKEND = `/user/${id}`;
+    return axios.get(URL_BACKEND);
+};
+
 const handleUploadFile = (file, folder )=>{
     const URL_BACKEND = `/files/upload`;
     let config = {
@@ -73,9 +80,18 @@ const handleUploadFile = (file, folder )=>{
     return axios.post(URL_BACKEND, bodyFormData, config )
 }
 
+const changePasswordAPI = (userId, oldPassword, newPassword) => {
+    const URL_BACKEND = `/user/${userId}/password`;
+    const data = {
+        oldPassword: oldPassword,
+        newPassword: newPassword
+    };
+    return axios.patch(URL_BACKEND, data);
+};
 
 
 
-export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,  fetchAllUsersAPI}
+
+export {createUserAPI, updateUserAPI, deleteUserAPI , fetchAllUserAPI , handleUploadFile,  fetchAllUsersAPI, changePasswordAPI, fetchUserByIdAPI}
 
 
