@@ -31,6 +31,10 @@ import CreateBrand from './pages/AdminLayout/AdminBrand/CreateBrand.jsx';
 import ManageOrder from './pages/AdminLayout/AdminOrder/ManageOrder.jsx';
 import UserProfile from './pages/ClientLayout/UserProfile.jsx';
 import ChangePassword from './pages/ClientLayout/ChangePassword.jsx';
+import ManageVendor from './pages/AdminLayout/AdminVendor/ManageVendor.jsx';
+import CreateVendor from './pages/AdminLayout/AdminVendor/CreateVendor.jsx';
+import ManageImportReceipt from './pages/AdminLayout/AdminReceipt/ManageImportReceipt.jsx';
+import CreateImportReceipt from './pages/AdminLayout/AdminReceipt/CreateImportReceipt.jsx';
 
 const router = createBrowserRouter([
 
@@ -54,6 +58,8 @@ const router = createBrowserRouter([
 
       { path: "/profile", element: <UserProfile /> }, // Direct route to UserProfile
       { path: "/password", element: <ChangePassword /> }, // Direct route to ChangePassword
+
+   
 
 
 
@@ -92,6 +98,15 @@ const router = createBrowserRouter([
       { path: "list-order", element: <ManageOrder/>},
 
 
+       // *** THÊM ROUTE CHO VENDOR (SUPPLIER) ***
+       { path: "list-supplier", element: <ManageVendor /> }, // Route bị thiếu gây lỗi 404
+       { path: "add-supplier", element: <CreateVendor /> },
+       // *****************************************
+
+       // *** THÊM ROUTE CHO IMPORT RECEIPT ***
+       { path: "list-receipt", element: <ManageImportReceipt /> },
+       { path: "add-receipt", element: <CreateImportReceipt /> },
+       // **************************************
 
 
 
