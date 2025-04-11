@@ -91,7 +91,7 @@ const UserProfile = () => {
                     user.lastName,
                     user.address,
                     newAvatar,
-                    user.roles
+                  
                 );
 
                 if (resUpdateAvatar.data) {
@@ -147,7 +147,7 @@ const UserProfile = () => {
                 values.lastName || '',
                 values.address || '',
                 avatarFileName, // Keep current avatar, avatar update is separate
-                user.roles || ['customer']
+               
             );
 
             if (response && (response.statusCode === 200 || response.status === 200)) {
