@@ -1,3 +1,4 @@
+// src/pages/AdminLayout/AdminUser/UserDetail.jsx
 import { Drawer, Button, notification, message, Card, Descriptions, Typography, Divider, Row, Col, Space, Image, Avatar } from 'antd';
 import { useEffect, useState } from 'react';
 import { handleUploadFile, updateUserAPI } from '../../../services/api.service';
@@ -5,18 +6,21 @@ import { UserOutlined, MailOutlined, PhoneOutlined, HomeOutlined, UploadOutlined
 
 const { Title, Text } = Typography;
 
+// Giữ nguyên props và state như ban đầu
 const UserDetail = (props) => {
     const { isDetailOpen, setIsDetailOpen, dataDetail, setDataDetail, reloadUsers } = props;
     const [selectedFile, setSelectedFile] = useState(null);
     const [preview, setPreview] = useState(null);
 
+    // Giữ nguyên hàm onClose
     const onClose = () => {
         setIsDetailOpen(false);
-        setDataDetail(null);
-        setPreview(null);
-        setSelectedFile(null);
+        setDataDetail(null); // Clear data when closing
+        setPreview(null);    // Clear preview
+        setSelectedFile(null); // Clear selected file
     };
 
+    // Giữ nguyên hàm handleOnChangeFile
     const handleOnChangeFile = (event) => {
         if (!event.target.files || event.target.files.length === 0) {
             setSelectedFile(null);
@@ -31,28 +35,51 @@ const UserDetail = (props) => {
         }
     };
 
+    // Giữ nguyên hàm handleUpdateUserAvatar
     const handleUpdateUserAvatar = async () => {
+        if (!selectedFile) {
+            notification.warning({ message: "Chưa chọn file", description: "Vui lòng chọn file ảnh đại diện mới." });
+            return;
+        }
+        if (!dataDetail || !dataDetail.id) {
+             notification.error({ message: "Lỗi dữ liệu", description: "Không tìm thấy thông tin người dùng để cập nhật." });
+            return;
+        }
+
         try {
             const resUpload = await handleUploadFile(selectedFile, "user");
-            if (resUpload.data) {
+            if (resUpload.data && resUpload.data.fileName) { // Kiểm tra response upload
                 const newAvatar = resUpload.data.fileName;
+
+                 // Lấy các role IDs hiện tại để gửi lại API update
+                const currentRoleIds = (dataDetail.roles && Array.isArray(dataDetail.roles))
+                    ? dataDetail.roles.map(role => role.id)
+                    : [];
+
+
+                // Gọi updateUserAPI với đầy đủ thông tin và avatar mới
                 const resUpdateAvatar = await updateUserAPI(
                     dataDetail.id,
-                    dataDetail.username,
+                    dataDetail.username, // Giữ nguyên các thông tin khác
                     dataDetail.email,
                     dataDetail.phone,
                     dataDetail.firstName,
                     dataDetail.lastName,
                     dataDetail.address,
-                    newAvatar,
-                    dataDetail.roles
+                    newAvatar,          // Avatar mới
+                    currentRoleIds      // Giữ nguyên roles hiện tại
                 );
 
-                if (resUpdateAvatar.data) {
-                    setIsDetailOpen(false);
+                if (resUpdateAvatar.data || resUpdateAvatar.statusCode === 200) { // Kiểm tra response update
+                    // setIsDetailOpen(false); // Không tự đóng drawer, để user thấy kết quả
                     setSelectedFile(null);
                     setPreview(null);
-                    reloadUsers();
+                    if(reloadUsers) {
+                        reloadUsers(); // Tải lại danh sách users để cập nhật avatar ở bảng ManageUser
+                    }
+                    // Cập nhật lại dataDetail ngay lập tức để hiển thị avatar mới trong Drawer
+                    setDataDetail(prevDetails => ({ ...prevDetails, avartar: newAvatar }));
+
                     notification.success({
                         message: "Cập nhật avatar",
                         description: "Avatar người dùng đã được cập nhật thành công"
@@ -60,20 +87,28 @@ const UserDetail = (props) => {
                 } else {
                     notification.error({
                         message: "Lỗi cập nhật",
-                        description: "Không thể cập nhật avatar người dùng"
+                        description: resUpdateAvatar.message || "Không thể cập nhật avatar người dùng"
                     });
                 }
+            } else {
+                 notification.error({
+                    message: "Lỗi upload",
+                    description: resUpload.message || "Tải lên avatar thất bại."
+                });
             }
         } catch (error) {
+             console.error("Update Avatar Error:", error);
             notification.error({
                 message: "Lỗi cập nhật",
-                description: error.message || "Đã xảy ra lỗi khi cập nhật avatar"
+                description: error.response?.data?.message || error.message || "Đã xảy ra lỗi khi cập nhật avatar"
             });
         }
     };
 
+    // --- GIAO DIỆN UI GIỮ NGUYÊN ---
     return (
         <Drawer
+            // Giữ nguyên các props của Drawer
             width="50vw"
             title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -84,6 +119,7 @@ const UserDetail = (props) => {
             onClose={onClose}
             open={isDetailOpen}
             maskClosable={false}
+            destroyOnClose={true} // Thêm để reset state khi đóng hẳn
             extra={
                 <Button type="primary" onClick={onClose}>
                     Đóng
@@ -91,14 +127,17 @@ const UserDetail = (props) => {
             }
         >
             {dataDetail ? (
+                // Giữ nguyên cấu trúc Row, Col, Card
                 <Row gutter={[24, 24]}>
                     <Col span={10}>
                         <Card bordered={false}>
+                            {/* Giữ nguyên cấu trúc phần Avatar và thông tin cơ bản */}
                             <div style={{ textAlign: 'center', padding: '20px 0' }}>
                                 <Avatar
                                     size={150}
-                                    src={`http://localhost:8082/images/user/${dataDetail.avartar}`}
-                                    icon={<UserOutlined />}
+                                    // Luôn hiển thị avatar từ dataDetail để cập nhật ngay khi thành công
+                                    src={dataDetail.avartar ? `http://localhost:8082/images/user/${dataDetail.avartar}` : undefined}
+                                    icon={<UserOutlined />} // Icon fallback
                                 />
                                 <Title level={4} style={{ marginTop: '16px', marginBottom: '4px' }}>
                                     {dataDetail.username}
@@ -109,9 +148,10 @@ const UserDetail = (props) => {
 
                                 <Divider />
 
+                                {/* Giữ nguyên phần Upload Avatar */}
                                 <div style={{ marginTop: '15px' }}>
                                     <label
-                                        htmlFor="btnUpload"
+                                        htmlFor="btnUploadDetail" // Đổi id để tránh trùng lặp nếu có nhiều instance
                                         style={{
                                             display: "inline-block",
                                             padding: "8px 16px",
@@ -123,16 +163,17 @@ const UserDetail = (props) => {
                                         }}
                                     >
                                         <UploadOutlined style={{ marginRight: 8 }} /> Tải ảnh đại diện mới
-                                        <input
-                                            hidden
-                                            id="btnUpload"
-                                            type="file"
-                                            onChange={(event) => handleOnChangeFile(event)}
-                                            accept="image/png, image/jpeg"
-                                        />
                                     </label>
+                                    <input
+                                        hidden
+                                        id="btnUploadDetail" // Đổi id tương ứng
+                                        type="file"
+                                        onChange={handleOnChangeFile} // Event handler không đổi
+                                        accept="image/png, image/jpeg"
+                                    />
                                 </div>
 
+                                {/* Giữ nguyên phần Preview và nút Lưu */}
                                 {preview && (
                                     <div style={{ marginTop: '20px' }}>
                                         <Title level={5}>Xem trước</Title>
@@ -145,7 +186,8 @@ const UserDetail = (props) => {
                                             <Button
                                                 type="primary"
                                                 icon={<SaveOutlined />}
-                                                onClick={() => handleUpdateUserAvatar()}
+                                                onClick={handleUpdateUserAvatar} // Event handler không đổi
+                                                disabled={!selectedFile} // Disable nút nếu chưa chọn file
                                             >
                                                 Lưu thay đổi
                                             </Button>
@@ -156,10 +198,12 @@ const UserDetail = (props) => {
                         </Card>
                     </Col>
                     <Col span={14}>
+                        {/* Giữ nguyên Card Thông tin chi tiết */}
                         <Card
                             title={<Title level={5}><InfoCircleOutlined /> Thông tin chi tiết</Title>}
                             bordered={false}
                         >
+                            {/* Giữ nguyên Descriptions và các Item khác */}
                             <Descriptions column={1} bordered>
                                 <Descriptions.Item label="ID">{dataDetail.id}</Descriptions.Item>
                                 <Descriptions.Item label="Tên đăng nhập">{dataDetail.username}</Descriptions.Item>
@@ -185,33 +229,32 @@ const UserDetail = (props) => {
                                         </Space>
                                     </Descriptions.Item>
                                 )}
-                                {dataDetail.roles && (
-                                    <Descriptions.Item label="Vai trò">
-                                        {console.log("dataDetail.roles:", dataDetail.roles)} {/* DEBUGGING CONSOLE LOG */}
-                                        {Array.isArray(dataDetail.roles) ?
-                                            dataDetail.roles.map(role => (
-                                                <span key={role} style={{ display: 'inline-block', padding: '4px 8px', backgroundColor: '#bae7ff', color: '#0050b3', borderRadius: '4px', margin: '2px' }}>
-                                                    {/* Giả định role là object và có trường 'name' hoặc 'description' để hiển thị */}
-                                                    {role.name || role.description || role.id || 'Vai trò không xác định'}
-                                                </span>
-                                            ))
-                                            :
-                                            (typeof dataDetail.roles === 'object' && dataDetail.roles !== null) ? (
-                                                <span style={{ display: 'inline-block', padding: '4px 8px', backgroundColor: '#bae7ff', color: '#0050b3', borderRadius: '4px', margin: '2px' }}>
-                                                    {/* Nếu dataDetail.roles là object, giả định nó là một object vai trò và có trường 'name' hoặc 'description' */}
-                                                    {dataDetail.roles.name || dataDetail.roles.description || dataDetail.roles.id || 'Vai trò không xác định'}
-                                                </span>
-                                            ) : (
-                                                String(dataDetail.roles) || 'Không có thông tin vai trò' // Fallback cuối cùng, chuyển đổi thành string hoặc hiển thị thông báo mặc định
-                                            )
-                                        }
-                                    </Descriptions.Item>
-                                )}
+
+                                {/* ----- PHẦN HIỂN THỊ ROLE ĐÃ ĐƯỢC SỬA ----- */}
+                                <Descriptions.Item label="Vai trò">
+                                    {/* Kiểm tra dataDetail.roles có tồn tại và là mảng không */}
+                                    {dataDetail.roles && Array.isArray(dataDetail.roles) && dataDetail.roles.length > 0 ? (
+                                        // Nếu có, map qua mảng roles
+                                        dataDetail.roles.map(role => (
+                                            // Sử dụng role.id làm key cho mỗi span
+                                            <span key={role.id} style={{ display: 'inline-block', padding: '4px 8px', backgroundColor: '#bae7ff', color: '#0050b3', borderRadius: '4px', margin: '2px' }}>
+                                                {/* Hiển thị role.name, nếu không có thì hiển thị ID */}
+                                                {role.name || `ID: ${role.id}`}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        // Nếu không có roles hoặc mảng rỗng, hiển thị thông báo
+                                        <Text type="secondary">Không có vai trò</Text>
+                                    )}
+                                </Descriptions.Item>
+                                {/* ----- KẾT THÚC PHẦN SỬA ROLE ----- */}
+
                             </Descriptions>
                         </Card>
                     </Col>
                 </Row>
             ) : (
+                 // Giữ nguyên phần hiển thị khi không có data
                 <Card>
                     <div style={{ textAlign: 'center', padding: '40px 0' }}>
                         <Text type="secondary">Không có dữ liệu người dùng</Text>

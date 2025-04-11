@@ -1,4 +1,4 @@
-//App.jsx
+//src/App.jsx
 import React, { useState } from 'react';
 
 
