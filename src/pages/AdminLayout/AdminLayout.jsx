@@ -15,7 +15,7 @@ import {
   TruckOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Dropdown, Menu, message, theme } from "antd"; // Import message
+import { Button, Dropdown, Menu, message, theme, Avatar } from "antd"; // Import Avatar
 import Layout, { Content, Header } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import React, { useState } from "react";
@@ -32,6 +32,8 @@ const AdminLayout = () => {
   const userData = localStorage.getItem("userData");
   const user = userData ? JSON.parse(userData) : null;
   const userRole = user?.role;
+  const username = user?.username || "Admin"; // Get username, default to "Admin" if not available
+  const userAvatar = user?.avartar; // Get avatar filename, can be undefined
 
   const handleAdminLogout = () => {
     localStorage.removeItem("userData");
@@ -463,7 +465,7 @@ const AdminLayout = () => {
         //     },
         //   ],
         // },
-        
+
   ].filter(Boolean); // Use filter(Boolean) to remove null/undefined items caused by conditional rendering
 
   return (
@@ -506,7 +508,13 @@ const AdminLayout = () => {
                 marginRight: "50px",
               }}
             >
-              <UserOutlined style={{ fontSize: "20px", marginRight: "5px" }} />
+              <span style={{ marginRight: 8, fontWeight: 'bold' }}>Vai trò: {userRole}</span> {/* Display Role */}
+              <Avatar
+                src={userAvatar ? `http://localhost:8082/images/user/${userAvatar}` : undefined}
+                icon={<UserOutlined />}
+                style={{ marginRight: 5 }}
+              /> {/* Avatar icon with image source */}
+              <span>{username}</span> {/* Display username here */}
               <CaretDownOutlined />
             </div>
           </Dropdown>
