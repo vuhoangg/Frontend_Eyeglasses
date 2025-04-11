@@ -35,6 +35,7 @@ import ManageVendor from './pages/AdminLayout/AdminVendor/ManageVendor.jsx';
 import CreateVendor from './pages/AdminLayout/AdminVendor/CreateVendor.jsx';
 import ManageImportReceipt from './pages/AdminLayout/AdminReceipt/ManageImportReceipt.jsx';
 import CreateImportReceipt from './pages/AdminLayout/AdminReceipt/CreateImportReceipt.jsx';
+import ProtectedRoute from './component/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
 
@@ -73,7 +74,11 @@ const router = createBrowserRouter([
   // Admin 
   {
     path: "/admin",
-    element:  <AdminLayout/>,
+    element: (
+      <ProtectedRoute allowedRoles={['admin', 'staff']}> {/* Protect AdminLayout */}
+      <AdminLayout/>
+    </ProtectedRoute>
+    ),
     errorElement: <ErrorPage/>,
     children: [
       { index: true, element:  <AdminDashboard/>  },

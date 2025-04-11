@@ -169,7 +169,7 @@ const UserDetail = (props) => {
                                         id="btnUploadDetail" // Đổi id tương ứng
                                         type="file"
                                         onChange={handleOnChangeFile} // Event handler không đổi
-                                        accept="image/png, image/jpeg"
+                                       
                                     />
                                 </div>
 

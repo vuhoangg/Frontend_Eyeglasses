@@ -1,39 +1,35 @@
 // src/pages/AdminLayout/AdminUser/UpdateUser.jsx
 import { Form, Input, Button, Row, Col, notification, Modal , Select } from "antd";
 import React, { useState, useEffect } from "react";
-import { updateUserAPI } from "../../../services/api.service";
+import { updateUserAPI, handleUploadFile } from "../../../services/api.service"; // Import handleUploadFile
 import { fetchAllRolesAPI } from "../../../services/api.role"; // Import API đã sửa
 
 const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
-  // State for each input field (Giữ nguyên các state như ban đầu nếu bạn vẫn dùng chúng, mặc dù form.setFieldsValue là đủ)
-  const [id, setId] = useState(""); // Giữ lại state này để truyền vào API
+  // State for each input field
+  const [id, setId] = useState("");
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState(""); // Không nên cập nhật password ở đây
   const [phone, setPhone] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
-  // const [roles, setRoles] = useState([]); // Không cần thiết nếu dùng selectedRoleIds
-  const [selectedRoleIds, setSelectedRoleIds] = useState([]); // State quản lý IDs được chọn
+  const [selectedRoleIds, setSelectedRoleIds] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null); // State for selected file
+  const [preview, setPreview] = useState(null); // State for preview image
 
-  const [availableRoles, setAvailableRoles] = useState([]); // State để lưu danh sách roles từ API
-  const [loadingRoles, setLoadingRoles] = useState(false); // State quản lý trạng thái loading roles
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
 
+  const [form] = Form.useForm();
 
-  const [form] = Form.useForm(); // Initialize Ant Design form instance
-
-  // Fetch roles khi modal mở
-   useEffect(() => {
+  // Fetch roles when modal opens
+  useEffect(() => {
     const loadRoles = async () => {
       setLoadingRoles(true);
       try {
-        // Gọi API fetchAllRolesAPI (phiên bản đơn giản)
-        const res = await fetchAllRolesAPI(1, 100); // Lấy tối đa 100 roles ở trang 1
+        const res = await fetchAllRolesAPI(1, 100);
         if (res.data && res.data.data) {
-           // Lọc chỉ lấy role active
            const activeRoles = res.data.data.filter(role => role.isActive === true);
-
            const roleOptions = activeRoles.map(role => ({
             label: role.name,
             value: role.id
@@ -54,18 +50,14 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
         setLoadingRoles(false);
       }
     };
-    // Chỉ fetch roles khi modal mở
     if (isModalOpen) {
         loadRoles();
     }
-
-  }, [isModalOpen]); // Dependency là isModalOpen
-
+  }, [isModalOpen]);
 
   // Update form fields and states when userData changes
   useEffect(() => {
     if (userData) {
-      // Cập nhật các state riêng lẻ (nếu vẫn dùng)
       setId(userData.id || "");
       setUserName(userData.username || "");
       setEmail(userData.email || "");
@@ -77,12 +69,14 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
       let initialRoleIds = [];
       if (userData.roles && Array.isArray(userData.roles)) {
         initialRoleIds = userData.roles.map(role => role.id);
-        setSelectedRoleIds(initialRoleIds); // Cập nhật state để logic submit hoạt động
+        setSelectedRoleIds(initialRoleIds);
       } else {
-         setSelectedRoleIds([]); // Reset nếu không có roles
+         setSelectedRoleIds([]);
       }
 
-      // Update Ant Design form values
+      // Set preview if avatar exists
+      setPreview(userData.avartar ? `http://localhost:8082/images/user/${userData.avartar}` : null);
+
       form.setFieldsValue({
         id: userData.id || "",
         username: userData.username || "",
@@ -91,54 +85,65 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
         firstName: userData.firstName || "",
         lastName: userData.lastName || "",
         address: userData.address || "",
-        roleIds: initialRoleIds, // Điền các ID role vào select
+        roleIds: initialRoleIds,
+        avartar: userData.avartar || null, // Set avatar value in form
       });
     } else {
-         form.resetFields(); // Reset form nếu không có userData (khi đóng modal)
-         // Reset các state riêng lẻ nếu cần
+         form.resetFields();
          setId(""); setUserName(""); setEmail(""); setPhone(""); setFirstName(""); setLastName(""); setAddress("");
          setSelectedRoleIds([]);
+         setSelectedFile(null);
+         setPreview(null);
     }
-  }, [userData, form, isModalOpen]); // Thêm isModalOpen để đảm bảo form reset đúng khi đóng/mở lại
+  }, [userData, form, isModalOpen]);
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    // form.resetFields(); // Form sẽ tự reset trong useEffect khi userData là null/undefined hoặc isModalOpen=false
   };
 
-  // Sử dụng onFinish của Form để lấy dữ liệu
   const onFinish = async (values) => {
     console.log("Form Data on Finish:", values);
-    // Lấy các giá trị từ 'values' mà Form cung cấp
     const { username, email, phone, firstName, lastName, address, roleIds } = values;
 
-     // Lấy id từ state hoặc từ userData nếu không có trong values
      const userId = id || userData?.id;
      if (!userId) {
          notification.error({ message: "Update User", description: "Không tìm thấy ID người dùng."});
          return;
      }
 
-    // Đảm bảo roleIds luôn là một mảng
      const rolesToSend = Array.isArray(roleIds) ? roleIds : (roleIds ? [roleIds] : []);
+     let avatarFileName = userData?.avartar || null; // Default to existing avatar
 
     try {
-     // Gọi API update
+      if (selectedFile) {
+        const resUpload = await handleUploadFile(selectedFile, "user");
+        if (resUpload.data && resUpload.data.fileName) {
+          avatarFileName = resUpload.data.fileName;
+        } else {
+          notification.error({
+            message: "Cập nhật User",
+            description: resUpload.message || "Tải lên avatar thất bại.",
+          });
+          return;
+        }
+      }
+
+
       const response = await updateUserAPI(
-        userId, // ID lấy từ state hoặc userData
+        userId,
         username,
         email,
         phone,
         firstName,
         lastName,
         address,
-        null, // Không có logic upload avatar trong component này theo yêu cầu
-        rolesToSend // Gửi mảng các ID đã chọn
+        avatarFileName, // Use uploaded avatar file name or existing one
+        rolesToSend
       );
 
       console.log("Update Response:", response);
 
-      if (response.statusCode === 200 || response.data) { // Kiểm tra response thành công
+      if (response.statusCode === 200 || response.data) {
         notification.success({
           message: "Update User",
           description: response.message || "Cập nhật User thành công"
@@ -163,38 +168,46 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
     }
   };
 
-  // Hàm xử lý khi thay đổi lựa chọn roles (vẫn cần để cập nhật state selectedRoleIds nếu logic submit dùng state)
-  // Hoặc không cần nếu hoàn toàn dựa vào onFinish values
     const handleRoleChange = (values) => {
-       // Cập nhật state nếu logic submit (handleSubmit cũ) dựa vào nó
         setSelectedRoleIds(Array.isArray(values) ? values : (values ? [values] : []));
-        // Form tự quản lý giá trị của nó, không cần form.setFieldsValue ở đây trừ khi có lý do đặc biệt
     };
 
-  // --- GIAO DIỆN UI GIỮ NGUYÊN NHƯ BAN ĐẦU ---
+    const handleOnChangeFile = (event) => {
+        if (!event.target.files || event.target.files.length === 0) {
+          setSelectedFile(null);
+          setPreview(null);
+          form.setFieldsValue({ avartar: userData?.avartar || null }); // Reset to existing avatar or null
+          return;
+        }
+
+        const file = event.target.files[0];
+        if (file) {
+          setSelectedFile(file);
+          setPreview(URL.createObjectURL(file));
+          form.setFieldsValue({ avartar: file.name }); // Optional: Update form field to filename for display
+        }
+      };
+
+
   return (
     <Modal
       title="Cập nhật người dùng"
       open={isModalOpen}
       onCancel={handleCancel}
-      footer={null} // Footer được quản lý trong Form
-      width={900} // Giữ nguyên width
-      // height={1000} // Thuộc tính height không chuẩn cho Modal Antd, bỏ đi hoặc dùng style nếu cần
-      destroyOnClose={true} // Reset form khi đóng
+      footer={null}
+      width={900}
+      destroyOnClose={true}
     >
       <Form form={form} onFinish={onFinish} layout="vertical">
-        {/* Giữ nguyên cấu trúc Row và Col */}
         <Row gutter={16}>
         <Col span={12}>
             <Form.Item label="Mã tài khoản" name="id" >
-                {/* Input disabled như ban đầu */}
                 <Input disabled />
             </Form.Item>
           </Col>
 
           <Col span={12}>
             <Form.Item label="Tên tài khoản" name="username" rules={[{ required: true, message: "Please enter username" }]}>
-                 {/* Input và event handler onChange nếu bạn vẫn dùng state riêng */}
               <Input placeholder="Enter username" onChange={(e) => setUserName(e.target.value)} />
             </Form.Item>
           </Col>
@@ -233,36 +246,73 @@ const UpdateUser = ({ isModalOpen, setIsModalOpen, userData, reloadUsers }) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            {/* Select component cho Roles */}
             <Form.Item
               label="Vai trò"
-              name="roleIds" // Tên field trong form
+              name="roleIds"
               rules={[{ required: true, message: "Vui lòng chọn ít nhất một vai trò" }]}
             >
               <Select
-                 
                  placeholder="Chọn vai trò"
-                 onChange={handleRoleChange} // Cập nhật state selectedRoleIds (nếu cần)
-                 options={availableRoles} // Sử dụng danh sách roles từ API
+                 onChange={handleRoleChange}
+                 options={availableRoles}
                  loading={loadingRoles}
                  filterOption={(input, option) =>
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                   }
-                // Không cần value={selectedRoleIds} vì form instance quản lý
               />
             </Form.Item>
           </Col>
         </Row>
 
-        {/* Không có phần upload avatar trong code gốc UpdateUser bạn cung cấp */}
+        {/* Avatar Upload Section - Added here */}
+        <Row gutter={16}>
+          <Col span={12}>
+          <Form.Item label="Avatar" name="avartar">
+              <div style={{ position: "relative" }} >
+                <label htmlFor="btnUploadUpdate" style={{
+                  display: "block",
+                  width: "fit-content",
+                  marginTop: "5px",
+                  padding: "5px 10px ",
+                  background: "orange",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  color: "white"
+                }}>
+                  Upload Avatar
+                </label>
+                <input
+                  hidden
+                  id='btnUploadUpdate'
+                  type="file"
+                  onChange={handleOnChangeFile}
+                  style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      opacity: 0,
+                      cursor: "pointer",
+                    }}
+                />
+              </div>
+              {preview && (
+                <div style={{ marginTop: "10px", height: "200px", width: "150px", border: "1px solid #ccc" }}>
+                  <img style={{ height: "100%", width: "100%", objectFit: "contain" }} src={preview} alt="Avatar Preview" />
+                </div>
+              )}
+            </Form.Item>
+          </Col>
+        </Row>
+        {/* End Avatar Upload Section */}
 
-        {/* Giữ nguyên vị trí và style của nút */}
+
         <Row justify="end" gutter={16}>
           <Col>
             <Button onClick={handleCancel}>Huỷ</Button>
           </Col>
           <Col>
-            {/* Nút submit của Form */}
             <Button type="primary" htmlType="submit">
               Cập nhật Tài khoản
             </Button>

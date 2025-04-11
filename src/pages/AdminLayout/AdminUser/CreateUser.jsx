@@ -245,7 +245,7 @@ const CreateUser = () => {
                   id='btnUpload'
                   type="file"
                   onChange={handleOnChangeFile} // Gọi hàm xử lý khi chọn file
-                  accept="image/png, image/jpeg" // Chỉ chấp nhận file ảnh
+               
                   style={{ // Style để input ẩn và nằm đè lên label
                       position: "absolute",
                       top: 0,
