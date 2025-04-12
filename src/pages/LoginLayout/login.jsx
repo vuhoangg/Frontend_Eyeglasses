@@ -49,8 +49,10 @@ const LoginPage = () => {
 
                 if (userRole === 'customer') {
                     navigate('/', { replace: true });
-                } else if (userRole === 'admin' || userRole === 'staff') {
+                } else if (userRole === 'admin' ) {
                     navigate('/admin', { replace: true });
+                } else if (userRole === 'staff'){
+                    navigate('/admin/list-category', { replace: true });
                 } else {
                     navigate('/', { replace: true });
                 }

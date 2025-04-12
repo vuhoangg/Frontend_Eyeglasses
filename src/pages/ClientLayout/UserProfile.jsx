@@ -228,7 +228,7 @@ const UserProfile = () => {
                                             id="btnUpload"
                                             type="file"
                                             onChange={(event) => handleOnChangeFile(event)}
-                                            accept="image/png, image/jpeg"
+                                            // accept="image/png, image/jpeg"
                                         />
                                     </label>
                                 </div>
