@@ -55,7 +55,7 @@ const AboutUsPage = () => {
         {
             name: 'Nguyễn Văn An',
             position: 'Nhà sáng lập & CEO',
-            avatar: 'https://images.unsplash.com/photo-1564564244674-741c164bb771?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1972&q=80',
+            avatar: 'src/resources/avatar/avatar13.jpg',
             bio: 'Với hơn 15 năm kinh nghiệm trong ngành kính mắt và đam mê về thị giác, anh An đã sáng lập LilyAnna với mong muốn mang đến những sản phẩm kính mắt chất lượng cho người Việt Nam.',
             social: {
                 facebook: '#',
@@ -66,7 +66,7 @@ const AboutUsPage = () => {
         {
             name: 'Lê Thị Bích',
             position: 'Giám đốc sản phẩm',
-            avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1976&q=80',
+            avatar: 'src/resources/avatar/nu_avatar-13.jpg',
             bio: 'Chị Bích chịu trách nhiệm về việc lựa chọn các sản phẩm chất lượng cao từ các thương hiệu quốc tế và trong nước. Với con mắt thẩm mỹ tinh tế, chị luôn biết được xu hướng thời trang kính mắt mới nhất.',
             social: {
                 facebook: '#',
@@ -88,7 +88,7 @@ const AboutUsPage = () => {
         {
             name: 'Phạm Thu Hà',
             position: 'Quản lý cửa hàng',
-            avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+            avatar: 'src/resources/avatar/nu_avatar_14.jpg',
             bio: 'Với tinh thần nhiệt huyết và thân thiện, chị Hà luôn đảm bảo mọi khách hàng đến với LilyAnna đều nhận được sự tư vấn và phục vụ tốt nhất.',
             social: {
                 facebook: '#',

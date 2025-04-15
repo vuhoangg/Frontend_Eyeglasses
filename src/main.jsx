@@ -36,6 +36,8 @@ import CreateVendor from './pages/AdminLayout/AdminVendor/CreateVendor.jsx';
 import ManageImportReceipt from './pages/AdminLayout/AdminReceipt/ManageImportReceipt.jsx';
 import CreateImportReceipt from './pages/AdminLayout/AdminReceipt/CreateImportReceipt.jsx';
 import ProtectedRoute from './component/ProtectedRoute.jsx';
+import BlogPage from './pages/ClientLayout/BlogPage.jsx';
+import VoucherPage from './pages/ClientLayout/VoucherPage.jsx';
 
 const router = createBrowserRouter([
 
@@ -52,6 +54,10 @@ const router = createBrowserRouter([
       { path: "/product/:id", element: <ProductDetailPage/>},
       { path: "/about_us_page", element: <AboutUsPage/>},
       { path: "/cart_page", element: <CartPage/>}, // Add this line
+
+      { path: "/blog", element: <BlogPage/>}, // Add Blog Page
+      // { path: "/blog/:blogId", element: <BlogDetailPage/> }, // Add Blog Detail Page
+      { path: "/voucher", element: <VoucherPage/>}, // Add Voucher Page
 
 
       { path: "/checkout",element: <CheckoutPage />,},

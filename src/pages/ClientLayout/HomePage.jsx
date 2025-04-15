@@ -374,7 +374,8 @@ const HomePage = () => {
         {
             title: 'Giảm Giá Lên Đến 30%',
             subtitle: 'Cho tất cả sản phẩm kính mắt thời trang',
-            image: 'src/resources/imagelayout/banner2.jpg'
+            image: 'src/resources/banner/web-02.webp'
+            // image: 'src/resources/imagelayout/banner2.jpg'
         },
         {
             title: 'Chương Trình Khám Mắt Miễn Phí',
@@ -385,19 +386,19 @@ const HomePage = () => {
 
     const testimonials = [
         {
-            avatar: 'https://via.placeholder.com/50x50',
+            avatar: ' src/resources/avatar/avatar_women01.jpg',
             name: 'Nguyễn Thị Hương',
             content: 'Tôi rất hài lòng với chất lượng kính mắt tại LilyAnna. Nhân viên tư vấn nhiệt tình, sản phẩm đa dạng và giá cả hợp lý.',
             rating: 5
         },
         {
-            avatar: 'https://via.placeholder.com/50x50',
+            avatar: 'src/resources/avatar/avatar011.png',
             name: 'Trần Văn Nam',
             content: 'Đây là lần thứ 3 tôi mua kính ở LilyAnna và vẫn luôn tin tưởng vào chất lượng sản phẩm. Dịch vụ khám mắt và tư vấn rất chuyên nghiệp.',
             rating: 5
         },
         {
-            avatar: 'https://via.placeholder.com/50x50',
+            avatar: 'src/resources/avatar/avatar13.jpg',
             name: 'Phạm Minh Tâm',
             content: 'Kính đẹp, chắc chắn, giá cả phải chăng. Tôi sẽ quay lại mua thêm sản phẩm khác.',
             rating: 4
@@ -521,7 +522,7 @@ const HomePage = () => {
                 {/* Banner */}
                 <div style={{
                     padding: '80px 0',
-                    backgroundImage: 'url(https://via.placeholder.com/1920x400)',
+                    backgroundImage: 'url(src/resources/banner/web-02.webp)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     position: 'relative'

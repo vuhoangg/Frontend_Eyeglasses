@@ -1,0 +1,35 @@
+
+
+1.Tài khoản Admin 
+
+    Vũ Hoàng Bắc 
+    adminhoangbac@gmail.com
+    123456
+
+    Lương Hoàng Lâm
+    adminHoangLam@gmail.com
+    123456
+
+
+2.Tài khoản Staff 
+
+    Hoàng Văn Chiến
+    mgVanchien@gmail.com
+    123456
+
+    Hoàng Thị Huệ
+    mgHuehoang@gmail.com
+    123456
+
+
+
+
+3. Tài khoản Customer 
+
+    Lê Hòng Phú 
+    lehoangphu0233333@gmail.com
+    123456
+
+    Thành Đạt 
+    thanhDat232@gmail.com
+    123456

@@ -33,9 +33,7 @@ const LoginPage = () => {
                 const userId = decodedToken.userId;
                 const userRole = Array.isArray(response.data.role) ? response.data.role[0] : response.data.role;
 
-
                 message.success(response.data.message || "Đăng nhập thành công");
-
                 localStorage.setItem('access_token', response.data.token);
                 localStorage.setItem('userData', JSON.stringify({
                     username: response.data.username || '',
