@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminProduct/ManagerProduct.jsx
 import { Space, Table, Popconfirm, notification, message, Row, Col , Tag} from 'antd';
 import { fetchAllProductAPI, deleteProductAPI } from '../../../services/api.product';
 import React, { useState, useEffect } from "react";

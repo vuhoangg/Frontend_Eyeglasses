@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminProduct/CreateProduct.jsx
 import { Form, Input, Button, Row, Col, notification, InputNumber, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import { createProductAPI, handleUploadFile } from "../../../services/api.product";

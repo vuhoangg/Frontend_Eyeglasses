@@ -372,11 +372,11 @@ try {
                                 <Form.Item
                                     name="paymentMethod"
                                     label="Phương thức thanh toán"
-                                    initialValue="cash"
+                                    initialValue="COD"
                                     rules={[{ required: true, message: 'Vui lòng chọn phương thức thanh toán!' }]}
                                 >
                                     <Radio.Group>
-                                        <Radio value="cash">Thanh toán khi nhận hàng (COD)</Radio>
+                                        <Radio value="COD">Thanh toán khi nhận hàng (COD)</Radio>
                                         <Radio value="bank" disabled>Chuyển khoản ngân hàng (Tạm đóng)</Radio>
                                     </Radio.Group>
                                 </Form.Item>

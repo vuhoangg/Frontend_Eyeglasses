@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminProduct/UpdateProduct.jsx
 import { Form, Input, Button, Row, Col, notification, Modal, InputNumber, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import { updateProductAPI, handleUploadFile } from "../../../services/api.product";

@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminVendor/CreateVendor.jsx
 import React, { useState } from "react";
 import { Form, Input, Button, Row, Col, notification, Typography, Breadcrumb } from "antd";
 import { createVendorAPI } from '../../../services/api.vendor'; // Import API tạo vendor

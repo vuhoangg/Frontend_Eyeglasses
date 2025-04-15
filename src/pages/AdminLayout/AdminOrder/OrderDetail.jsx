@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminOrder/OrderDetail.jsx
 import { Drawer, Button, Table, Card, Descriptions, Typography, Tag, Divider, Row, Col, Statistic } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { fetchOrderByIdAPI } from '../../../services/api.order';

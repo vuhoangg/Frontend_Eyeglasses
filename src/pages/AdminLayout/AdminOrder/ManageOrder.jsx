@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminOrder/ManagerOrder.jsx
 import { Space, Table, Popconfirm, notification, message, Row, Col, Tag } from 'antd';
 import { fetchAllOrdersAPI, deleteOrderAPI } from '../../../services/api.order';
 import React, { useState, useEffect } from "react";

@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminReceipt/ImportReceptDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { Drawer, Button, Table, Card, Descriptions, Typography, Tag, Divider, Row, Col, Spin } from 'antd';
 import { fetchImportReceiptByIdAPI } from '../../../services/api.importReceipt'; // API để lấy chi tiết

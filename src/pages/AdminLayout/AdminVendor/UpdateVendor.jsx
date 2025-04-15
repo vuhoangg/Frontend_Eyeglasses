@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminVendor/UpdateVendor.jsx
 import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Row, Col, notification, Modal, Switch, Typography } from "antd";
 import { updateVendorAPI } from '../../../services/api.vendor';

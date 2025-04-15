@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminVendor/VendorDetail.jsx
 import React, { useEffect } from 'react';
 import { Drawer, Button, Descriptions, Typography, Tag, Divider, Image, Spin } from 'antd';
 import { ShopOutlined, MailOutlined, PhoneOutlined, HomeOutlined, LinkOutlined, InfoCircleOutlined, CalendarOutlined } from '@ant-design/icons';

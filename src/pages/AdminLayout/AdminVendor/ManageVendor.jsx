@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminVendor/ManagerVendor.jsx
 import React, { useState, useEffect } from "react";
 import { Space, Table, Popconfirm, notification, message, Row, Col, Tag, Button, Input } from 'antd';
 import { fetchAllVendorAPI, deleteVendorAPI } from '../../../services/api.vendor'; // Import API vendor

@@ -1,4 +1,4 @@
-// src/services/api.orderStatus.jsx
+//src/services/api.orderStatus.jsx
 import axios from './axios.customize';
 
 const fetchAllOrderStatusAPI = () => {

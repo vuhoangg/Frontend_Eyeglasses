@@ -1,4 +1,4 @@
-// api.auth.jsx
+//src/services/api.auth.jsx
 import axios from './axios.customize'; // Đảm bảo axios.customize đã được cấu hình
 
 const loginAPI = (email, password) => {

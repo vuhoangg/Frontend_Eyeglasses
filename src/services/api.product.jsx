@@ -1,3 +1,4 @@
+//src/services/api.service.jsx
 import axios from './axios.customize';
 
 const createProductAPI = (name, description, price, stock_quantity, category_id, brand_id, imageProduct, sku) => {

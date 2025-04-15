@@ -1,3 +1,4 @@
+//src/pages/AdminLayout/AdminProduct/ProductDetail.jsx
 import { Drawer, Button, notification, message, Card, Descriptions, Typography, Divider, Row, Col, Space, Image, Upload } from 'antd';
 import { useEffect, useState } from 'react';
 import { handleUploadFile, updateProductAPI } from '../../../services/api.product';

@@ -1,4 +1,4 @@
-// api.order.jsx
+//src/services/api.order.jsx
 import axios from './axios.customize'; // Đảm bảo đường dẫn đúng
 
 const createOrderAPI = (userId, cartItems, shippingAddress, paymentMethod, totalAmount) => {
