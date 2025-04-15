@@ -109,9 +109,9 @@ const OrderDetail = (props) => {
                         {/* Phần đầu trang (Header) */}
                         <div style={{ borderBottom: '1px solid #ccc', paddingBottom: '15px', marginBottom: '20px', textAlign: 'center' }}>
                             {/* Thêm Logo công ty ở đây nếu có */}
-                            <Typography.Title level={3} style={{ margin: 0 }}>HUNO Shop </Typography.Title>
+                            <Typography.Title level={3} style={{ margin: 0 }}>Kinh mắt HUNO </Typography.Title>
                             <Typography.Paragraph style={{ margin: 0 }}>Địa chỉ 28 Đông Các - Đống Đa - Hà Nội </Typography.Paragraph>
-                            <Typography.Paragraph style={{ margin: 0 }}>Điện thoại: 0825855002 | Email: hunoEyegalassese.com</Typography.Paragraph>
+                            <Typography.Paragraph style={{ margin: 0 }}>Điện thoại: 0825-855-002 | Email: hunoEyegalassese.com</Typography.Paragraph>
                         </div>
 
                         {/* Thông tin hóa đơn */}

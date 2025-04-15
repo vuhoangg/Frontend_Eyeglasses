@@ -1,9 +1,10 @@
 //src/pages/AdminLayout/AdminReceipt/ImportReceptDetail.jsx
-import React, { useEffect, useState } from 'react';
-import { Drawer, Button, Table, Card, Descriptions, Typography, Tag, Divider, Row, Col, Spin } from 'antd';
-import { fetchImportReceiptByIdAPI } from '../../../services/api.importReceipt'; // API để lấy chi tiết
+import React, { useEffect, useState, useRef } from 'react'; // Import useRef
+import { Drawer, Button, Table, Card, Descriptions,Statistic, Typography, Tag, Divider, Row, Col, Spin } from 'antd';
+import { fetchImportReceiptByIdAPI } from '../../../services/api.importReceipt';
 import { ShoppingOutlined, ShopOutlined, CalendarOutlined, DollarOutlined, FileTextOutlined, BarcodeOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { format } from 'date-fns'; // Để format ngày
+import { format } from 'date-fns';
+import html2pdf from 'html2pdf.js'; // Import html2pdf
 
 const { Title, Text } = Typography;
 
@@ -26,29 +27,41 @@ const getStatusTag = (status) => {
 const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDataDetail }) => {
     const [receiptDetails, setReceiptDetails] = useState(null);
     const [loading, setLoading] = useState(false);
+    const componentRef = useRef(); // Create ref for print area
+
+    const handlePrint = () => {
+        const element = componentRef.current;
+
+        if (element) {
+            html2pdf()
+                .from(element)
+                .save(`PhieuNhapHang_${receiptDetails?.receiptCode}.pdf`); // Use receiptCode for filename
+        } else {
+            console.error("componentRef.current is null. Cannot generate PDF.");
+        }
+    };
+
 
     useEffect(() => {
         const fetchDetails = async () => {
             if (dataDetail?.id && isDetailOpen) {
                 setLoading(true);
                 try {
-                    // Dùng API fetchById để đảm bảo lấy dữ liệu mới nhất và đầy đủ relations
                     const res = await fetchImportReceiptByIdAPI(dataDetail.id);
                     if (res.data) {
                         setReceiptDetails(res.data);
                     } else {
-                        notification.error({ message: "Lỗi", description: "Không thể tải chi tiết phiếu nhập." });
-                         setReceiptDetails(null);
+                        console.error("Không thể tải chi tiết phiếu nhập.");
+                        setReceiptDetails(null);
                     }
                 } catch (error) {
-                     console.error("Fetch receipt detail error:", error.response || error);
-                    notification.error({ message: "Lỗi", description: "Không thể tải chi tiết phiếu nhập." });
+                    console.error("Fetch receipt detail error:", error.response || error);
                     setReceiptDetails(null);
                 } finally {
                     setLoading(false);
                 }
             } else {
-                setReceiptDetails(null); // Reset khi đóng hoặc không có ID
+                setReceiptDetails(null);
             }
         };
         fetchDetails();
@@ -57,8 +70,8 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
 
     const onClose = () => {
         setIsDetailOpen(false);
-        setDataDetail(null); // Reset data trigger khi đóng
-        setReceiptDetails(null); // Reset data chi tiết
+        setDataDetail(null);
+        setReceiptDetails(null);
     };
 
      const formatDate = (dateString) => {
@@ -66,19 +79,18 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
         return format(new Date(dateString), 'dd/MM/yyyy HH:mm:ss');
     };
 
-     // Cấu hình cột cho bảng chi tiết sản phẩm trong Drawer
      const itemColumns = [
         {
             title: 'SKU',
-            dataIndex: ['product', 'sku'], // Truy cập nested data
+            dataIndex: ['product', 'sku'],
             key: 'sku',
             render: (sku) => sku || 'N/A',
         },
         {
             title: 'Tên Sản phẩm',
-            dataIndex: ['product', 'name'], // Truy cập nested data
+            dataIndex: ['product', 'name'],
             key: 'productName',
-             render: (name) => name || 'Sản phẩm không tồn tại', // Handle nếu product bị null
+             render: (name) => name || 'Sản phẩm không tồn tại',
         },
         {
             title: 'Số lượng',
@@ -103,7 +115,7 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
 
     return (
         <Drawer
-            width={"70vw"} // Rộng hơn để chứa bảng
+            width={"80vw"}
             title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <ShoppingOutlined style={{ fontSize: '24px', marginRight: '10px', color: '#1890ff' }} />
@@ -114,9 +126,14 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
             onClose={onClose}
             open={isDetailOpen}
             extra={
-                <Button type="primary" onClick={onClose}>
-                    Đóng
-                </Button>
+                <>
+                    <Button type="primary" onClick={handlePrint} style={{ marginRight: 8 }}>
+                        Tải Phiếu Nhập PDF
+                    </Button>
+                    <Button type="primary" onClick={onClose}>
+                        Đóng
+                    </Button>
+                </>
             }
         >
             {loading && <div style={{ textAlign: 'center', padding: '50px' }}><Spin size="large" /></div>}
@@ -128,47 +145,98 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
             )}
 
             {!loading && receiptDetails && (
-                <>
-                    <Card bordered={false} style={{ marginBottom: 24 }}>
-                        <Descriptions title="Thông tin chung" bordered column={2}>
-                             <Descriptions.Item label={<><BarcodeOutlined /> Mã Phiếu</>}>{receiptDetails.receiptCode || 'N/A'}</Descriptions.Item>
-                            <Descriptions.Item label={<><ShopOutlined /> Nhà cung cấp</>}>{receiptDetails.vendor?.name || 'N/A'}</Descriptions.Item>
-                             <Descriptions.Item label={<><CalendarOutlined /> Ngày nhập</>}>{formatDate(receiptDetails.importDate)}</Descriptions.Item>
-                             <Descriptions.Item label={<><DollarOutlined /> Tổng tiền</>}><Text strong style={{color: '#f5222d'}}>{formatCurrency(receiptDetails.totalAmount)}</Text></Descriptions.Item>
-                             <Descriptions.Item label={<><CheckCircleOutlined /> Trạng thái</>}>{getStatusTag(receiptDetails.status)}</Descriptions.Item>
-                             <Descriptions.Item label={<><FileTextOutlined /> Ghi chú</>} span={2}>{receiptDetails.notes || 'Không có ghi chú'}</Descriptions.Item>
-                             <Descriptions.Item label="Hoạt động">
-                                <Tag color={receiptDetails.isActive ? 'success' : 'error'}>
-                                    {receiptDetails.isActive ? 'Active' : 'Inactive'}
-                                </Tag>
-                             </Descriptions.Item>
-                              <Descriptions.Item label={<><CalendarOutlined /> Ngày tạo</>}>{formatDate(receiptDetails.creationDate)}</Descriptions.Item>
+                <div ref={componentRef} style={{ padding: '20px' }}> {/* Ref for print, padding for layout */}
+                    <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '14px' }}>
+                        {/* Header Section */}
+                        <div style={{ borderBottom: '1px solid #ccc', paddingBottom: '15px', marginBottom: '20px', textAlign: 'center' }}>
+                            <Typography.Title level={3} style={{ margin: 0 }}>Kinh mắt HUNO</Typography.Title> {/* Replace with your company name */}
+                            <Typography.Paragraph style={{ margin: 0 }}>Địa chỉ 28 Đông Các - Đống Đa - Hà Nội </Typography.Paragraph> {/* Replace with your company address */}
+                            <Typography.Paragraph style={{ margin: 0 }}>Điện thoại: 0825-855-002 | Email: hunoEyegalassese.com</Typography.Paragraph> {/* Replace with your contact info */}
+                        </div>
 
-                        </Descriptions>
-                    </Card>
+                        {/* Receipt Information */}
+                        <Row style={{ marginBottom: '15px' }}>
+                            <Col span={12}>
+                                <Typography.Title level={4} style={{ margin: 0 }}>PHIẾU NHẬP HÀNG</Typography.Title>
+                            </Col>
+                            <Col span={12} style={{ textAlign: 'right' }}>
+                                <Text>Mã phiếu nhập: {receiptDetails.receiptCode || 'N/A'}</Text><br />
+                                <Text>Ngày nhập: {formatDate(receiptDetails.importDate)}</Text>
+                            </Col>
+                        </Row>
 
-                    <Divider orientation="left">Chi tiết sản phẩm</Divider>
+                        {/* Vendor Information */}
+                        <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
+                            <Typography.Title level={5} style={{ marginTop: 0 }}>Thông tin nhà cung cấp:</Typography.Title>
+                            <Descriptions column={1} size="small">
+                                <Descriptions.Item label="Tên nhà cung cấp">{receiptDetails.vendor?.name || 'N/A'}</Descriptions.Item>
+                                <Descriptions.Item label="Địa chỉ">{receiptDetails.vendor?.address || 'N/A'}</Descriptions.Item> {/* Assuming vendor has address */}
+                                <Descriptions.Item label="Điện thoại">{receiptDetails.vendor?.phone || 'N/A'}</Descriptions.Item> {/* Assuming vendor has phone */}
+                                {/* Thêm các thông tin nhà cung cấp khác nếu cần */}
+                            </Descriptions>
+                        </div>
 
-                    <Card bordered={false}>
-                        <Table
-                            columns={itemColumns}
-                            dataSource={receiptDetails.importReceiptDetails || []} // Lấy từ data fetch được
-                            rowKey="id" // Dùng ID của detail làm key
-                            pagination={false}
-                            bordered
-                            size="small"
-                             summary={() => (
-                                <Table.Summary.Row style={{ background: '#fafafa' }}>
-                                    <Table.Summary.Cell index={0} colSpan={4} align="right"><Text strong>Tổng cộng:</Text></Table.Summary.Cell>
-                                    <Table.Summary.Cell index={1} align="right">
-                                        <Text strong style={{ color: '#f5222d', fontSize: '14px' }}>{formatCurrency(receiptDetails.totalAmount)}</Text>
-                                    </Table.Summary.Cell>
-                                </Table.Summary.Row>
-                            )}
-                        />
-                    </Card>
-                </>
+                        {/* Product Items Table */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <Typography.Title level={5}>Chi tiết sản phẩm nhập:</Typography.Title>
+                            <Table
+                                columns={itemColumns}
+                                dataSource={receiptDetails.importReceiptDetails || []}
+                                rowKey="id"
+                                pagination={false}
+                                bordered
+                                size="small"
+                                summary={() => (
+                                    <Table.Summary.Row style={{ background: '#fafafa' }}>
+                                        <Table.Summary.Cell index={0} colSpan={4} align="right"><Text strong>Tổng cộng:</Text></Table.Summary.Cell>
+                                        <Table.Summary.Cell index={4} align="right">
+                                            <Text strong style={{ color: '#f5222d', fontSize: '14px' }}>{formatCurrency(receiptDetails.totalAmount)}</Text>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                )}
+                            />
+                        </div>
+
+                        {/* Totals and Notes */}
+                        <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+                            <Statistic title="Tổng tiền nhập" value={formatCurrency(receiptDetails.totalAmount)} valueStyle={{ fontSize: '20px', color: '#000' }} />
+                            <Divider style={{ borderStyle: 'dashed' }} />
+                            {/* <Text>Trạng thái phiếu nhập: {getStatusTag(receiptDetails.status)}</Text><br /> */}
+                             <Text>Ngày tạo phiếu: {formatDate(receiptDetails.creationDate)}</Text>
+                        </div>
+
+                        {/* Footer Section */}
+                        <div style={{ borderTop: '1px solid #ccc', paddingTop: '15px', textAlign: 'center', fontSize: '12px', color: '#777' }}>
+                            <Typography.Paragraph style={{ margin: '5px 0' }}>Xin cảm ơn quý nhà cung cấp!</Typography.Paragraph> {/* Customize thank you message */}
+                            <Typography.Paragraph style={{ margin: '5px 0' }}>Website: hunoEyegalassese.com| Hotline: 1900-8252</Typography.Paragraph> {/* Replace with your website and hotline */}
+                        </div>
+                    </div>
+                </div>
             )}
+
+            {/* Print Styles */}
+            <style type="text/css" media="print">
+                {`
+                    @page {
+                        size: A4;
+                        margin: 20mm;
+                    }
+
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+
+                    .ant-drawer-extra {
+                        display: none;
+                    }
+
+                    .ant-card {
+                        border: 1px solid #ccc !important;
+                        box-shadow: none !important;
+                    }
+                `}
+            </style>
         </Drawer>
     );
 };
