@@ -28,7 +28,8 @@ import {
     EnvironmentOutlined,
     InstagramOutlined,
     FacebookOutlined,
-    TwitterOutlined
+    TwitterOutlined,
+    ThunderboltOutlined 
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchAllProductAPI, fetchLatestProductsAPI, fetchBestSellingProductsAPI } from '../../services/api.product'; // Import API functions
@@ -274,6 +275,7 @@ const HomePage = () => {
         >
             <Card
                 hoverable
+                className="home-product-card" // *** THÊM CLASS NAME NÀY ***
                 onClick={() => navigate(`/product/${product.id}`)}
                 cover={
                     <div style={{ position: 'relative', paddingTop: '100%' }}>
@@ -310,7 +312,7 @@ const HomePage = () => {
                 }
                 actions={[
                     <Button type="link" icon={<ShoppingOutlined />} disabled={!product.isActive} onClick={(event) => onAddToCart(product, event)}>Thêm vào giỏ</Button>,
-                    <Button type="link" icon={<HeartOutlined />} onClick={(event) => onBuyNow(product, event)} disabled={!product.isActive || product.stock_quantity === 0}>Mua ngay</Button>
+                    <Button type="link" icon={<ThunderboltOutlined  />} onClick={(event) => onBuyNow(product, event)} disabled={!product.isActive || product.stock_quantity === 0}>Mua ngay</Button>
                 ]}
             >
                 <Meta
@@ -343,7 +345,7 @@ const HomePage = () => {
         >
             <Text strong>{category.name}</Text>
             <br />
-            <Text type="secondary">{category.productCount || 'N/A'} sản phẩm</Text> {/* Assuming category object has productCount */}
+            {/* <Text type="secondary">{category.productCount || 'N/A'} sản phẩm</Text> Assuming category object has productCount */}
         </Card>
     );
 
@@ -510,7 +512,7 @@ const HomePage = () => {
                         ) : (
                             <Row gutter={[24, 24]}>
                                 {bestSellers.map(product => (
-                                    <Col xs={24} sm={12} md={6} key={product.id}>
+                                    <Col xs={12} sm={12} md={6} key={product.id}>
                                         <ProductCard product={product} onAddToCart={handleAddToCartFromCard} onBuyNow={handleBuyNowFromCard} />
                                     </Col>
                                 ))}
@@ -572,7 +574,7 @@ const HomePage = () => {
                         ) : (
                             <Row gutter={[24, 24]}>
                                 {newArrivals.map(product => (
-                                    <Col xs={24} sm={12} md={6} key={product.id}>
+                                    <Col xs={12} sm={12} md={6} key={product.id}>
                                         <ProductCard product={product} onAddToCart={handleAddToCartFromCard} onBuyNow={handleBuyNowFromCard} />
                                     </Col>
                                 ))}
@@ -682,6 +684,38 @@ const HomePage = () => {
                     </div>
                 </div>
             </Content>
+
+            {/* *** THÊM ĐOẠN STYLE NÀY *** */}
+           {/* *** CẬP NHẬT HOẶC THAY THẾ BẰNG ĐOẠN STYLE NÀY *** */}
+           <style jsx global>{`
+                /* Áp dụng cho màn hình có chiều rộng tối đa là 767px */
+                @media (max-width: 767px) {
+                  /* Nhắm mục tiêu các nút bên trong actions của home-product-card */
+                  .home-product-card .ant-card-actions > li > span > .ant-btn {
+                    font-size: 0; /* Đặt font-size = 0 để ẩn văn bản */
+                    padding: 0 10px; /* Điều chỉnh padding ngang cho icon */
+                    min-width: 40px; /* Đặt chiều rộng tối thiểu để dễ bấm */
+                    line-height: normal; /* Đảm bảo line-height không gây vấn đề */
+                  }
+
+                  /* Đảm bảo icon vẫn hiển thị với kích thước mong muốn */
+                  .home-product-card .ant-card-actions > li > span > .ant-btn .anticon {
+                    font-size: 16px; /* Kích thước icon mong muốn */
+                    margin-right: 0; /* Bỏ margin nếu có */
+                  }
+
+                  /* Có thể cần căn giữa icon nếu padding làm lệch */
+                  .home-product-card .ant-card-actions > li > span {
+                     display: inline-flex;
+                     justify-content: center;
+                     align-items: center;
+                     width: 100%; /* Cần thiết để justify-content hoạt động */
+                   }
+                    .home-product-card .ant-card-actions > li {
+                       text-align: center; /* Căn giữa nội dung li */
+                   }
+                }
+            `}</style>
         </Layout>
     );
 };

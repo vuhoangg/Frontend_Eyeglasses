@@ -1,14 +1,12 @@
 // CartPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Row, Col, Button, InputNumber, message, Table, Space } from 'antd';
+import { Layout, Typography, Row, Col, Button, InputNumber, message, Table, Space, Divider } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-// --- IMPORT FIX ---
 import {
     createCartItemAPI,
     updateCartItemAPI,
     deleteCartItemAPI,
 } from '../../services/api.cartItems';
-
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -16,7 +14,20 @@ const { Title, Text, Paragraph } = Typography;
 const CartPage = () => {
     const [cartItems, setCartItems] = useState([]);
     const [userId, setUserId] = useState(null);
+    const [screenSize, setScreenSize] = useState(window.innerWidth);
     const navigate = useNavigate();
+
+    // Update screen size state when window resizes
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenSize(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Lấy userId khi component mount
     useEffect(() => {
@@ -25,8 +36,6 @@ const CartPage = () => {
         if (userData && userData.id && token) {
             setUserId(userData.id);
         } else {
-            // Handle case where user data/token is missing if necessary
-            // Maybe clear userId state?
             setUserId(null);
         }
     }, []);
@@ -89,13 +98,9 @@ const CartPage = () => {
             } catch (error) {
                 console.error("Error updating quantity on DB:", error);
                 message.error("Lỗi cập nhật giỏ hàng trên hệ thống.");
-                // Consider reverting local state or fetching cart from DB on error
-                // For now, just log and show message
             }
         } else if (userId && !cartItemId) {
              console.warn(`Cannot update product ${productId} on DB: missing cart_item_id. Maybe sync on next checkout.`);
-             // Optional: You might want to add logic here to create the item on the DB
-             // if it exists locally but not remotely (e.g., added while offline)
         }
     };
 
@@ -121,7 +126,6 @@ const CartPage = () => {
             } catch (error) {
                 console.error("Lỗi khi xóa sản phẩm trên DB:", error);
                 message.error("Lỗi xóa sản phẩm trên hệ thống.");
-                // Consider reverting or re-fetching cart
             }
         } else if (userId && !cartItemId) {
              console.warn(`Cannot delete product ${productId} on DB: missing cart_item_id.`);
@@ -144,14 +148,11 @@ const CartPage = () => {
             } catch (error) {
                 console.error("Lỗi khi xóa toàn bộ giỏ hàng trên DB:", error);
                 message.error("Lỗi khi làm trống giỏ hàng trên hệ thống.");
-                // Maybe fetch cart to ensure sync after error?
             }
         }
     };
 
-
     const calculateTotalPrice = () => {
-        // Ensure items have price and quantity before calculating
         return cartItems.reduce((total, item) => {
             const price = Number(item.price) || 0;
             const quantity = Number(item.quantity) || 0;
@@ -166,7 +167,7 @@ const CartPage = () => {
         const userData = JSON.parse(localStorage.getItem("userData"));
         const token = localStorage.getItem("access_token");
 
-        if (!userId || !userData || !token) { // Check userId state as well
+        if (!userId || !userData || !token) {
             message.error("Vui lòng đăng nhập để thanh toán.");
             navigate('/login');
             return;
@@ -179,168 +180,228 @@ const CartPage = () => {
 
         message.loading('Đang đồng bộ giỏ hàng...', 0);
         try {
-            
-
             // BƯỚC 2: Tạo lại các cart items từ LocalStorage lên DB
             console.log("Attempting to save current local cart items to DB...");
-            if (cartItems.length > 0) { // Only proceed if there are items to save
+            if (cartItems.length > 0) {
                 const creationPromises = cartItems.map(item => {
                     console.log(` -> Saving Product ID: ${item.id}, Quantity: ${item.quantity}, Price: ${item.price}, Color: ${item.color}, Size: ${item.size}`);
-                    // Ensure data types are correct, especially price
                     return createCartItemAPI(
-                        item.id,            // productId
-                        Number(item.quantity) || 1, // Ensure quantity is a number, default to 1 if invalid
-                        Number(item.price) || 0,    // Ensure price is a number, default to 0 if invalid
-                        item.color,         // color (can be null/undefined)
-                        item.size           // size (can be null/undefined)
+                        item.id,
+                        Number(item.quantity) || 1,
+                        Number(item.price) || 0,
+                        item.color,
+                        item.size
                     );
                 });
 
-                // Wait for all creation promises to resolve
                 await Promise.all(creationPromises);
             } else {
                 console.log("Local cart is empty, nothing to add to DB after clearing.");
             }
 
-
-            message.destroy(); // Hide loading message
+            message.destroy();
             message.success('Đồng bộ giỏ hàng thành công!');
-
-            // BƯỚC 3: Chuyển trang KHI đồng bộ thành công
             console.log("Cart synced successfully. Navigating to checkout...");
             navigate('/checkout');
 
         } catch (error) {
-            message.destroy(); // Hide loading message
+            message.destroy();
             console.error('Lỗi khi đồng bộ giỏ hàng trước khi thanh toán:', error);
             const errorMsg = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đồng bộ giỏ hàng.';
             message.error(`${errorMsg} Vui lòng thử lại.`);
-            // Do NOT navigate if sync failed
         }
-        // --- REMOVE REDUNDANT NAVIGATION ---
-        // console.log("Navigating to checkout..."); // This line is removed
-        // navigate('/checkout'); // This line is removed
     };
 
-    // Cấu hình cột cho bảng
-    const columns = [
-         {
-            title: 'Sản phẩm',
-            key: 'productInfo', // Changed key to be more descriptive
-            render: (text_ignored, record) => {
-                const productId = record.product?.id ?? record.id;
-                const productName = record.product?.name ?? record.name ?? 'Sản phẩm không tên';
-                const imageFilename = record.product?.imageProduct ?? record.imageProduct ?? record.thumbnail; // Added fallback for thumbnail
+    // Dynamic columns based on screen size
+    const getColumns = () => {
+        // Base columns that show on all screen sizes
+        const baseColumns = [
+            {
+                title: 'Sản phẩm',
+                key: 'productInfo',
+                render: (text_ignored, record) => {
+                    const productId = record.product?.id ?? record.id;
+                    const productName = record.product?.name ?? record.name ?? 'Sản phẩm không tên';
+                    const imageFilename = record.product?.imageProduct ?? record.imageProduct ?? record.thumbnail;
 
-                // Handle potential base64 images or build URL
-                let imageUrl = "https://placehold.co/40x40/eee/ccc?text=N/A"; // Default placeholder
-                if (imageFilename) {
-                     // Basic check if it looks like a filename vs a base64 string
-                    if (imageFilename.startsWith('data:image')) {
-                        imageUrl = imageFilename; // Assume it's a base64 string
-                    } else {
-                         // Assume it's a filename, construct URL
-                        imageUrl = `http://localhost:8082/images/product/${imageFilename}`; // Adjust BASE_URL if needed
+                    let imageUrl = "https://placehold.co/40x40/eee/ccc?text=N/A";
+                    if (imageFilename) {
+                        if (imageFilename.startsWith('data:image')) {
+                            imageUrl = imageFilename;
+                        } else {
+                            imageUrl = `http://localhost:8082/images/product/${imageFilename}`;
+                        }
                     }
-                }
 
-
-                return (
-                    <Space>
-                         <img
-                            src={imageUrl}
-                            alt={productName}
-                            style={{ width: 40, height: 40, objectFit: 'cover', border: '1px solid #f0f0f0' }}
-                            onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/40x40/eee/ccc?text=Error" }}
-                        />
-                        {productId ? (
-                             <Link to={`/product_detail/${productId}`}>{productName}</Link>
-                        ) : (
-                            <span>{productName}</span> // Render as text if no ID for linking
-                        )}
-                     </Space>
-                );
+                    return (
+                        <Space>
+                            <img
+                                src={imageUrl}
+                                alt={productName}
+                                style={{ 
+                                    width: screenSize < 576 ? 30 : 40, 
+                                    height: screenSize < 576 ? 30 : 40,
+                                    objectFit: 'cover', 
+                                    border: '1px solid #f0f0f0' 
+                                }}
+                                onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/40x40/eee/ccc?text=Error" }}
+                            />
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {productId ? (
+                                    <Link to={`/product_detail/${productId}`} style={{ fontSize: screenSize < 576 ? '12px' : '14px' }}>
+                                        {productName.length > 20 && screenSize < 576 ? `${productName.substring(0, 20)}...` : productName}
+                                    </Link>
+                                ) : (
+                                    <span style={{ fontSize: screenSize < 576 ? '12px' : '14px' }}>
+                                        {productName.length > 20 && screenSize < 576 ? `${productName.substring(0, 20)}...` : productName}
+                                    </span>
+                                )}
+                                
+                                {/* Show attributes inline on small screens */}
+                                {screenSize < 768 && (
+                                    <Space direction="vertical" size="small" style={{ marginTop: '4px' }}>
+                                        {record.color && <Text type="secondary" style={{ fontSize: '11px' }}>Màu: {record.color}</Text>}
+                                        {record.size && <Text type="secondary" style={{ fontSize: '11px' }}>Size: {record.size}</Text>}
+                                        <Text type="secondary" style={{ fontSize: '11px' }}>
+                                            {formatPrice(record.price)} x {record.quantity}
+                                        </Text>
+                                    </Space>
+                                )}
+                            </div>
+                        </Space>
+                    );
+                },
             },
-        },
-        {
-            title: 'Giá',
-            dataIndex: 'price',
-            key: 'price',
-            render: (price) => formatPrice(price),
-        },
-        {
-            title: 'Số lượng',
-            key: 'quantity',
-            render: (text, record) => (
-                <InputNumber
-                    min={0} // Allow 0, updateQuantity handles removal
-                    value={record.quantity}
-                    onChange={(value) => {
-                         // Prevent non-numeric input if necessary or handle NaN
-                         const newQuantity = parseInt(value, 10);
-                         if (!isNaN(newQuantity)) {
-                             updateQuantity(record.id, newQuantity);
-                         }
-                     }}
-                    style={{ width: 70 }} // Adjust width as needed
-                />
-            ),
-        },
-        {
-             title: 'Thuộc tính', // Optional: Display Color/Size
-             key: 'attributes',
-             render: (text, record) => (
-                 <Space direction="vertical" size="small">
-                     {record.color && <Text type="secondary">Màu: {record.color}</Text>}
-                     {record.size && <Text type="secondary">Size: {record.size}</Text>}
-                 </Space>
-             )
-         },
-        {
-            title: 'Tổng cộng',
-            key: 'total',
-            render: (text, record) => formatPrice((Number(record.price) || 0) * (Number(record.quantity) || 0)),
-        },
-        {
-            title: 'Hành động',
+            {
+                title: 'Số lượng',
+                key: 'quantity',
+                render: (text, record) => (
+                    <InputNumber
+                        min={0}
+                        value={record.quantity}
+                        onChange={(value) => {
+                            const newQuantity = parseInt(value, 10);
+                            if (!isNaN(newQuantity)) {
+                                updateQuantity(record.id, newQuantity);
+                            }
+                        }}
+                        style={{ width: screenSize < 576 ? 50 : 70 }}
+                    />
+                ),
+            },
+        ];
+
+        // Columns to show only on medium screens and up
+        const mediumScreenColumns = [
+            {
+                title: 'Giá',
+                dataIndex: 'price',
+                key: 'price',
+                render: (price) => formatPrice(price),
+            },
+            // {
+            //     title: 'Thuộc tính',
+            //     key: 'attributes',
+            //     render: (text, record) => (
+            //         <Space direction="vertical" size="small">
+            //             {record.color && <Text type="secondary">Màu: {record.color}</Text>}
+            //             {record.size && <Text type="secondary">Size: {record.size}</Text>}
+            //         </Space>
+            //     )
+            // },
+        ];
+
+        // Columns to show only on large screens
+        const largeScreenColumns = [
+            {
+                title: 'Tổng cộng',
+                key: 'total',
+                render: (text, record) => formatPrice((Number(record.price) || 0) * (Number(record.quantity) || 0)),
+            },
+        ];
+
+        // Action column shows on all screen sizes
+        const actionColumn = {
+            title: screenSize < 576 ? '' : 'Hành động',
             key: 'action',
             render: (text, record) => (
-                <Button type="link" danger onClick={() => removeFromCart(record.id)}>
+                <Button 
+                    type="link" 
+                    danger 
+                    onClick={() => removeFromCart(record.id)}
+                    style={{ padding: screenSize < 576 ? '0 5px' : '', fontSize: screenSize < 576 ? '12px' : '14px' }}
+                >
                     Xóa
                 </Button>
             ),
-        },
-    ];
+         
+        };
+
+        // Combine columns based on screen size
+        if (screenSize >= 992) {
+            return [...baseColumns, ...mediumScreenColumns, ...largeScreenColumns, actionColumn];
+        } else if (screenSize >= 768) {
+            return [...baseColumns, ...mediumScreenColumns, actionColumn];
+        } else {
+            return [...baseColumns, actionColumn];
+        }
+    };
+
+    // Get page content padding based on screen size
+    const getContentPadding = () => {
+        if (screenSize < 576) {
+            return '10px';
+        } else if (screenSize < 992) {
+            return '15px 20px';
+        } else {
+            return '20px 50px';
+        }
+    };
 
     return (
-        <Layout>
-            <Content style={{ padding: '20px 50px', maxWidth: 1200, margin: '20px auto' }}> {/* Added top margin */}
-                <Title level={2} style={{ marginBottom: '20px' }}>Giỏ hàng của bạn</Title> {/* Added bottom margin */}
+        <Layout style={{ padding:'0', margin: '0' }}>
+            <Content style={{ 
+                padding: getContentPadding(),
+                maxWidth: 1200, 
+                margin: '20px auto',
+                overflowX: 'hidden'
+            }}>
+                <Title level={screenSize < 576 ? 3 : 2} style={{ marginBottom: '20px' }}>Giỏ hàng của bạn</Title>
                 {cartItems.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '50px 0' }}> {/* Centered content */}
+                    <div style={{ textAlign: 'center', padding: '50px 0' }}>
                         <Paragraph style={{ fontSize: '16px' }}>Giỏ hàng của bạn đang trống.</Paragraph>
-                        <Button type="primary" size="large"> {/* Larger button */}
+                        <Button type="primary" size="large">
                             <Link to="/product">Tiếp tục mua sắm</Link>
                         </Button>
                     </div>
                 ) : (
                     <>
-                        <Table
-                            dataSource={cartItems}
-                            columns={columns}
-                            rowKey={(record) => `${record.id}-${record.color || 'none'}-${record.size || 'none'}`} // More specific rowKey if color/size matters for uniqueness
-                            pagination={false}
-                            style={{ marginBottom: '24px' }} // Add space below table
-                         />
-                        <Row justify="space-between" align="middle" style={{ marginTop: 20 }}> {/* Align items vertically */}
-                            <Col>
+                        <div style={{ overflowX: 'auto' }}>
+                            <Table
+                                dataSource={cartItems}
+                                columns={getColumns()}
+                                rowKey={(record) => `${record.id}-${record.color || 'none'}-${record.size || 'none'}`}
+                                pagination={false}
+                                style={{ marginBottom: '24px' }}
+                                scroll={{ x: 'max-content' }}
+                                size={screenSize < 768 ? 'small' : 'middle'}
+                            />
+                        </div>
+                        <Divider style={{ margin: '16px 0' }} />
+                        <Row 
+                            justify={screenSize < 576 ? 'center' : 'space-between'} 
+                            align="middle" 
+                            style={{ marginTop: 20 }}
+                            gutter={[16, 16]}
+                        >
+                            <Col xs={24} sm={12} style={{ textAlign: screenSize < 576 ? 'center' : 'left' }}>
                                 <Button onClick={clearCart} danger>Xóa hết giỏ hàng</Button>
                             </Col>
-                            <Col style={{ textAlign: 'right' }}>
-                                <Title level={4} style={{ marginBottom: '10px' }}> {/* Space below total */}
-                                    Tổng cộng: <Text strong>{formatPrice(calculateTotalPrice())}</Text> {/* Bolder total */}
+                            <Col xs={24} sm={12} style={{ textAlign: screenSize < 576 ? 'center' : 'right' }}>
+                                <Title level={4} style={{ marginBottom: '10px' }}>
+                                    Tổng cộng: <Text strong>{formatPrice(calculateTotalPrice())}</Text>
                                 </Title>
-                                <Button type="primary" size="large" onClick={handleCheckout} disabled={cartItems.length === 0}> {/* Disable if cart is empty */}
+                                <Button type="primary" size="large" onClick={handleCheckout} disabled={cartItems.length === 0}>
                                     Tiến hành thanh toán
                                 </Button>
                             </Col>

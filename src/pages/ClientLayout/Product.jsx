@@ -326,7 +326,8 @@ const ProductPage = () => {
         >
             <Card
                 hoverable
-                className={viewType === 'list' ? 'product-card-list' : 'product-card-grid'}
+             // *** Đảm bảo class này vẫn còn ***
+             className={`${viewType === 'list' ? 'product-card-list' : 'product-card-grid'} product-page-card`}
                 onClick={() => navigate(`/product/${product.id}`)}
                 cover={
                     <div style={{ position: 'relative', paddingTop: '100%' }}>
@@ -436,8 +437,8 @@ const ProductPage = () => {
     const formatPrice = value => `${Number(value || 0).toLocaleString('vi-VN')}đ`;
 
     return (
-        <Layout>
-            <Content style={{ padding: '0 50px', maxWidth: 1600, margin: '0 auto' }}>
+        <Layout style={{ padding: '0', margin: '0'}}>
+            <Content style={{ padding: '0 0px', maxWidth: 1200, margin: '0 auto' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item><Link to="/">Trang chủ</Link></Breadcrumb.Item>
                     <Breadcrumb.Item>Cửa hàng</Breadcrumb.Item>
@@ -555,8 +556,8 @@ const ProductPage = () => {
                                 <Row gutter={[16, 16]}>
                                     {filteredProducts.map(product => (
                                         <Col key={`${product.id}-${viewType}`}
-                                            xs={24}
-                                            sm={12}
+                                            xs={12}
+                                            sm={24}
                                             md={viewType === 'list' ? 24 : 8}
                                             lg={viewType === 'list' ? 24 : (viewType === 'grid' ? 8 : 24)}
                                         >
@@ -581,7 +582,9 @@ const ProductPage = () => {
                                         onShowSizeChange={handlePaginationChange}
                                         showSizeChanger
                                         pageSizeOptions={['6', '12', '24', '48']}
-                                        showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`}
+                                        // showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`}
+                                        size="small" // *** LÀM CHO CÁC NÚT NHỎ LẠI ***
+                                        // showLessItems // *** HIỂN THỊ ÍT NÚT SỐ HƠN ***
                                     />
                                 </div>
                             )}
@@ -589,31 +592,14 @@ const ProductPage = () => {
                     </Row>
                 </div>
             </Content>
-            <style jsx global>{`
+           {/* *** THÊM ĐOẠN STYLE NÀY VÀO CUỐI KHỐI STYLE HIỆN CÓ HOẶC TẠO MỚI *** */}
+           <style jsx global>{`
+                /* ---- CSS hiện có cho list/grid view ---- */
                 .product-card-list .ant-card-body {
                     display: flex;
                     align-items: center;
                 }
-                .product-card-list .ant-card-cover {
-                    width: 150px !important;
-                    flex-shrink: 0;
-                    padding-top: 0 !important;
-                    height: 150px;
-                }
-                .product-card-list .ant-card-cover img {
-                    height: 100% !important;
-                    object-fit: cover;
-                }
-
-                .product-card-list .ant-card-meta {
-                    flex-grow: 1;
-                    margin-left: 16px;
-                }
-                .product-card-list .ant-card-actions {
-                    border-top: none;
-                    margin-left: 16px;
-                    flex-shrink: 0;
-                }
+                /* ... (giữ các style cũ) ... */
                 .product-card-list .ant-card-actions > li {
                     margin: 0 4px;
                 }
@@ -625,6 +611,48 @@ const ProductPage = () => {
                 .ant-card-hoverable:hover .ant-card-cover img {
                     transform: scale(1.03);
                 }
+
+                /* ----- CSS MỚI: Ẩn text button trên mobile ----- */
+                @media (max-width: 767px) {
+                  /* Nhắm mục tiêu các nút actions của product-page-card */
+                  .product-page-card .ant-card-actions > li > span > .ant-btn {
+                    font-size: 0; /* Ẩn văn bản */
+                    padding: 0 10px; /* Điều chỉnh padding cho icon */
+                    min-width: 40px; /* Đảm bảo dễ bấm */
+                    line-height: normal; /* Reset line-height */
+                  }
+
+                  /* Hiển thị lại icon với kích thước mong muốn */
+                  .product-page-card .ant-card-actions > li > span > .ant-btn .anticon {
+                    font-size: 16px; /* Kích thước icon */
+                    margin-right: 0; /* Bỏ margin */
+                  }
+
+                  /* Căn giữa icon trong nút */
+                   .product-page-card .ant-card-actions > li > span {
+                     display: inline-flex;
+                     justify-content: center;
+                     align-items: center;
+                     width: 100%;
+                   }
+                    .product-page-card .ant-card-actions > li {
+                       text-align: center;
+                   }
+                }
+
+                /* Optional: Điều chỉnh cho màn hình nhỏ hơn nữa nếu cần */
+                /*
+                @media (max-width: 575px) {
+                   .product-page-card .ant-card-actions > li > span > .ant-btn .anticon {
+                       font-size: 14px; // Icon nhỏ hơn nữa
+                   }
+                   .product-page-card .ant-card-actions > li > span > .ant-btn {
+                       min-width: 35px; // Nút nhỏ hơn
+                       padding: 0 8px;
+                   }
+                }
+                */
+
             `}</style>
         </Layout>
     );
