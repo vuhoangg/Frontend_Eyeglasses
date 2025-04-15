@@ -1,0 +1,88 @@
+/* src/pages/AdminLayout/AdminOrder/OrderDetail.css */
+
+@media print {
+    /* Hide everything except the printable area */
+    body * {
+        visibility: hidden;
+    }
+    .printable-area, .printable-area * {
+        visibility: visible;
+    }
+    .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%; /* Ensure it takes full width */
+        margin: 0;
+        padding: 20px; /* Add some padding for print */
+        box-sizing: border-box;
+    }
+
+    /* Hide elements not needed for the invoice */
+    .ant-drawer-header, /* Hide Drawer Header */
+    .ant-drawer-footer, /* Hide Drawer Footer */
+    .print-button, /* Hide the print button itself */
+    .ant-divider { /* Optionally hide dividers if they look odd */
+       /* display: none; */
+    }
+
+     /* --- Invoice Specific Styles --- */
+
+    /* Remove card borders/shadows for cleaner look */
+    .printable-area .ant-card {
+        border: none !important;
+        box-shadow: none !important;
+        margin-bottom: 15px; /* Add some space between cards */
+    }
+    .printable-area .ant-card-head {
+        border-bottom: 1px solid #eee !important; /* Keep a light separator for card titles */
+        padding: 10px 15px !important;
+        min-height: auto !important;
+    }
+     .printable-area .ant-card-body {
+        padding: 10px 15px !important;
+    }
+
+    /* Ensure table looks good */
+    .printable-area .ant-table {
+        font-size: 12px; /* Smaller font for print potentially */
+    }
+     .printable-area .ant-table-thead > tr > th,
+     .printable-area .ant-table-tbody > tr > td,
+     .printable-area .ant-table tfoot > tr > th,
+     .printable-area .ant-table tfoot > tr > td {
+        padding: 8px 8px; /* Adjust padding */
+        background: white !important; /* Ensure white background */
+     }
+
+    /* Style tags for print */
+    .printable-area .ant-tag {
+        background-color: #f0f0f0 !important; /* Light grey background */
+        color: #333 !important; /* Darker text */
+        border: 1px solid #d9d9d9 !important;
+        margin: 2px;
+    }
+
+     /* Ensure text is black */
+     .printable-area, .printable-area * {
+        color: black !important;
+     }
+
+     /* Adjust title sizes if needed */
+     .printable-area h1, .printable-area h2, .printable-area h3, .printable-area h4, .printable-area h5 {
+        margin-bottom: 0.5em;
+     }
+     .printable-area .ant-statistic-title {
+        margin-bottom: 4px;
+        font-size: 13px;
+     }
+     .printable-area .ant-statistic-content {
+        font-size: 16px;
+     }
+
+
+     /* Invoice header/footer */
+     .invoice-header, .invoice-footer {
+        page-break-after: avoid; /* Avoid breaking after header/before footer */
+     }
+}

@@ -38,6 +38,7 @@ import CreateImportReceipt from './pages/AdminLayout/AdminReceipt/CreateImportRe
 import ProtectedRoute from './component/ProtectedRoute.jsx';
 import BlogPage from './pages/ClientLayout/BlogPage.jsx';
 import VoucherPage from './pages/ClientLayout/VoucherPage.jsx';
+import TestPrint from './pages/AdminLayout/AdminOrder/TestPrint.jsx';
 
 const router = createBrowserRouter([
 
@@ -117,6 +118,10 @@ const router = createBrowserRouter([
        // *** THÊM ROUTE CHO IMPORT RECEIPT ***
        { path: "list-receipt", element: <ManageImportReceipt /> },
        { path: "add-receipt", element: <CreateImportReceipt /> },
+       // **************************************
+       // *** THÊM ROUTE CHO IMPORT RECEIPT ***
+       { path: "import-order", element: <TestPrint/> },
+    
        // **************************************
 
 
