@@ -1,17 +1,24 @@
 //src/pages/AdminLayout/AdminReceipt/ManageImportReceipt.jsx
-import React, { useState, useEffect } from "react";
-import { Space, Table, Popconfirm, notification, message, Row, Col, Tag, Button, Input, Select, DatePicker, Tooltip } from 'antd'; // Thêm Tooltip
+import React, { useState, useEffect, useCallback } from "react"; // Thêm useCallback
+import { Space, Table, Popconfirm, notification, message, Row, Col, Tag, Button, Input, Select, DatePicker, Tooltip } from 'antd';
 import { fetchAllImportReceiptAPI, deleteImportReceiptAPI } from '../../../services/api.importReceipt';
 import { fetchAllVendorAPI } from '../../../services/api.vendor';
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons'; // Thêm InfoCircleOutlined
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import UpdateImportReceipt from './UpdateImportReceipt';
 import ImportReceiptDetail from './ImportReceiptDetail';
 import { useNavigate } from "react-router-dom";
 import { format } from 'date-fns';
-import moment from 'moment'; // Thêm moment để tính toán ngày
+import moment from 'moment';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+
+const PRINTED_RECEIPTS_STORAGE_KEY = 'printedImportReceipts';
+
+const getPrintedReceiptsFromStorage = () => {
+    const stored = localStorage.getItem(PRINTED_RECEIPTS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+};
 
 const formatCurrency = (value) => {
     if (value === null || value === undefined) return 'N/A';
@@ -19,6 +26,7 @@ const formatCurrency = (value) => {
 };
 
 const getStatusTagColor = (status) => {
+    // ... (giữ nguyên)
     switch (status) {
         case 'PENDING': return 'orange';
         case 'COMPLETED': return 'success';
@@ -46,9 +54,22 @@ const ManageImportReceipt = () => {
         dateRange: [],
     });
     const navigate = useNavigate();
+    const [printedReceiptIds, setPrintedReceiptIds] = useState(getPrintedReceiptsFromStorage()); // State để lưu ID các phiếu đã in
+
+    // Callback khi một phiếu được in thành công từ ImportReceiptDetail
+    const handleReceiptPrinted = useCallback((receiptId) => {
+        setPrintedReceiptIds(prevIds => {
+            if (!prevIds.includes(receiptId)) {
+                return [...prevIds, receiptId];
+            }
+            return prevIds;
+        });
+    }, []);
+
 
     useEffect(() => {
         const loadVendorsForFilter = async () => {
+            // ... (giữ nguyên)
             try {
                 const res = await fetchAllVendorAPI(1, 1000, "", "", true);
                 if (res.data) {
@@ -62,12 +83,12 @@ const ManageImportReceipt = () => {
     }, []);
 
     const loadReceipts = async (page = 1, limit = 6, currentFilters = filters) => {
+        // ... (giữ nguyên)
         try {
             const { receiptCode, vendorId, status, dateRange } = currentFilters;
             const startDate = dateRange && dateRange[0] ? dateRange[0].toISOString() : "";
             const endDate = dateRange && dateRange[1] ? dateRange[1].toISOString() : "";
 
-            // Giả sử API trả về creationDate (hoặc createdAt)
             const res = await fetchAllImportReceiptAPI(page, limit, vendorId, receiptCode, status, startDate, endDate);
             if (res.data) {
                 setDataReceipts(res.data.data);
@@ -87,14 +108,16 @@ const ManageImportReceipt = () => {
 
     useEffect(() => {
         loadReceipts(1, pagination.limit, filters);
-    }, [filters]);
+    }, [filters, pagination.limit]); // Thêm pagination.limit để load lại khi thay đổi limit
 
     const handleTableChange = (paginationInfo) => {
+        // setPagination(prev => ({...prev, page: paginationInfo.current, limit: paginationInfo.pageSize})); // Cập nhật state trước
         loadReceipts(paginationInfo.current, paginationInfo.pageSize, filters);
     };
 
     const handleShowUpdateModal = (record) => {
-        setDataUpdate(record);
+        const isPrintedClientSide = printedReceiptIds.includes(record.id);
+        setDataUpdate({ ...record, isPrintedClientSide }); // Truyền cờ đã in
         setIsModalUpdateOpen(true);
     };
 
@@ -104,6 +127,7 @@ const ManageImportReceipt = () => {
     };
 
     const confirmDelete = async (id) => {
+        // ... (giữ nguyên)
         try {
             const res = await deleteImportReceiptAPI(id);
             if (res.statusCode === 200 || res.status === 200 || (res.data && res.data.success)) {
@@ -135,6 +159,7 @@ const ManageImportReceipt = () => {
     };
 
     const columns = [
+        // ... (ID, Mã Phiếu, Nhà cung cấp, Tổng tiền, Trạng thái, Ngày nhập, Ngày tạo giữ nguyên)
         {
             title: 'ID',
             dataIndex: 'id',
@@ -143,12 +168,13 @@ const ManageImportReceipt = () => {
                 <a onClick={() => handleShowDetailDrawer(record)}>{text}</a>
             ),
         },
-        { title: 'Mã Phiếu', dataIndex: 'receiptCode', key: 'receiptCode' },
+        { title: 'Mã Phiếu', dataIndex: 'receiptCode', key: 'receiptCode', ellipsis: true },
         {
             title: 'Nhà cung cấp',
             dataIndex: ['vendor', 'name'],
             key: 'vendorName',
             render: (name) => name || 'N/A',
+            ellipsis: true,
         },
         {
             title: 'Tổng tiền',
@@ -174,8 +200,8 @@ const ManageImportReceipt = () => {
             render: (date) => date ? format(new Date(date), 'dd/MM/yyyy HH:mm') : 'N/A',
         },
         {
-            title: 'Ngày tạo', // Thêm cột ngày tạo để user dễ thấy
-            dataIndex: 'creationDate', // Hoặc createdAt, tùy thuộc vào backend của bạn
+            title: 'Ngày tạo',
+            dataIndex: 'creationDate',
             key: 'creationDate',
             render: (date) => date ? format(new Date(date), 'dd/MM/yyyy HH:mm') : 'N/A',
         },
@@ -183,28 +209,31 @@ const ManageImportReceipt = () => {
             title: 'Hành động',
             key: 'action',
             width: 120,
+            fixed: 'right', // Giữ cột hành động cố định khi cuộn ngang
             render: (_, record) => {
-                // Yêu cầu 1: Kiểm tra thời gian tạo phiếu
                 let canEdit = true;
                 let editTooltipMessage = "Sửa phiếu nhập";
-                if (record.creationDate) { // Đảm bảo creationDate tồn tại
+                if (record.creationDate) {
                     const creationMoment = moment(record.creationDate);
                     const now = moment();
                     if (now.diff(creationMoment, 'days') > 7) {
                         canEdit = false;
                         editTooltipMessage = "Không thể sửa phiếu đã tạo quá 7 ngày.";
                     }
-                } else {
-                    // Nếu không có creationDate, có thể cho phép sửa hoặc coi như không thể xác định
-                    // canEdit = false; 
-                    // editTooltipMessage = "Không có thông tin ngày tạo phiếu.";
                 }
 
-                // Không cho sửa phiếu đã hủy
-                if (record.status === 'CANCELLED') {
-                    canEdit = false;
-                    editTooltipMessage = "Không thể sửa phiếu đã hủy.";
+                // Nếu phiếu đã COMPLETED VÀ đã được in (theo client-side), thì cũng không cho sửa các thông tin quan trọng
+                // Hoặc nếu phiếu là CANCELLED
+                const isPrintedClientSide = printedReceiptIds.includes(record.id);
+                if ((record.status === 'COMPLETED' && isPrintedClientSide) || record.status === 'CANCELLED') {
+                    canEdit = false; // Khóa sửa nếu đã COMPLETED và đã in, hoặc đã CANCELLED
+                    if (record.status === 'CANCELLED') {
+                        editTooltipMessage = "Không thể sửa phiếu đã hủy.";
+                    } else {
+                        editTooltipMessage = "Không thể sửa phiếu đã hoàn thành và đã được in.";
+                    }
                 }
+
 
                 return (
                     <Space size="middle">
@@ -215,27 +244,27 @@ const ManageImportReceipt = () => {
                             />
                         </Tooltip>
                         <Tooltip title={editTooltipMessage}>
-                            <span> {/* Thêm span để Tooltip hoạt động với button disabled */}
+                            <span>
                                 <EditOutlined
-                                    style={{ 
-                                        cursor: canEdit ? "pointer" : "not-allowed", 
-                                        color: canEdit ? "orange" : "grey" 
+                                    style={{
+                                        cursor: canEdit ? "pointer" : "not-allowed",
+                                        color: canEdit ? "orange" : "grey"
                                     }}
                                     onClick={() => canEdit && handleShowUpdateModal(record)}
                                     disabled={!canEdit}
                                 />
                             </span>
                         </Tooltip>
-                        <Tooltip title={record.status === 'COMPLETED' || record.status === 'CANCELLED' ? "Không thể xóa phiếu đã hoàn thành hoặc đã hủy" : "Xóa phiếu nhập"}>
+                         <Tooltip title={record.status === 'COMPLETED' || record.status === 'CANCELLED' ? "Không thể xóa phiếu đã hoàn thành hoặc đã hủy" : "Xóa phiếu nhập"}>
                              <span>
                                 <Popconfirm
                                     title="Xác nhận xóa"
-                                    description={`Bạn có chắc muốn xóa phiếu nhập "${record.receiptCode || record.id}"?`}
+                                    description={`Bạn có chắc muốn xóa phiếu nhập "${record.receiptCode || record.id}"? Hành động này không thể hoàn tác.`}
                                     onConfirm={() => confirmDelete(record.id)}
                                     onCancel={cancelDelete}
                                     okText="Xóa"
                                     cancelText="Hủy"
-                                    disabled={record.status === 'COMPLETED' || record.status === 'CANCELLED'} // Không cho xóa phiếu đã hoàn thành hoặc hủy
+                                    disabled={record.status === 'COMPLETED' || record.status === 'CANCELLED'}
                                 >
                                     <DeleteOutlined
                                         style={{
@@ -255,6 +284,7 @@ const ManageImportReceipt = () => {
 
     return (
         <>
+            {/* ... (Filter Section giữ nguyên) ... */}
             <Row gutter={[16, 16]} style={{ marginBottom: '20px', padding: '16px', background: '#f0f2f5', borderRadius: '8px' }}>
                 <Col xs={24} sm={12} md={6}>
                     <Input
@@ -321,13 +351,14 @@ const ManageImportReceipt = () => {
                 columns={columns}
                 dataSource={dataReceipts}
                 rowKey="id"
+                scroll={{ x: 1000 }} // Cho phép cuộn ngang nếu cần
                 pagination={{
                     current: pagination.page,
                     pageSize: pagination.limit,
                     total: pagination.total,
                     showSizeChanger: true,
                     pageSizeOptions: ['6', '10', '20', '50'],
-                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
                 }}
                 onChange={handleTableChange}
                 bordered
@@ -336,7 +367,7 @@ const ManageImportReceipt = () => {
             <UpdateImportReceipt
                 isModalOpen={isModalUpdateOpen}
                 setIsModalOpen={setIsModalUpdateOpen}
-                receiptData={dataUpdate}
+                receiptData={dataUpdate} // dataUpdate đã chứa isPrintedClientSide
                 reloadReceipts={() => loadReceipts(pagination.page, pagination.limit, filters)}
             />
 
@@ -345,6 +376,7 @@ const ManageImportReceipt = () => {
                 setIsDetailOpen={setIsDetailOpen}
                 dataDetail={dataDetail}
                 setDataDetail={setDataDetail}
+                onReceiptPrinted={handleReceiptPrinted} // Truyền callback
             />
         </>
     );

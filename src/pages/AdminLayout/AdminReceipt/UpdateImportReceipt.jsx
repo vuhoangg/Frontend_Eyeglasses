@@ -1,9 +1,8 @@
 //src/pages/AdminLayout/AdminReceipt/UpdateImportReceipt.jsx
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Row, Col, notification, Modal, Select, Typography, DatePicker, Switch } from "antd";
+import { Form, Input, Button, Row, Col, notification, Modal, Select, Typography, DatePicker, Switch, Alert } from "antd";
 import { updateImportReceiptAPI } from '../../../services/api.importReceipt';
-import { fetchAllVendorAPI } from '../../../services/api.vendor'; // Có thể cần nếu cho phép đổi NCC
-import { ClockCircleOutlined, CheckCircleOutlined, FileTextOutlined, BarcodeOutlined, CalendarOutlined, ShopOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, CheckCircleOutlined, FileTextOutlined, BarcodeOutlined, CalendarOutlined, InfoCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import moment from 'moment';
 
 const { Title } = Typography;
@@ -12,91 +11,81 @@ const { Option } = Select;
 const UpdateImportReceipt = ({ isModalOpen, setIsModalOpen, receiptData, reloadReceipts }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [vendors, setVendors] = useState([]); // Nếu cho phép đổi Vendor
-    const [currentStatus, setCurrentStatus] = useState(null);
-
-    // Load vendors nếu cần
-    useEffect(() => {
-        const loadVendorsIfNeeded = async () => {
-            // if (cho_phep_doi_vendor) {
-            //     try {
-            //         const res = await fetchAllVendorAPI(1, 1000, "", "", true);
-            //         if (res.data) setVendors(res.data.data);
-            //     } catch (error) { console.error("Failed to load vendors:", error); }
-            // }
-        };
-        loadVendorsIfNeeded();
-    }, []);
+    const [initialStatus, setInitialStatus] = useState(null);
+    // const [isActuallyPrinted, setIsActuallyPrinted] = useState(false); // Không cần state riêng này nữa, dùng receiptData.isPrintedClientSide
 
     useEffect(() => {
-        if (receiptData) {
-            setCurrentStatus(receiptData.status); // Lưu trạng thái hiện tại
+        if (receiptData && isModalOpen) { // Chỉ set giá trị khi modal mở và có data
+            setInitialStatus(receiptData.status);
+            // setIsActuallyPrinted(receiptData.isPrintedClientSide || false); // Lấy từ props
             form.setFieldsValue({
                 receiptCode: receiptData.receiptCode,
                 notes: receiptData.notes,
                 importDate: receiptData.importDate ? moment(receiptData.importDate) : null,
                 status: receiptData.status,
                 isActive: receiptData.isActive,
-                // vendorId: receiptData.vendorId, // Nếu cho phép đổi Vendor
             });
-        } else {
-            form.resetFields();
-            setCurrentStatus(null);
+        } else if (!isModalOpen) { // Reset form khi modal đóng
+             form.resetFields();
+             setInitialStatus(null);
+            // setIsActuallyPrinted(false);
         }
-    }, [receiptData, form]);
+    }, [receiptData, form, isModalOpen]);
 
     const handleCancel = () => {
         setIsModalOpen(false);
+        // form.resetFields(); // Đã xử lý trong useEffect
     };
 
-    const handleStatusChange = (value) => {
-        if (currentStatus === 'COMPLETED' && (value === 'PENDING' || value === 'CANCELLED')) {
+    const handleStatusChange = (newStatus) => {
+        // ... (Logic cảnh báo giữ nguyên)
+        if (initialStatus === 'COMPLETED' && (newStatus === 'PENDING' || newStatus === 'CANCELLED')) {
             Modal.confirm({
                 title: 'Xác nhận thay đổi trạng thái',
-                content: 'Chuyển trạng thái từ COMPLETED sang PENDING/CANCELLED sẽ hoàn tác việc cập nhật số lượng tồn kho. Bạn có chắc chắn?',
+                icon: <InfoCircleOutlined style={{ color: 'orange' }} />,
+                content: 'Chuyển trạng thái từ COMPLETED sang PENDING/CANCELLED sẽ hoàn tác việc cập nhật số lượng tồn kho (nếu backend hỗ trợ). Bạn có chắc chắn?',
                 okText: 'Xác nhận',
                 cancelText: 'Hủy',
                 onOk: () => {
-                    form.setFieldsValue({ status: value }); // Cập nhật form nếu xác nhận
+                    form.setFieldsValue({ status: newStatus });
                 },
                 onCancel: () => {
-                    form.setFieldsValue({ status: currentStatus }); // Hoàn tác về trạng thái cũ nếu hủy
+                    form.setFieldsValue({ status: initialStatus });
                 },
             });
-        } else if (value === 'COMPLETED' && currentStatus !== 'COMPLETED') {
-             Modal.confirm({
-                title: 'Xác nhận thay đổi trạng thái',
-                content: 'Chuyển trạng thái sang COMPLETED sẽ cập nhật số lượng tồn kho theo chi tiết phiếu nhập này. Bạn có chắc chắn?',
-                okText: 'Xác nhận',
+        } else if (newStatus === 'COMPLETED' && initialStatus !== 'COMPLETED') {
+            Modal.confirm({
+                title: 'Xác nhận hoàn thành phiếu nhập',
+                icon: <InfoCircleOutlined style={{ color: 'green' }} />,
+                content: 'Chuyển trạng thái sang COMPLETED sẽ cập nhật số lượng tồn kho theo chi tiết phiếu nhập này. Hành động này có thể không thể đảo ngược hoàn toàn. Bạn có chắc chắn?',
+                okText: 'Xác nhận Hoàn thành',
                 cancelText: 'Hủy',
                 onOk: () => {
-                    form.setFieldsValue({ status: value });
+                    form.setFieldsValue({ status: newStatus });
                 },
                 onCancel: () => {
-                     form.setFieldsValue({ status: currentStatus });
+                    form.setFieldsValue({ status: initialStatus });
                 },
             });
         } else {
-             form.setFieldsValue({ status: value }); // Các trường hợp khác thì cập nhật bình thường
+            form.setFieldsValue({ status: newStatus });
         }
     };
 
     const onFinish = async (values) => {
-        console.log("Form Data to Update:", values);
         setLoading(true);
         try {
             const payload = {
                 receiptCode: values.receiptCode,
                 notes: values.notes,
-                importDate: values.importDate ? values.importDate.toISOString() : undefined, // Gửi nếu có thay đổi
-                status: values.status,
+                importDate: values.importDate ? values.importDate.toISOString() : undefined,
+                status: values.status, // Gửi trạng thái hiện tại từ form
                 isActive: values.isActive,
-                // vendorId: values.vendorId, // Nếu cho phép đổi Vendor
             };
 
             const res = await updateImportReceiptAPI(
-                receiptData.id, // ID của phiếu nhập cần cập nhật
-                payload.vendorId, // Có thể undefined nếu không cho đổi
+                receiptData.id,
+                undefined,
                 payload.receiptCode,
                 payload.notes,
                 payload.importDate,
@@ -104,13 +93,13 @@ const UpdateImportReceipt = ({ isModalOpen, setIsModalOpen, receiptData, reloadR
                 payload.isActive
             );
 
-            if (res.statusCode === 200 || res.status === 200) {
+            if (res.statusCode === 200 || (res.data && res.data.id)) {
                 notification.success({
                     message: "Cập nhật Phiếu Nhập",
                     description: "Cập nhật thông tin phiếu nhập thành công!",
                 });
                 setIsModalOpen(false);
-                reloadReceipts(); // Gọi hàm reload từ props
+                reloadReceipts();
             } else {
                 notification.error({
                     message: "Cập nhật Phiếu Nhập",
@@ -118,70 +107,94 @@ const UpdateImportReceipt = ({ isModalOpen, setIsModalOpen, receiptData, reloadR
                 });
             }
         } catch (error) {
-             console.error("Update receipt error:", error.response || error);
+            console.error("Update receipt error:", error.response || error);
             notification.error({
                 message: "Cập nhật Phiếu Nhập",
-                description: error?.response?.data?.message || "Cập nhật thất bại.",
+                description: error?.response?.data?.message || "Đã xảy ra lỗi khi cập nhật.",
             });
         } finally {
             setLoading(false);
         }
     };
 
+    // Yêu cầu 3 (đã điều chỉnh): Khóa trạng thái nếu phiếu ban đầu là COMPLETED VÀ đã được in (theo client-side)
+    const isActuallyPrinted = receiptData?.isPrintedClientSide || false;
+    const isStatusLocked = initialStatus === 'COMPLETED' && isActuallyPrinted;
+    const statusLockMessage = "Không thể thay đổi trạng thái của phiếu nhập đã hoàn thành và đã được in.";
+
+
     return (
         <Modal
-            title={<Title level={4}>Cập Nhật Phiếu Nhập Hàng</Title>}
+            title={<Title level={4}>Cập Nhật Phiếu Nhập Hàng #{receiptData?.id}</Title>}
             open={isModalOpen}
             onCancel={handleCancel}
             footer={null}
             width={700}
             maskClosable={false}
+            destroyOnClose // Rất quan trọng để reset state của form và các state khác khi modal đóng hẳn
         >
-            <Form form={form} layout="vertical" onFinish={onFinish}>
-                 {/* Không cho phép sửa details ở đây */}
-                 <Row gutter={24}>
-                    {/* <Col span={12}>
-                        <Form.Item label="Nhà cung cấp" name="vendorId" rules={[{ required: true, message: "Vui lòng chọn nhà cung cấp!" }]}>
-                            <Select placeholder="Chọn nhà cung cấp" disabled={!cho_phep_doi_vendor}>
-                                {vendors.map(v => <Option key={v.id} value={v.id}>{v.name}</Option>)}
-                            </Select>
-                        </Form.Item>
-                    </Col> */}
+            <Form form={form} layout="vertical" onFinish={onFinish} key={receiptData?.id || 'new'}> {/* Thêm key để re-render form khi receiptData thay đổi */}
+                {isStatusLocked && (
+                    <Alert
+                        message="Thông báo quan trọng"
+                        description={statusLockMessage}
+                        type="warning"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
+                )}
+                 {initialStatus === 'COMPLETED' && !isActuallyPrinted && (
+                    <Alert
+                        message="Lưu ý"
+                        description="Phiếu này đã HOÀN THÀNH. Nếu bạn in phiếu này, bạn sẽ không thể thay đổi trạng thái của nó nữa."
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
+                )}
+                <Row gutter={24}>
+                    {/* ... (các trường khác giữ nguyên) ... */}
                      <Col span={12}>
-                         <Form.Item label="Mã Phiếu Nhập" name="receiptCode">
+                        <Form.Item label="Mã Phiếu Nhập" name="receiptCode">
                             <Input prefix={<BarcodeOutlined />} placeholder="VD: PNK20240521001" />
                         </Form.Item>
-                     </Col>
-                      <Col span={12}>
+                    </Col>
+                    <Col span={12}>
                         <Form.Item label="Ngày nhập" name="importDate">
                             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY HH:mm" showTime={{ format: 'HH:mm' }} prefix={<CalendarOutlined />} />
                         </Form.Item>
                     </Col>
-
-                 </Row>
+                </Row>
 
                 <Form.Item label="Ghi chú" name="notes">
                     <Input.TextArea rows={3} prefix={<FileTextOutlined />} placeholder="Ghi chú thêm..." />
                 </Form.Item>
 
-                 <Row gutter={24}>
-                     <Col span={12}>
-                        <Form.Item label="Trạng thái" name="status" rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}>
-                             {/* Dùng onChange để xử lý cảnh báo */}
-                            <Select onChange={handleStatusChange}>
+
+                <Row gutter={24}>
+                    <Col span={12}>
+                        <Form.Item
+                            label="Trạng thái"
+                            name="status"
+                            rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
+                            tooltip={isStatusLocked ? statusLockMessage : "Chọn trạng thái cho phiếu nhập"}
+                        >
+                            <Select
+                                onChange={handleStatusChange}
+                                disabled={isStatusLocked} // Khóa nếu đã COMPLETED VÀ đã in
+                            >
                                 <Option value="PENDING"><ClockCircleOutlined /> PENDING</Option>
                                 <Option value="COMPLETED"><CheckCircleOutlined /> COMPLETED</Option>
-                                <Option value="CANCELLED">CANCELLED</Option>
+                                <Option value="CANCELLED"><CloseCircleOutlined /> CANCELLED</Option>
                             </Select>
                         </Form.Item>
-                     </Col>
-                     <Col span={12}>
-                        <Form.Item label="Hoạt động" name="isActive" valuePropName="checked">
+                    </Col>
+                    <Col span={12}>
+                        <Form.Item label="Hoạt động (Ẩn/Hiện)" name="isActive" valuePropName="checked">
                             <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
                         </Form.Item>
                     </Col>
-                 </Row>
-
+                </Row>
 
                 <Row justify="end" style={{ marginTop: 24 }}>
                     <Col>
