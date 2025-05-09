@@ -6,21 +6,21 @@ const createImportReceiptAPI = (vendorId, details, receiptCode, notes, importDat
     const URL_BACKEND = "/import-receipts";
     const data = {
         vendorId: vendorId,
-        details: details.map(item => ({ // Ensure details match the DTO structure
+        details: details.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
             importPrice: item.importPrice,
         })),
         receiptCode: receiptCode,
         notes: notes,
-        importDate: importDate, // Should be ISO string format if provided e.g., "2024-05-21T10:00:00Z"
-        status: status, // e.g., 'PENDING' or 'COMPLETED'
+        importDate: importDate,
+        status: status,
     };
     return axios.post(URL_BACKEND, data);
 };
 
-// GET /import-receipts?page=1&limit=10&vendorId=1&status=PENDING&startDate=...&endDate=...
-const fetchAllImportReceiptAPI = (page, limit, vendorId = null, receiptCode = "", status = "", startDate = "", endDate = "") => {
+// GET /import-receipts?page=1&limit=10&vendorId=1&status=PENDING&startDate=...&endDate=...&sortBy=creationDate&sortOrder=DESC
+const fetchAllImportReceiptAPI = (page, limit, vendorId = null, receiptCode = "", status = "", startDate = "", endDate = "", sortBy = "", sortOrder = "") => {
     let URL_BACKEND = `/import-receipts?page=${page}&limit=${limit}`;
     if (vendorId) {
         URL_BACKEND += `&vendorId=${vendorId}`;
@@ -32,15 +32,18 @@ const fetchAllImportReceiptAPI = (page, limit, vendorId = null, receiptCode = ""
         URL_BACKEND += `&status=${status}`;
     }
      if (startDate) {
-        URL_BACKEND += `&startDate=${startDate}`; // Expect ISO date string
+        URL_BACKEND += `&startDate=${startDate}`;
     }
     if (endDate) {
-        URL_BACKEND += `&endDate=${endDate}`;     // Expect ISO date string
+        URL_BACKEND += `&endDate=${endDate}`;
     }
-    // if (isActive !== null) {
-    //     URL_BACKEND += `&isActive=${isActive}`;
-    // }
-    console.log("Fetching import receipts URL:", URL_BACKEND); // Debug log
+    if (sortBy) {
+        URL_BACKEND += `&sortBy=${sortBy}`;
+    }
+    if (sortOrder) {
+        URL_BACKEND += `&sortOrder=${sortOrder}`;
+    }
+    console.log("Fetching import receipts URL:", URL_BACKEND);
     return axios.get(URL_BACKEND);
 };
 
@@ -51,18 +54,15 @@ const fetchImportReceiptByIdAPI = (id) => {
 };
 
 // PATCH /import-receipts/:id
-// IMPORTANT: This API CANNOT update details array based on backend logic.
-// It's primarily for updating notes, status, receiptCode, isActive etc.
 const updateImportReceiptAPI = (id, vendorId, receiptCode, notes, importDate, status, isActive) => {
     const URL_BACKEND = `/import-receipts/${id}`;
     const data = {
-        // You might not need to send vendorId or importDate for updates unless your backend allows it
-         ...(vendorId && { vendorId }), // Conditionally include vendorId if needed
+         ...(vendorId && { vendorId }),
          ...(receiptCode && { receiptCode }),
          ...(notes && { notes }),
          ...(importDate && { importDate }),
-         ...(status && { status }), // Crucial for triggering stock updates
-         ...(isActive !== undefined && { isActive }), // Allow updating isActive
+         ...(status && { status }),
+         ...(isActive !== undefined && { isActive }),
     };
     return axios.patch(URL_BACKEND, data);
 };
@@ -72,14 +72,6 @@ const deleteImportReceiptAPI = (id) => {
     const URL_BACKEND = `/import-receipts/${id}`;
     return axios.delete(URL_BACKEND);
 };
-
-
-// You might need an API to fetch products for the create/update form's product selection
-// Re-use fetchAllProductAPI from api.product.jsx
-// import { fetchAllProductAPI } from './api.product';
-
-// You might need an API to fetch vendors for the create/update form's vendor selection
-// Re-use fetchAllVendorAPI from api.vendor.jsx
 
 export {
     createImportReceiptAPI,

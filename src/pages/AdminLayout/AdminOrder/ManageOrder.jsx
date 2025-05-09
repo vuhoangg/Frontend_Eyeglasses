@@ -155,12 +155,12 @@ const ManageOrder = () => {
     // Get status tag color for table column
     const getStatusTagColorForTable = (status) => {
         const statusMap = {
-            'Pending': 'orange',
-            'Processing': 'blue',
-            'Shipped': 'purple',
-            'Delivered': 'green',
-            'Cancelled': 'red',
-            'Completed': 'green'
+            'Chờ xử lý': 'orange',
+            'Xác nhận đơn': 'blue',
+            'Đang Giao': 'purple',
+            'Giao thành công': 'green',
+            'Huỷ Đơn': 'red',
+            'Hoàn Hàng': 'yellow'
         };
         return statusMap[status] || 'default';
     };
