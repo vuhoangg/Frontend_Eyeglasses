@@ -127,6 +127,37 @@ const AdminLayout = () => {
         },
       ],
     },
+
+    // *** THÊM MENU QUẢN LÝ VAI TRÒ (CHỈ ADMIN) ***
+    userRole === "admin" && {
+      key: "g_role", // Key mới
+      icon: <SafetyCertificateOutlined />, // Icon mới
+      label: "Quản lý vai trò",
+      children: [
+        {
+          key: "role_1", // Key con mới
+          label: (
+            <Link
+              to="/admin/list-role" // Link đến trang list role
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Danh sách vai trò
+            </Link>
+          ),
+        },
+        {
+          key: "role_2", // Key con mới
+          label: (
+            <Link
+              to="/admin/add-role" // Link đến trang add role
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Thêm vai trò
+            </Link>
+          ),
+        },
+      ],
+    },
     {
       key: "g2",
       icon: <MenuUnfoldOutlined />,

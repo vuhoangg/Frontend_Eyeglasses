@@ -117,7 +117,7 @@ const CheckoutPage = () => {
                     price: Number(item.price)
                 })),
                 shippingAddress,
-                paymentMethod: paymentMethod || 'cash',
+                paymentMethod: paymentMethod || 'COD',
                 order_status_id: 1, // ID trạng thái "Pending" (cần đảm bảo ID này đúng)
                 totalAmount: totalPrice,
                 promotionId: promotionId ? Number(promotionId) : null,

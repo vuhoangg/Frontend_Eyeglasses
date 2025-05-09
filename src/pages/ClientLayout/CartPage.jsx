@@ -207,7 +207,7 @@ const CartPage = () => {
         } catch (error) {
             message.destroy();
             console.error('Lỗi khi đồng bộ giỏ hàng trước khi thanh toán:', error);
-            const errorMsg = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đồng bộ giỏ hàng.';
+            // const errorMsg = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi đồng bộ giỏ hàng.';
             message.error(`${errorMsg} Vui lòng thử lại.`);
         }
     };

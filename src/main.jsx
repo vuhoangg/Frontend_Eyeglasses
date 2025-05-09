@@ -39,6 +39,8 @@ import ProtectedRoute from './component/ProtectedRoute.jsx';
 import BlogPage from './pages/ClientLayout/BlogPage.jsx';
 import VoucherPage from './pages/ClientLayout/VoucherPage.jsx';
 import TestPrint from './pages/AdminLayout/AdminOrder/TestPrint.jsx';
+import ManageRole from './pages/AdminLayout/AdminRole/ManageRole.jsx';
+import CreateRole from './pages/AdminLayout/AdminRole/CreateRole.jsx';
 
 const router = createBrowserRouter([
 
@@ -123,6 +125,10 @@ const router = createBrowserRouter([
        { path: "import-order", element: <TestPrint/> },
     
        // **************************************
+
+        // *** THÊM ROUTE CHO ROLE ***
+      { path: "list-role", element: <ManageRole /> },
+      { path: "add-role", element: <CreateRole /> },
 
 
 

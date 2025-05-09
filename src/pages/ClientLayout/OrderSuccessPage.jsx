@@ -94,7 +94,7 @@ const OrderSuccessPage = () => {
                             <Text>Địa chỉ: {orderData.shippingAddress}</Text>
                             <br />
                             <Text>Phương thức thanh toán: {
-                                orderData.paymentMethod === 'cash'
+                                orderData.paymentMethod === 'COD'
                                     ? 'Thanh toán khi nhận hàng'
                                     : 'Chuyển khoản ngân hàng'
                             }</Text>
