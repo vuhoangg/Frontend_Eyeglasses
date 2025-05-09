@@ -31,13 +31,19 @@ const ImportReceiptDetail = ({ isDetailOpen, setIsDetailOpen, dataDetail, setDat
 
     const handlePrint = () => {
         const element = componentRef.current;
-
-        if (element) {
+        if (element && receiptDetails && receiptDetails.status === 'COMPLETED') { // Chỉ in khi COMPLETED
             html2pdf()
                 .from(element)
-                .save(`PhieuNhapHang_${receiptDetails?.receiptCode}.pdf`); // Use receiptCode for filename
+                .set({
+                    margin: [10, 5, 10, 5], // top, left, bottom, right in mm
+                    filename: `PhieuNhapHang_${receiptDetails?.receiptCode || receiptDetails?.id}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, logging: true, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                })
+                .save();
         } else {
-            console.error("componentRef.current is null. Cannot generate PDF.");
+            console.error("Không thể tạo PDF: Component rỗng hoặc trạng thái phiếu không hợp lệ.");
         }
     };
 

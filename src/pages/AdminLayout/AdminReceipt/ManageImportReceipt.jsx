@@ -1,25 +1,23 @@
-//src/pages/AdminLayout/AdminReceipt/ManagerImportReceipt.jsx
+//src/pages/AdminLayout/AdminReceipt/ManageImportReceipt.jsx
 import React, { useState, useEffect } from "react";
-import { Space, Table, Popconfirm, notification, message, Row, Col, Tag, Button, Input, Select, DatePicker } from 'antd';
-import { fetchAllImportReceiptAPI, deleteImportReceiptAPI } from '../../../services/api.importReceipt'; // API Phiếu nhập
-import { fetchAllVendorAPI } from '../../../services/api.vendor'; // API Nhà cung cấp để lọc
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, FilterOutlined } from '@ant-design/icons';
-import UpdateImportReceipt from './UpdateImportReceipt'; // Tạo file này
-import ImportReceiptDetail from './ImportReceiptDetail'; // Tạo file này
-// import FormSearch from '../../../component/SearchForm'; // Có thể dùng SearchForm hoặc input thường
+import { Space, Table, Popconfirm, notification, message, Row, Col, Tag, Button, Input, Select, DatePicker, Tooltip } from 'antd'; // Thêm Tooltip
+import { fetchAllImportReceiptAPI, deleteImportReceiptAPI } from '../../../services/api.importReceipt';
+import { fetchAllVendorAPI } from '../../../services/api.vendor';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons'; // Thêm InfoCircleOutlined
+import UpdateImportReceipt from './UpdateImportReceipt';
+import ImportReceiptDetail from './ImportReceiptDetail';
 import { useNavigate } from "react-router-dom";
-import { format } from 'date-fns'; // Để format ngày
+import { format } from 'date-fns';
+import moment from 'moment'; // Thêm moment để tính toán ngày
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-// Hàm format tiền tệ
 const formatCurrency = (value) => {
     if (value === null || value === undefined) return 'N/A';
     return Number(value).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 };
 
-// Hàm lấy màu Tag trạng thái
 const getStatusTagColor = (status) => {
     switch (status) {
         case 'PENDING': return 'orange';
@@ -40,20 +38,19 @@ const ManageImportReceipt = () => {
         limit: 6,
         total: 0,
     });
-    const [vendors, setVendors] = useState([]); // Danh sách NCC cho bộ lọc
-    const [filters, setFilters] = useState({ // State cho các bộ lọc
+    const [vendors, setVendors] = useState([]);
+    const [filters, setFilters] = useState({
         receiptCode: "",
         vendorId: null,
         status: "",
-        dateRange: [], // [startDate, endDate]
+        dateRange: [],
     });
     const navigate = useNavigate();
 
-    // Load danh sách NCC khi component mount
     useEffect(() => {
         const loadVendorsForFilter = async () => {
             try {
-                const res = await fetchAllVendorAPI(1, 1000, "", "", true); // Lấy tất cả NCC đang hoạt động
+                const res = await fetchAllVendorAPI(1, 1000, "", "", true);
                 if (res.data) {
                     setVendors(res.data.data);
                 }
@@ -64,14 +61,14 @@ const ManageImportReceipt = () => {
         loadVendorsForFilter();
     }, []);
 
-
     const loadReceipts = async (page = 1, limit = 6, currentFilters = filters) => {
         try {
             const { receiptCode, vendorId, status, dateRange } = currentFilters;
             const startDate = dateRange && dateRange[0] ? dateRange[0].toISOString() : "";
             const endDate = dateRange && dateRange[1] ? dateRange[1].toISOString() : "";
 
-            const res = await fetchAllImportReceiptAPI(page, limit, vendorId, receiptCode, status, startDate, endDate); // Mặc định lấy active=true
+            // Giả sử API trả về creationDate (hoặc createdAt)
+            const res = await fetchAllImportReceiptAPI(page, limit, vendorId, receiptCode, status, startDate, endDate);
             if (res.data) {
                 setDataReceipts(res.data.data);
                 setPagination({
@@ -88,12 +85,10 @@ const ManageImportReceipt = () => {
         }
     };
 
-    // Load lần đầu và khi filter thay đổi
     useEffect(() => {
-        loadReceipts(1, pagination.limit, filters); // Load trang 1 khi filter thay đổi
-    }, [filters]); // Chạy lại khi filters thay đổi
+        loadReceipts(1, pagination.limit, filters);
+    }, [filters]);
 
-    // Load khi phân trang thay đổi
     const handleTableChange = (paginationInfo) => {
         loadReceipts(paginationInfo.current, paginationInfo.pageSize, filters);
     };
@@ -108,10 +103,9 @@ const ManageImportReceipt = () => {
         setIsDetailOpen(true);
     };
 
-     const confirmDelete = async (id) => {
+    const confirmDelete = async (id) => {
         try {
-            const res = await deleteImportReceiptAPI(id); // API xóa (soft delete)
-            // Kiểm tra response từ backend, có thể là res.data, res.status, res.statusCode tùy cách bạn trả về
+            const res = await deleteImportReceiptAPI(id);
             if (res.statusCode === 200 || res.status === 200 || (res.data && res.data.success)) {
                 notification.success({
                     message: "Xóa Phiếu nhập",
@@ -136,11 +130,9 @@ const ManageImportReceipt = () => {
         message.error('Hủy bỏ thao tác xóa');
     };
 
-    // Cập nhật state bộ lọc
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     };
-
 
     const columns = [
         {
@@ -154,9 +146,9 @@ const ManageImportReceipt = () => {
         { title: 'Mã Phiếu', dataIndex: 'receiptCode', key: 'receiptCode' },
         {
             title: 'Nhà cung cấp',
-            dataIndex: ['vendor', 'name'], // Truy cập nested data
+            dataIndex: ['vendor', 'name'],
             key: 'vendorName',
-            render: (name) => name || 'N/A', // Hiển thị N/A nếu không có vendor
+            render: (name) => name || 'N/A',
         },
         {
             title: 'Tổng tiền',
@@ -175,58 +167,97 @@ const ManageImportReceipt = () => {
                 </Tag>
             ),
         },
-         {
+        {
             title: 'Ngày nhập',
             dataIndex: 'importDate',
             key: 'importDate',
             render: (date) => date ? format(new Date(date), 'dd/MM/yyyy HH:mm') : 'N/A',
         },
         {
+            title: 'Ngày tạo', // Thêm cột ngày tạo để user dễ thấy
+            dataIndex: 'creationDate', // Hoặc createdAt, tùy thuộc vào backend của bạn
+            key: 'creationDate',
+            render: (date) => date ? format(new Date(date), 'dd/MM/yyyy HH:mm') : 'N/A',
+        },
+        {
             title: 'Hành động',
             key: 'action',
             width: 120,
-            render: (_, record) => (
-                 <Space size="middle">
-                    <EyeOutlined
-                        style={{ cursor: "pointer", color: "#1890ff" }}
-                        onClick={() => handleShowDetailDrawer(record)}
-                    />
-                    {/* Chỉ cho sửa nếu chưa COMPLETED hoặc chưa CANCELLED? (Tùy logic nghiệp vụ) */}
-                    <EditOutlined
-                        style={{ cursor: "pointer", color: "orange" }}
-                         // Tạm thời cho sửa mọi trạng thái, logic trong modal sẽ kiểm tra
-                        onClick={() => handleShowUpdateModal(record)}
-                    />
-                    {/* Chỉ cho xóa nếu chưa COMPLETED? (Tùy logic nghiệp vụ) */}
-                     <Popconfirm
-                        title="Xác nhận xóa"
-                        description={`Bạn có chắc muốn xóa phiếu nhập "${record.receiptCode || record.id}"?`}
-                        onConfirm={() => confirmDelete(record.id)}
-                        onCancel={cancelDelete}
-                        okText="Xóa"
-                        cancelText="Hủy"
-                         // Điều kiện disable xóa (ví dụ: không cho xóa phiếu đã hoàn thành)
-                        // disabled={record.status === 'COMPLETED'}
-                    >
-                        <DeleteOutlined
-                            style={{ cursor: "pointer" , color: "red" }}
-                            // style={{
-                            //     cursor: record.status !== 'COMPLETED' ? "pointer" : "not-allowed",
-                            //     color: record.status !== 'COMPLETED' ? "red" : "grey"
-                            // }}
-                        />
-                    </Popconfirm>
-                </Space>
-            ),
+            render: (_, record) => {
+                // Yêu cầu 1: Kiểm tra thời gian tạo phiếu
+                let canEdit = true;
+                let editTooltipMessage = "Sửa phiếu nhập";
+                if (record.creationDate) { // Đảm bảo creationDate tồn tại
+                    const creationMoment = moment(record.creationDate);
+                    const now = moment();
+                    if (now.diff(creationMoment, 'days') > 7) {
+                        canEdit = false;
+                        editTooltipMessage = "Không thể sửa phiếu đã tạo quá 7 ngày.";
+                    }
+                } else {
+                    // Nếu không có creationDate, có thể cho phép sửa hoặc coi như không thể xác định
+                    // canEdit = false; 
+                    // editTooltipMessage = "Không có thông tin ngày tạo phiếu.";
+                }
+
+                // Không cho sửa phiếu đã hủy
+                if (record.status === 'CANCELLED') {
+                    canEdit = false;
+                    editTooltipMessage = "Không thể sửa phiếu đã hủy.";
+                }
+
+                return (
+                    <Space size="middle">
+                        <Tooltip title="Xem chi tiết">
+                            <EyeOutlined
+                                style={{ cursor: "pointer", color: "#1890ff" }}
+                                onClick={() => handleShowDetailDrawer(record)}
+                            />
+                        </Tooltip>
+                        <Tooltip title={editTooltipMessage}>
+                            <span> {/* Thêm span để Tooltip hoạt động với button disabled */}
+                                <EditOutlined
+                                    style={{ 
+                                        cursor: canEdit ? "pointer" : "not-allowed", 
+                                        color: canEdit ? "orange" : "grey" 
+                                    }}
+                                    onClick={() => canEdit && handleShowUpdateModal(record)}
+                                    disabled={!canEdit}
+                                />
+                            </span>
+                        </Tooltip>
+                        <Tooltip title={record.status === 'COMPLETED' || record.status === 'CANCELLED' ? "Không thể xóa phiếu đã hoàn thành hoặc đã hủy" : "Xóa phiếu nhập"}>
+                             <span>
+                                <Popconfirm
+                                    title="Xác nhận xóa"
+                                    description={`Bạn có chắc muốn xóa phiếu nhập "${record.receiptCode || record.id}"?`}
+                                    onConfirm={() => confirmDelete(record.id)}
+                                    onCancel={cancelDelete}
+                                    okText="Xóa"
+                                    cancelText="Hủy"
+                                    disabled={record.status === 'COMPLETED' || record.status === 'CANCELLED'} // Không cho xóa phiếu đã hoàn thành hoặc hủy
+                                >
+                                    <DeleteOutlined
+                                        style={{
+                                            cursor: (record.status !== 'COMPLETED' && record.status !== 'CANCELLED') ? "pointer" : "not-allowed",
+                                            color: (record.status !== 'COMPLETED' && record.status !== 'CANCELLED') ? "red" : "grey"
+                                        }}
+                                        disabled={record.status === 'COMPLETED' || record.status === 'CANCELLED'}
+                                    />
+                                </Popconfirm>
+                            </span>
+                        </Tooltip>
+                    </Space>
+                );
+            },
         },
     ];
 
     return (
         <>
-             {/* Filter Section */}
-             <Row gutter={[16, 16]} style={{ marginBottom: '20px', padding: '16px', background: '#f0f2f5', borderRadius: '8px' }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: '20px', padding: '16px', background: '#f0f2f5', borderRadius: '8px' }}>
                 <Col xs={24} sm={12} md={6}>
-                     <Input
+                    <Input
                         placeholder="Tìm theo mã phiếu..."
                         value={filters.receiptCode}
                         onChange={(e) => handleFilterChange('receiptCode', e.target.value)}
@@ -243,14 +274,14 @@ const ManageImportReceipt = () => {
                         showSearch
                         filterOption={(input, option) =>
                             (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-                          }
+                        }
                     >
                         {vendors.map(vendor => (
                             <Option key={vendor.id} value={vendor.id}>{vendor.name}</Option>
                         ))}
                     </Select>
                 </Col>
-                 <Col xs={24} sm={12} md={6}>
+                <Col xs={24} sm={12} md={6}>
                     <Select
                         placeholder="Chọn trạng thái"
                         style={{ width: '100%' }}
@@ -264,31 +295,22 @@ const ManageImportReceipt = () => {
                     </Select>
                 </Col>
                 <Col xs={24} sm={12} md={6}>
-                     <RangePicker
+                    <RangePicker
                         style={{ width: '100%' }}
                         value={filters.dateRange}
                         onChange={(dates) => handleFilterChange('dateRange', dates)}
                         format="DD/MM/YYYY"
                     />
                 </Col>
-                 {/* Nút Lọc có thể không cần nếu useEffect tự động lọc */}
-                 {/* <Col>
-                    <Button type="primary" icon={<FilterOutlined />} onClick={() => loadReceipts(1, pagination.limit, filters)}>
-                        Lọc
-                    </Button>
-                 </Col> */}
-             </Row>
+            </Row>
 
             <Row justify="space-between" style={{ marginBottom: "20px" }}>
-                {/* Search bar có thể gộp vào Filter */}
-                <Col>
-                    {/* Optional: Title */}
-                </Col>
+                <Col />
                 <Col>
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => navigate('/admin/add-receipt')} // Điều hướng đến trang tạo mới
+                        onClick={() => navigate('/admin/add-receipt')}
                     >
                         Thêm Phiếu nhập
                     </Button>
@@ -314,8 +336,8 @@ const ManageImportReceipt = () => {
             <UpdateImportReceipt
                 isModalOpen={isModalUpdateOpen}
                 setIsModalOpen={setIsModalUpdateOpen}
-                receiptData={dataUpdate} // Truyền receiptData thay vì orderData
-                reloadReceipts={() => loadReceipts(pagination.page, pagination.limit, filters)} // Đổi tên hàm reload
+                receiptData={dataUpdate}
+                reloadReceipts={() => loadReceipts(pagination.page, pagination.limit, filters)}
             />
 
             <ImportReceiptDetail
@@ -323,7 +345,6 @@ const ManageImportReceipt = () => {
                 setIsDetailOpen={setIsDetailOpen}
                 dataDetail={dataDetail}
                 setDataDetail={setDataDetail}
-                 // Không cần reload ở đây trừ khi detail có action sửa đổi
             />
         </>
     );
