@@ -126,20 +126,19 @@ const CheckoutPage = () => {
             };
 
             // --- BƯỚC 1: Gọi API tạo Order ---
-            console.log("Sending order data to createOrderAPI:", orderDataPayload);
+            // --- BƯỚC 1: Gọi API tạo Order ---
+            console.log("Sending order data (from CheckoutPage state):", orderDataPayload); // Log payload bạn đã chuẩn bị
             const orderResponse = await createOrderAPI(
                 orderDataPayload.userId,
-                orderDataPayload.cartItems, // Vẫn gửi lên, backend có thể sẽ dùng sau
+                orderDataPayload.cartItems,       // Đây là mảng [{productId, quantity, price}, ...]
                 orderDataPayload.shippingAddress,
                 orderDataPayload.paymentMethod,
                 orderDataPayload.totalAmount,
                 orderDataPayload.promotionId,
-                orderDataPayload.fullName,
-                orderDataPayload.phone
-                // Thêm order_status_id nếu API yêu cầu
+                orderDataPayload.order_status_id  // <--- SỬA Ở ĐÂY: Truyền order_status_id (là số 1)
+                // Không truyền fullName và phone ở đây nữa vì createOrderAPI hiện tại không dùng chúng
             );
-             console.log("Create order API response:", orderResponse);
-
+            console.log("Create order API response:", orderResponse);
             // --- BƯỚC 2: Xử lý kết quả tạo Order và tạo Order Items ---
             if (orderResponse && (orderResponse.statusCode === 201 || orderResponse.status === 201) && orderResponse.data?.id) {
                 const orderId = orderResponse.data.id; // Lấy ID của Order vừa tạo

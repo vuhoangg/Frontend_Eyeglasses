@@ -69,9 +69,6 @@ const router = createBrowserRouter([
       { path: "/profile", element: <UserProfile /> }, // Direct route to UserProfile
       { path: "/password", element: <ChangePassword /> }, // Direct route to ChangePassword
 
-   
-
-
 
     ],
   },
