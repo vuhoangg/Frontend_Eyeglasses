@@ -1,37 +1,44 @@
-//src/services/api.order.jsx
-import axios from './axios.customize'; // Đảm bảo đường dẫn đúng
+// src/services/api.order.jsx
+import axios from './axios.customize';
 
-const createOrderAPI = (userId, cartItems, shippingAddress, paymentMethod, totalAmount) => {
+const createOrderAPI = (userId, orderItems, shippingAddress, paymentMethod, totalAmount, promotionId = null, orderStatusId = 1) => {
     const URL_BACKEND = `/orders`;
     const data = {
-        user_id: userId, // Thay đổi userId thành user_id
-        cartItems: cartItems.map(item => ({
-            productId: item.id, // Assuming 'id' is product ID
+        user_id: userId,
+        orderItems: orderItems.map(item => ({
+            productId: item.productId, // Đảm bảo khớp với cấu trúc item trong giỏ hàng của bạn
             quantity: item.quantity,
-            price: item.price
+            price: item.price // Giá tại thời điểm đặt hàng
         })),
         shippingAddress: shippingAddress,
         paymentMethod: paymentMethod,
-        totalAmount: totalAmount,
-        order_status_id: 1 // ID trạng thái đơn hàng mặc định (ví dụ: 1 là "Đang xử lý")
+        totalAmount: totalAmount, // Backend có thể tính lại dựa trên items và promotion
+        promotion_id: promotionId,
+        order_status_id: orderStatusId // Mặc định là 'Chờ xử lý' (ID=1)
     };
-
     return axios.post(URL_BACKEND, data);
 };
 
-const fetchAllOrdersAPI = (page, limit, userId = null, orderStatusId = null, isActive = null) => {
+// Cập nhật hàm fetchAllOrdersAPI
+const fetchAllOrdersAPI = (page, limit, customerName = "", orderStatusId = null, sortBy = "creationDate", sortOrder = "DESC", isActive = null) => {
     let URL_BACKEND = `/orders?page=${page}&limit=${limit}`;
 
-    if (userId) {
-        URL_BACKEND += `&user_id=${userId}`;
+    if (customerName) {
+        URL_BACKEND += `&customerName=${encodeURIComponent(customerName)}`;
     }
-    if (orderStatusId) {
+    if (orderStatusId !== null && orderStatusId !== undefined && orderStatusId !== '') { // Kiểm tra kỹ hơn
         URL_BACKEND += `&order_status_id=${orderStatusId}`;
+    }
+    if (sortBy) {
+        URL_BACKEND += `&sortBy=${sortBy}`;
+    }
+    if (sortOrder) {
+        URL_BACKEND += `&sortOrder=${sortOrder}`;
     }
     if (isActive !== null) {
         URL_BACKEND += `&isActive=${isActive}`;
     }
-
+    console.log("Fetching orders URL:", URL_BACKEND);
     return axios.get(URL_BACKEND);
 };
 
@@ -40,19 +47,21 @@ const fetchOrderByIdAPI = (id) => {
     return axios.get(URL_BACKEND);
 };
 
-const updateOrderAPI = (id, userId, orderStatusId, totalAmount, shippingAddress, paymentMethod, promotionId) => {
+// Đảm bảo các tham số của updateOrderAPI khớp với backend
+const updateOrderAPI = (id, userId, orderStatusId, totalAmount, shippingAddress, paymentMethod, promotionId, isActive) => {
     const URL_BACKEND = `/orders/${id}`;
-    const data = {
-        user_id: userId,
-        order_status_id: orderStatusId,
-        totalAmount: totalAmount,
-        shippingAddress: shippingAddress,
-        paymentMethod: paymentMethod,
-        promotion_id: promotionId,
-    };
+    const data = {};
+    // Chỉ thêm vào data nếu giá trị không phải là undefined để tránh ghi đè không mong muốn ở backend
+    if (userId !== undefined) data.user_id = userId;
+    if (orderStatusId !== undefined) data.order_status_id = orderStatusId;
+    if (totalAmount !== undefined) data.totalAmount = totalAmount;
+    if (shippingAddress !== undefined) data.shippingAddress = shippingAddress;
+    if (paymentMethod !== undefined) data.paymentMethod = paymentMethod;
+    if (promotionId !== undefined) data.promotion_id = promotionId; // Cho phép gửi null để xóa promotion
+    if (isActive !== undefined) data.isActive = isActive;
+
     return axios.patch(URL_BACKEND, data);
 };
-
 
 const deleteOrderAPI = (id) => {
     const URL_BACKEND = `/orders/${id}`;
